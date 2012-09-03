@@ -1,0 +1,69 @@
+<idea-plugin version="2">
+  <name>Magicento</name>
+  <vendor email="contacto@enriquepiatti.com" url="http://www.magicento.com">Enrique Piatti</vendor>
+  <description>Plugin for magento development</description>
+  <idea-version since-build="111.296"/>
+
+  <version>0.6</version>
+  <change-notes>
+      <![CDATA[
+        <p>
+            Bugfixes
+            <br>
+            Autocomplete for config strings inside Mage::getStoreConfig('[USE CTRL+SPACE HERE]');
+            <br>
+            Solved ambiguity in the setting for the path to Mage.php, now it uses allways the absolute path to Mage.php
+            <br>
+            More autocomplete for config.xml
+        </p>
+      ]]>
+  </change-notes>
+
+
+  <depends>com.intellij.modules.lang</depends>
+
+  <application-components>
+    <!-- Add your application components here -->
+  </application-components>
+
+  <project-components>
+    <!-- Add your project components here -->
+      <component>
+          <implementation-class>com.magicento.MagicentoProjectComponent</implementation-class>
+      </component>
+  </project-components>
+
+  <actions>
+    <!-- Add your actions here -->
+      <action id="MagicentoAction" class="com.magicento.MagicentoAction" text="Magicento"
+              description="Magento magic global and context aware action">
+          <add-to-group group-id="ToolsMenu" anchor="last"/>
+          <keyboard-shortcut keymap="$default" first-keystroke="alt M"/>
+      </action>
+      <action id="GotoMagentoClass" class="com.magicento.actions.GotoMagentoClassAction" text="Go to Magento Class"
+              description="Go to magento class declaration"/>
+      <action id="AddVarPhpDoc" class="com.magicento.actions.AddVarPhpDocAction" text="Add @var"
+              description="Add @var doc for getting autocomplete"/>
+      <action id="GetStoreConfig" class="com.magicento.actions.GetStoreConfigAction"
+              text="Get Store Config" description="show the store config value"/>
+      <action id="EvaluateInMagento" class="com.magicento.actions.EvaluateInMagentoAction"
+              text="Evaluate in Magento" description="evaluates the selected text/code in magento context"/>
+      <action id="GotoClassesOfFactory" class="com.magicento.actions.GotoClassesOfFactoryAction"
+              text="Go to Classes of Factory" description="Find models, blocks and helpers matching the factory "/>
+      <action id="SetMagePath" class="com.magicento.actions.SetMagePathAction" text="Set Path to Mage.php"
+              description="set path to magento"/>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+    <!--<applicationConfigurable instance="com.magicento.ui.forms.MagicentoSettingsForm"></applicationConfigurable>-->
+    <projectConfigurable instance="com.magicento.ui.forms.MagicentoSettingsForm"></projectConfigurable>
+    <completion.contributor language="XML" implementationClass="com.magicento.extensions.MagicentoXmlCompletionContributor"/>
+    <completion.contributor language="PHP" implementationClass="com.magicento.extensions.MagicentoPhpCompletionContributor"/>
+    <projectService serviceImplementation="com.magicento.MagicentoSettings"/>
+    <weigher key="completion" implementationClass="com.magicento.extensions.MagicentoPhpWeigher" id="magicentoPhpWeigher" />
+    <!--<gotoSymbolContributor implementation="" id="magicentoFactoryGotoSymbolContributor" />-->
+    <documentationProvider implementation="com.magicento.extensions.MagicentoXmlDocumentationProvider" id="magicentoConfigXmlDocumentation" />
+    <gotoDeclarationHandler implementation="com.magicento.extensions.MagicentoGotoDeclarationHandler" />
+  </extensions>
+</idea-plugin>

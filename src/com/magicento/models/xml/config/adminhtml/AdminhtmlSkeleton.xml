@@ -1,0 +1,59 @@
+<config>
+    <menu help="Inside this element you can modify or add new menues to the admin panel">
+        <___>
+            <title help="Title of the menu"/>
+            <sort_order help="Position of the menu relative to the other menues of the same level"/>
+            <action help="Action to be executed when this menu is clicked, normally it is something like 'adminhtml/controllerName/actionName'"/>
+            <depends>
+                <module/>
+                <config/>
+            </depends>
+            <children help="Submenues">
+                <___>
+                    <title help="Title of the submenu"/>
+                    <sort_order/>
+                    <action help="Action to be executed when this submenu is clicked, normally it is something like 'adminhtml/controllerName/actionName'"/>
+                    <depends>
+                        <module/>
+                        <config/>
+                    </depends>
+                    <children>
+                        <___>
+                            <title/>
+                            <sort_order/>
+                            <action/>
+                            <depends>
+                                <module/>
+                                <config/>
+                            </depends>
+                        </___>
+                    </children>
+                </___>
+            </children>
+        </___>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <___>
+                        <title help="Title to show in Permissions > Roles > Role Resources"/>
+                        <sort_order/>
+                        <children>
+                            <___>
+                                <title help="Title to show in Permissions > Roles > Role Resources"/>
+                                <sort_order/>
+                                <children>
+                                    <___>
+                                        <title help="Title to show in Permissions > Roles > Role Resources"/>
+                                        <sort_order/>
+                                    </___>
+                                </children>
+                            </___>
+                        </children>
+                    </___>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

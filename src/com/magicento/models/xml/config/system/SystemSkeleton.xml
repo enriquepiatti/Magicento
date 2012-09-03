@@ -1,0 +1,63 @@
+<config>
+    <tabs help="Inside this tag you can create new groups for the sections inside System > Configuration (left menu)">
+        <___ help="Unique identifier for the new tab (just for referencing it inside this xml)">
+            <label help="Visible name of the tab" />
+            <sort_order help="[Number] Order of appearance relative to the other tabs" />
+        </___>
+    </tabs>
+    <sections help="Inside this tag you can create new sections for the System > Configuration menu (clickable items on the left menu)">
+        <___ help="Unique internal identifier for the new section. This is used for referencing this section in config.xml <default> or adminhtml.xml <acl> for example. Also this is the first part of the URI used in Mage::getStoreConfig">
+            <class help="css class to be added to the section link (optional)" />
+            <header_css help="css class to be added to the header (title) inside the section (optional)" />
+            <label help="Visible name of the section" />
+            <tab help="[ID] Parent tab for this section, put here the tab identifier (child of <tabs>)" />
+            <frontend_type help="Defines the renderer for the section link, default=text (optional)" />
+            <frontend_model help="Block used for rendering the section, by default adminhtml/system_config_form" />
+            <show_in_default help="[0|1] Defines if this sections is visible when the scope is 'default'" />
+            <show_in_website help="[0|1] Defines if this sections is visible when the scope is 'website'" />
+            <show_in_store help="[0|1] Defines if this sections is visible when the scope is 'store'" />
+            <sort_order help="[Number] Order of appearance relative to the other sections inside the same tab" />
+            <groups help="Groups inside the section (accordion containers)">
+                <___ help="Identifier for the group (must be unique inside the section). This is used for example in the second part of the URI passed to Mage::getStoreConfig ">
+                    <label help="Visible name of the group (accordion header)" />
+                    <comment help="[HTML] Comment to be added inside the group before the fields (optional)" />
+                    <sort_order help="[Number] Order of appearance relative to the other groups inside the same section" />
+                    <show_in_default help="[0|1] Defines if this group is visible when the scope is 'default'" />
+                    <show_in_website help="[0|1] Defines if this group is visible when the scope is 'website'" />
+                    <show_in_store help="[0|1] Defines if this group is visible when the scope is 'store'" />
+                    <frontend_model help="Block used for rendering the section, by default adminhtml/system_config_form_fieldset" />
+                    <expanded help="[0|1] Defines if this group should be open initially (default is 0)"/>
+                    <sort_fields help="Defines a custom sorting mechanism for the fields inside the group (instead of using the sort_order of every <field>">
+                        <by help="Tag name inside the field to be used as the sort value"/>
+                        <direction_desc help="[0|1] Desc or Asc sorting" />
+                    </sort_fields>
+                    <fields help="Inside this node you can define the input fields">
+                        <___ help="Identifier for the field (must be unique inside the group). This is used for example in the third part of the URI passed to Mage::getStoreConfig " >
+                            <label help="Visible name of the field (input label)" />
+                            <comment help="This comment will appear under the field" />
+                            <frontend_model help="Block used for rendering this field, by default: adminhtml/system_config_form_field" />
+                            <frontend_type help="Determines the type of field (text, textarea, select, multiselect, time, password, etc), by default: text" />
+                            <can_be_empty help="[0|1] Used if frontend_type is multiselect" />
+                            <source_model help="The source model to be used for filling the options in select and multiselect frontend_types. You can use the URI, the full class name, or even specify the method to be executed on your class for retrieving the options using this format: module/modelName::methodName, if you don't specify the method it will use toOptionArray" />
+                            <backend_model help="The backend model to be used for saving this config value (you can change the values or places to be saved here, and also make extra validation, etc), by default it uses Mage_Core_Model_Config_Data" />
+                            <tooltip help="Tooltip for the field (it will be shown on mouse over this field)" />
+                            <tooltip_block help="Block to be used for rendering the tooltip, don't use with <tooltip> tag, they are mutually exclusive. Use this if you want to render the tooltip with custom HTML"/>
+                            <depends help="Inside this tag you can define other <fields> identifiers of the same group. Allows you specify that your configuration field should only be displayed when another confgiruation field in the same group has a specific value">
+                                <___ help="Field identifier of the same group, the parent field will be shown only when the value of this field is equals to the value defined inside this node. This is done dinamically with javascript" />
+                            </depends>
+                            <config_path help="Defines the uri to be used for saving the value of this field, by default it uses: [section_name]/[group_name]/[field_name]"/>
+                            <validate help="css class to be added to the field, it will be used for js validation by js/prototype/validation.js" />
+                            <frontend_class help="custom css class to be added to the field" />
+                            <upload_dir help="Used when the <frontend_type> is image and <backend_model> is adminhtml/system_config_backend_image and "/>
+                            <base_url help="Used when the <frontend_type> is image and <backend_model> is adminhtml/system_config_backend_image and "/>
+                            <sort_order help="[Number] Order of appearance relative to the other fields inside the same group" />
+                            <show_in_default help="[0|1] Defines if this group is visible when the scope is 'default'" />
+                            <show_in_website help="[0|1] Defines if this group is visible when the scope is 'website'" />
+                            <show_in_store help="[0|1] Defines if this group is visible when the scope is 'store'" />
+                        </___>
+                    </fields>
+                </___>
+            </groups>
+        </___>
+    </sections>
+</config>

@@ -1,10 +1,16 @@
 package com.magicento.helpers;
 
+import com.intellij.ide.util.gotoByName.GotoClassModel2;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiWhiteSpace;
+import com.magicento.models.MagentoClassInfo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 
+import javax.management.remote.rmi._RMIConnection_Stub;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,13 +39,16 @@ public class PsiPhpHelper {
     public static final String COMMENT_LINE = "line comment";
     public static final String IDENTIFIER = "identifier";
     public static final String PARAMETER_LIST = "Parameter list";
+    public static final String STRING = "String";
+    public static final String SINGLE_QUOTED_STRING = "single quoted string";
+    public static final String DOUBLE_QUOTED_STRING = "double quoted string";
 
 
-    private static String getElementType(PsiElement psiElement){
+    @NotNull private static String getElementType(PsiElement psiElement){
         if(psiElement != null && psiElement.getNode() != null && psiElement.getNode().getElementType() != null){
             return psiElement.getNode().getElementType().toString();
         }
-        return null;
+        return "";
     }
 
     public static boolean isElementType(PsiElement psiElement, String type){
@@ -52,7 +61,7 @@ public class PsiPhpHelper {
             String elementType = getElementType(psiElement);
             if(elementType != null && ! elementType.isEmpty()){
                 for (String type : types){
-                    if(elementType == type)
+                    if(elementType.equals(type))
                         return true;
                 }
             }
@@ -69,7 +78,7 @@ public class PsiPhpHelper {
     }
 
     public static boolean isPhp(PsiElement psiElement){
-        return psiElement.getLanguage().getID() == LANGUAGE_PHP;
+        return  psiElement.getLanguage().getID().equals(LANGUAGE_PHP);
     }
 
     public static boolean isVariable(PsiElement psiElement){
@@ -112,11 +121,33 @@ public class PsiPhpHelper {
         return isElementType(psiElement, types);
     }
 
+    public static boolean isClassMethod(PsiElement psiElement){
+        String[] types = {CLASS_METHOD};
+        return isElementType(psiElement, types);
+    }
+
+
+    public static boolean isString(PsiElement psiElement){
+        String[] types = {STRING, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING};
+        boolean isAnyString = isElementType(psiElement, types);
+        if( ! isAnyString ){
+            PsiElement parent = psiElement.getParent();
+            String[] typeString = {STRING};
+            return isElementType(parent, typeString);
+        }
+        return true;
+    }
+
+    public static boolean isParameterList(PsiElement psiElement){
+        String[] types = {PARAMETER_LIST};
+        return isElementType(psiElement, types);
+    }
+
     public static String getVarName(PsiElement psiElement){
-        if(getElementType(psiElement) == VARIABLE){
+        if(getElementType(psiElement).equals(VARIABLE)){
             return psiElement.getText();    // with "$"
         }
-        else if(getElementType(psiElement) == VARIABLE_DECLARATION){
+        else if(getElementType(psiElement).equals(VARIABLE_DECLARATION)){
             //return psiElement.getChildren()[0].getText();
             return psiElement.getText();
         }
@@ -325,6 +356,95 @@ public class PsiPhpHelper {
             parentElement = parentElement.getParent();
         }
         return parentElement;
+    }
+
+
+    /**
+     * The IDE is not returning the full list of children sometimes when using "PsiElemetn.getChildren()" I don'w know why, this method fixes that
+     * @return
+     */
+    @NotNull public static List<PsiElement> getFullListOfChildren(PsiElement psiElement)
+    {
+        List<PsiElement> children = new ArrayList<PsiElement>();
+        if(psiElement != null){
+            // this doesn't work as expected for example for a Method Reference it returns only Class reference and Parameter List
+            // it doesn't return the scope resolution (or arrow), psiwhitespaces (if exists), identifier (method name), etc...
+            // PsiElement[] children = psiElement.getChildren();
+            PsiElement child = psiElement.getFirstChild();
+            while(child != null){
+                children.add(child);
+                child = child.getNextSibling();
+            }
+        }
+        return children;
+    }
+
+    @NotNull public static List<PsiElement> getPsiElementsFromClassName(String className, Project project)
+    {
+        List<String> classes = new ArrayList<String>();
+        classes.add(className);
+        return getPsiElementsFromClassesNames(classes, project);
+    }
+
+    /**
+     * useful for go to declaration using only the class name
+     * @param classes
+     * @param project
+     * @return
+     */
+    @NotNull public static List<PsiElement> getPsiElementsFromClassesNames(List<String> classes, Project project)
+    {
+        List<PsiElement> psiElements = new ArrayList<PsiElement>();
+        if(classes != null && project != null)
+        {
+            GotoClassModel2 model = new GotoClassModel2(project);
+            for(String className : classes)
+            {
+                Object[] elements = model.getElementsByName(className, true, className);
+                if(elements.length > 0){
+                    for(Object element : elements){
+                        if(element instanceof PsiElement){
+                            psiElements.add((PsiElement)element);
+
+                        }
+                    }
+                }
+            }
+        }
+        return psiElements;
+    }
+
+    @NotNull public static List<PsiElement> findMethodInClass(String methodName, String className, Project project)
+    {
+        List<PsiElement> methods = new ArrayList<PsiElement>();
+        if(methodName != null && className != null && ! methodName.isEmpty() && ! className.isEmpty())
+        {
+            List<PsiElement> classes = getPsiElementsFromClassName(className, project);
+            for(PsiElement psiClass : classes){
+                PsiElement method = findMethodInClass(methodName, psiClass);
+                if(method != null){
+                    methods.add(method);
+                }
+            }
+        }
+        return methods;
+    }
+
+
+    public static PsiElement findMethodInClass(String methodName, PsiElement psiClass)
+    {
+        if(methodName != null && ! methodName.isEmpty() && psiClass != null)
+        {
+            PsiElement[] children = psiClass.getChildren();
+            for(PsiElement child : children){
+                if(isClassMethod(child)){
+                    if(methodName.equals(((PsiNamedElement) child).getName())){
+                        return child;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

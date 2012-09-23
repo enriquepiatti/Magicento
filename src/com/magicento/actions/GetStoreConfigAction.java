@@ -10,7 +10,7 @@ import com.intellij.psi.PsiElement;
 /**
  * @author Enrique Piatti
  */
-public class GetStoreConfigAction extends MagicentoActionAbstract {
+public class GetStoreConfigAction extends MagicentoPhpActionAbstract {
 
     private String _getStoreConfig;
 
@@ -21,24 +21,12 @@ public class GetStoreConfigAction extends MagicentoActionAbstract {
         return getStoreConfig() != null;
     }
 
-    public void actionPerformed(AnActionEvent e)
+    public void executeAction()
     {
-        MagicentoSettings settings = MagicentoSettings.getInstance(getProject());
-        if(settings != null && settings.enabled)
-        {
-            String className = null;
-            if(settings.phpEnabled){
-                // TODO: add support for multiple stores
-                setEvent(e);
-                String php = "echo "+getStoreConfig()+";"; //"var_dump("+getStoreConfig()+");";
-                String output = getMagicentoComponent().executePhpWithMagento(php);
-                IdeHelper.showDialog(output, "getStoreConfig");
-            }
-            else {
-                // TODO: add support for getStoreConfig without PHP
-                IdeHelper.showDialog("You need to enable PHP in magicento settings for getting the real store config value", "Feature available with PHP enabled only");
-            }
-        }
+        // TODO: add support for multiple stores
+        String php = "echo "+getStoreConfig()+";"; //"var_dump("+getStoreConfig()+");";
+        String output = getMagicentoComponent().executePhpWithMagento(php);
+        IdeHelper.showDialog(output, "getStoreConfig");
     }
 
     public String getStoreConfig()

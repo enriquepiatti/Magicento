@@ -2,6 +2,7 @@ package com.magicento.extensions;
 
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
+import com.magicento.helpers.IdeHelper;
 import com.magicento.helpers.MagentoParser;
 import com.intellij.codeInsight.navigation.NavigationUtil;
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler;
@@ -14,8 +15,14 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
+import com.magicento.helpers.PsiPhpHelper;
+import com.magicento.helpers.XmlHelper;
 import com.magicento.models.MagentoClassInfo;
+import org.apache.commons.lang.StringUtils;
+import org.jdom.Element;
 
+import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +51,11 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
             return null;
         }
 
-        final Project project = editor.getProject();
+        Project project = editor.getProject();
+
+        if(project == null){
+            project = sourceElement.getProject();
+        }
 
         List<PsiElement> psiElements = new ArrayList<PsiElement>();
 
@@ -75,22 +86,14 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
             }
 
             // search the psiElement of the classes
-            if(classes != null && classes.size()>0){
-                GotoClassModel2 model = new GotoClassModel2(project);
+            if(classes != null && classes.size()>0)
+            {
+                List<String> classNames = new ArrayList<String>();
                 for(MagentoClassInfo classInfo : classes)
                 {
-                    String className = classInfo.name;
-                    Object[] elements = model.getElementsByName(className, true, className);
-                    if(elements.length > 0){
-                        for(Object element : elements){
-                            if(element instanceof PsiElement){
-
-                                psiElements.add((PsiElement)element);
-
-                            }
-                        }
-                    }
+                    classNames.add(classInfo.name);
                 }
+                psiElements = PsiPhpHelper.getPsiElementsFromClassesNames(classNames, project);
             }
         }
         // is cursor is over a file path (like template paths in layout xml)
@@ -113,6 +116,44 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
             }
 
         }
+        // if cursor is over the name of the event in Mage::dispatchEvernt('CURSOR IS HERE')
+        else if(MagentoParser.isEventDispatcherName(sourceElement))
+        {
+            String eventName = MagentoParser.getEventDispatcherName(sourceElement);
+            MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
+            File configXml = magicento.getCachedConfigXml();
+
+            String xpath = "config/*[name()='global' or name()='frontend' or name()='adminhtml']/events/"+eventName+"/observers/*";
+            List<Element> observers = XmlHelper.findXpath(configXml, xpath);
+            if(observers != null && observers.size() > 0)
+            {
+                for(Element observer : observers){
+                    Element classElement = observer.getChild("class");
+                    Element methodElement = observer.getChild("method");
+                    if(classElement != null && methodElement != null){
+                        String className =  classElement.getValue();
+                        String methodName = methodElement.getValue();
+                        List<String> classNames = new ArrayList<String>();
+                        if(MagentoParser.isUri(className)){
+                            List<MagentoClassInfo> classes = magicento.findModelsOfFactoryUri(className);
+                            if(classes != null){
+                                for(MagentoClassInfo classInfo : classes){
+                                    classNames.add(classInfo.name);
+                                }
+                            }
+                        }
+                        else {
+                            classNames.add(className);
+                        }
+                        for(String clazz : classNames){
+                            psiElements.addAll( PsiPhpHelper.findMethodInClass(methodName, clazz, project));
+                        }
+                    }
+                }
+
+            }
+
+        }
 
 
         if(psiElements.size() > 0)
@@ -131,7 +172,14 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
             //NavigationUtil.getPsiElementPopup(_psiElements, new DefaultPsiElementCellRenderer(), title, processor).showInBestPositionFor(editor);
 
             // TODO: this should be executed only if we are here because an Action (if not we will get "Access is allowed from event dispatch thread only")
-            NavigationUtil.getPsiElementPopup(_psiElements, new DefaultPsiElementCellRenderer(), title).showInBestPositionFor(editor);
+            if(EventQueue.isDispatchThread()){
+                try{
+                    NavigationUtil.getPsiElementPopup(_psiElements, new DefaultPsiElementCellRenderer(), title).showInBestPositionFor(editor);
+                }
+                catch(Exception e){
+                    return null;
+                }
+            }
         }
         return null;
     }

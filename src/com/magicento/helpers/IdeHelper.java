@@ -8,6 +8,9 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import com.intellij.psi.formatter.xml.XmlCodeStyleSettings;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ui.UIUtil;
 
@@ -40,13 +43,19 @@ public class IdeHelper {
         showDialog(message, title, Messages.getInformationIcon());
     }
 
+    // TODO: this log doesn't work
     public static void log(String message){
-        logError(message);
+        Logger.getInstance("").info(message);
     }
 
     public static void logError(String message){
         message += " (if you think this is a bug please send the trace to issues@magicento.com)";
         Logger.getInstance("").error(message);
+    }
+
+    // TODO: this log doesn't work
+    public static void logWarning(String message){
+        Logger.getInstance("").warn(message);
     }
 
     public static void navigateToPsiElement(PsiElement psiElement)
@@ -67,6 +76,34 @@ public class IdeHelper {
             }
         }
     }
+
+    public static boolean promp(String message, String title)
+    {
+        // Messages.showOkCancelDialog(myProject, question, myTitle, Messages.getQuestionIcon()) == 0;
+        return Messages.showOkCancelDialog(message, title, Messages.getQuestionIcon()) == 0;
+    }
+
+
+    public static CodeStyleSettings getSettings(Project project)
+    {
+        if(project != null){
+            CodeStyleSettingsManager manager = CodeStyleSettingsManager.getInstance(project);
+            if(manager != null){
+                return manager.getCurrentSettings();
+            }
+        }
+        return null;
+    }
+
+    public static XmlCodeStyleSettings getXmlSettings(Project project)
+    {
+        CodeStyleSettings settings = getSettings(project);
+        if(settings != null){
+            return settings.getCustomSettings(XmlCodeStyleSettings.class);
+        }
+        return null;
+    }
+
 
 
 }

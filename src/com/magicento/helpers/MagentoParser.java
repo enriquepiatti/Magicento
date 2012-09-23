@@ -7,6 +7,7 @@ import com.magicento.models.MagentoClassInfo;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,6 +75,7 @@ public class MagentoParser {
         return getMageMethod(code, position, methods,paramRegex);
     }
 
+
     private static String getMageMethod(String code, int position, String[] posibleMethods, String methodParametersRegex)
     {
         int pos1 = code.lastIndexOf("Mage::", position);
@@ -92,6 +94,21 @@ public class MagentoParser {
             }
         }
         return null;
+    }
+
+
+    public static String getMethodName(PsiElement psiElement)
+    {
+        if(psiElement != null && PsiPhpHelper.isMethodRefence(psiElement)){
+            //PsiElement[] children = psiElement.getChildren();
+            List<PsiElement> children = PsiPhpHelper.getFullListOfChildren(psiElement);
+            for(PsiElement child : children){
+                if(PsiPhpHelper.isIdentifier(child)){
+                    return child.getText().replace("'", "").replace("\"", "");
+                }
+            }
+        }
+         return null;
     }
 
     public static boolean isUri(String test){
@@ -271,5 +288,28 @@ public class MagentoParser {
             return JavaHelper.testRegex(regex, phpCode);
         }
         return false;
+    }
+
+    public static boolean isEventDispatcherName(PsiElement sourceElement)
+    {
+        String eventName = getEventDispatcherName(sourceElement);
+        return eventName != null;
+    }
+
+    public static String getEventDispatcherName(PsiElement psiElement)
+    {
+        if(psiElement != null){
+            if( PsiPhpHelper.isString(psiElement)){
+                PsiElement parameterList = PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.PARAMETER_LIST); // psiElement.getParent();
+                if( PsiPhpHelper.isParameterList(parameterList)){
+                    PsiElement methodReference = parameterList.getParent();
+                    String methodName = getMethodName(methodReference);
+                    if(methodName != null && ! methodName.isEmpty() && methodName.equals("dispatchEvent")){
+                        return psiElement.getText().replace("'", "").replace("\"", "");
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

@@ -152,7 +152,11 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
 
     public String getDefaultPathToMagento()
     {
-       return _project.getBaseDir().getPath();
+        String projectPath = _project.getBaseDir().getPath();
+        if(projectPath == null || projectPath.isEmpty()){
+            projectPath = _project.getLocation();
+        }
+       return projectPath;
     }
 
     protected String getCacheDirectoryPath()
@@ -199,14 +203,17 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
     public String executePhpWithMagento(String phpCode)
     {
 
-        String phpMageApp = "define('PATH_TO_MAGENTO', '.');require_once PATH_TO_MAGENTO.'/app/Mage.php';Mage::app();";
-        String php = phpMageApp;
-
-        php += phpCode;
-
         MagicentoSettings settings = MagicentoSettings.getInstance(_project);
+
         if(settings != null)
         {
+
+            String store = settings.store == null ? "" : settings.store;
+
+            String phpMageApp = "define('PATH_TO_MAGENTO', '.');require_once PATH_TO_MAGENTO.'/app/Mage.php';Mage::app('"+store+"');";
+            String php = phpMageApp;
+
+            php += phpCode;
 
             String pathToMage = settings.getPathToMage();
             File f = new File(pathToMage);
@@ -232,7 +239,7 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
 
             php = "chdir('" + settings.getPathToMagento() + "');" + php;
 
-            return PHP.execute(php);
+            return PHP.execute(php, _project);
         }
 
         return null;

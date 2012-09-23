@@ -21,9 +21,8 @@ public class GotoMagentoClassAction extends MagicentoActionAbstract {
         return true;
     }
 
-    public void actionPerformed(AnActionEvent e)
+    public void executeAction()
     {
-        setEvent(e);
         String className = getMagentoClassName();
         gotoClass(className);
     }

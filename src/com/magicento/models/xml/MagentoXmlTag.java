@@ -10,6 +10,7 @@ import com.intellij.util.containers.SortedList;
 import com.intellij.xml.util.XmlUtil;
 import org.apache.commons.collections.comparators.ComparableComparator;
 import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -238,8 +239,9 @@ public class MagentoXmlTag extends MagentoXmlElement {
      * @param xpath
      * @return
      */
-    protected List<Element> getAllNodesFromMergedXml(String xpath)
+    @NotNull protected List<Element> getAllNodesFromMergedXml(String xpath)
     {
+        List<Element> nodes = new ArrayList<Element>();
         PsiElement context = getContext();
         if(context != null){
             // suggest the rest of the model ids (for <rewrite>)
@@ -247,10 +249,10 @@ public class MagentoXmlTag extends MagentoXmlElement {
             File configFile = getManager().getMergedXmlFile(context.getProject());
             //String xpath = "/config/global/blocks/* | /config/global/helpers/*";
             //String xpath = "/config/global/models/*";
-            List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
+            nodes = XmlHelper.findXpath(configFile, xpath);
             return nodes;
         }
-        return null;
+        return nodes;
     }
 
     /**

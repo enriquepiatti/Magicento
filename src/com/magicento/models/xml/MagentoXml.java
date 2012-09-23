@@ -272,6 +272,9 @@ abstract public class MagentoXml {
                 if( ! magicentoProject.saveCacheFile(cachedFile, result) ){
                     invalidateCache();
                 }
+                else {
+                    isCacheInvalid = false;
+                }
             }
         }
 

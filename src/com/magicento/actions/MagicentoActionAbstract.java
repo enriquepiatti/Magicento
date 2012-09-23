@@ -1,8 +1,11 @@
 package com.magicento.actions;
 
+import com.intellij.ide.IdeView;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.vfs.VfsUtilCore;
+import com.intellij.util.PsiNavigateUtil;
 import com.magicento.MagicentoProjectComponent;
 import com.intellij.codeInsight.TargetElementUtilBase;
-import com.intellij.ide.util.gotoByName.GotoClassModel2;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
@@ -16,12 +19,15 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiUtilCore;
+import com.magicento.helpers.PsiPhpHelper;
+
+import java.util.List;
 
 /**
  * base class for all the MagicentoActions
  * @author Enrique Piatti
  */
-public abstract class MagicentoActionAbstract extends AnAction
+public abstract class MagicentoActionAbstract extends AnAction implements IMagicentoAction
 {
 
     protected String _code;
@@ -44,7 +50,7 @@ public abstract class MagicentoActionAbstract extends AnAction
 
 
 
-    public abstract Boolean isApplicable(AnActionEvent e);
+    // public abstract Boolean isApplicable(AnActionEvent e);
 
 //    public void actionPerformed(AnActionEvent e)
 //    {
@@ -213,6 +219,11 @@ public abstract class MagicentoActionAbstract extends AnAction
     }
 
 
+    public IdeView getIdeView() {
+        return LangDataKeys.IDE_VIEW.getData(getDataContext());
+    }
+
+
     public PsiElement getPsiElementAtCursor(){
         PsiFile psiFile = getPsiFile();
         if(psiFile == null)
@@ -232,11 +243,17 @@ public abstract class MagicentoActionAbstract extends AnAction
     {
         if(className == null)
             return;
-        GotoClassModel2 model = new GotoClassModel2(getProject());
-        Object[] elements = model.getElementsByName(className, true, className);
+
+//        GotoClassModel2 model = new GotoClassModel2(getProject());
+//        Object[] elements = model.getElementsByName(className, true, className);
+
+        List<PsiElement> elements = PsiPhpHelper.getPsiElementsFromClassName(className, getProject());
+
         //com.jetbrains.php.lang.psi.elements.impl.PhpClassImpl
-        if(elements.length > 0){
-            PsiElement element = (PsiElement) elements[0];
+        //if(elements.length > 0)
+        if(elements.size() > 0)
+        {
+            PsiElement element = elements.get(0);// (PsiElement) elements[0];
             /*
             PsiFile containingFile = element.getContainingFile();
             //PsiReference psiReference = element.getReference(); // element.getReferences() // (PsiReference) element;
@@ -292,6 +309,42 @@ public abstract class MagicentoActionAbstract extends AnAction
         }
         return null;
     }
+
+
+    public void openFile(VirtualFile file)
+    {
+        if(file != null){
+            FileEditorManager.getInstance(getProject()).openFile(file, true);
+        }
+        // new OpenFileDescriptor(getProject(), file, 0).navigate(true);
+    }
+
+    public void openFile(PsiFile file)
+    {
+//        PsiElement navElement = file.getNavigationElement();
+//        if(navElement != null){
+//            navElement = TargetElementUtilBase.getInstance().getGotoDeclarationTarget(file, navElement);
+//            if (navElement instanceof Navigatable) {
+//                if (((Navigatable)navElement).canNavigate()) {
+//                    ((Navigatable)navElement).navigate(true);
+//                    return;
+//                }
+//            }
+//        }
+//
+//        openFile(file.getVirtualFile());
+
+        PsiNavigateUtil.navigate(file);
+    }
+
+    @Override
+    public void actionPerformed(AnActionEvent e)
+    {
+        setEvent(e);
+        executeAction();
+    }
+
+    public abstract void executeAction();
 
 
 }

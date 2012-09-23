@@ -23,7 +23,10 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
     public String pathToMage;
     public boolean enabled = true;
     public boolean phpEnabled = false;
+    public boolean useHttp = false;
     public String pathToPhp;
+    public String urlToMagento;
+    public String store = "";
 
     protected String relativePathToMage = "/app/Mage.php";
 
@@ -67,6 +70,9 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
             if( defaultPathToMagento != null){
                 setPathToMage(defaultPathToMagento + relativePathToMage);
             }
+            else {
+                enabled = false;
+            }
         }
     }
 
@@ -104,7 +110,9 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
 
     public void setPathToPhp(String path)
     {
-        path = path.trim().replace("\\", "/");
+        if(path != null){
+            path = path.trim().replace("\\", "/");
+        }
         pathToPhp = path;
     }
 
@@ -114,7 +122,6 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
      */
     public String getPathToMagento()
     {
-
         if(pathToMage != null && pathToMage.length() > relativePathToMage.length()){
             return pathToMage.substring( 0, pathToMage.length() - relativePathToMage.length() );
         }
@@ -136,7 +143,9 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
      */
     public void setPathToMage(String path)
     {
-        path = path.trim().replace("\\", "/");
+        if(path != null){
+            path = path.trim().replace("\\", "/");
+        }
         pathToMage = path;
 
 //        File f = new File(pathToMage);
@@ -146,6 +155,16 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
 
     }
 
+    public void setUrlToMagento(String url)
+    {
+        if(url != null){
+            url = url.trim().replace("\\", "/");
+            if( ! url.isEmpty() && ! url.toLowerCase().startsWith("http")){
+                url = "http://"+url;
+            }
+        }
+        urlToMagento = url;
+    }
 }
 
 

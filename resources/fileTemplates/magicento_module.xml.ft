@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <${MODULENAME}>
+            <active>true</active>
+            <codePool>${CODEPOOL}</codePool>
+            #if(${DEPENDS} != "")
+            <depends>
+                ${DEPENDS}
+            </depends>#end
+        </${MODULENAME}>
+    </modules>
+</config>

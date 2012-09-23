@@ -48,7 +48,7 @@ public class JavaHelper {
     public static String extractFirstCaptureRegex(String regex, String text)
     {
         Pattern myPattern = Pattern.compile(regex);
-        Matcher myMatcher = myPattern.matcher(regex);
+        Matcher myMatcher = myPattern.matcher(text);
         if (myMatcher.find())
         {
             return myMatcher.group(1);

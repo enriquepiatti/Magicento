@@ -123,11 +123,8 @@ public class AddVarPhpDocAction extends MagicentoActionAbstract {
         return false;
     }
 
-    @Override
-    public void actionPerformed(AnActionEvent e)
+    public void executeAction()
     {
-        setEvent(e);
-
         PsiFile psiFile = getPsiFile();
         PsiElement psiElement = psiFile.findElementAt(getCursorOffset());
 

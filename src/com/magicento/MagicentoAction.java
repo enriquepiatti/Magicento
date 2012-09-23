@@ -1,5 +1,6 @@
 package com.magicento;
 
+import com.magicento.actions.IMagicentoAction;
 import com.magicento.actions.MagicentoActionAbstract;
 import com.intellij.openapi.actionSystem.*;
 //import com.intellij.openapi.actionSystem.DataKeys;
@@ -20,12 +21,10 @@ import java.util.List;
  * General magicento action for Alt+M (Option+M)
  * @author Enrique Piatti
  */
-public class MagicentoAction extends MagicentoActionAbstract {
+public class MagicentoAction extends MagicentoActionAbstract implements IMagicentoAction {
 
-    public void actionPerformed(AnActionEvent e)
+    public void executeAction()
     {
-        setEvent(e);
-
         DefaultActionGroup actionGroup = new DefaultActionGroup();
         //SimpleActionGroup actionGroup = new SimpleActionGroup();
         List<AnAction> actions = _getMagentoContextActions();
@@ -56,15 +55,20 @@ public class MagicentoAction extends MagicentoActionAbstract {
         String[] actionIds = {
                 "GotoMagentoClass",
                 "AddVarPhpDoc",
+                "CopyTemplate",
                 "GetStoreConfig",
+                "CompareWithOriginal",
                 "EvaluateInMagento",
                 "GotoClassesOfFactory",
-                "SetMagePath"
+                "CreateModule",
+                "SetMagePath",
+                "SetStore",
+                "ToggleTemplateHints"
         };
         ActionManager actionManager = ActionManagerImpl.getInstance();
         for (String actionId : actionIds) {
-            MagicentoActionAbstract action = (MagicentoActionAbstract) actionManager.getAction(actionId);
-            if( action.isApplicable(getEvent()) ) {
+            AnAction action = actionManager.getAction(actionId);
+            if( ((IMagicentoAction)action).isApplicable(getEvent()) ) {
                 actions.add(action);
             }
         }
@@ -97,7 +101,6 @@ public class MagicentoAction extends MagicentoActionAbstract {
         //e.getPresentation().setEnabled(e.getDataContext().getData(DataConstants.EDITOR) != null);
     }
 
-    @Override
     public Boolean isApplicable(AnActionEvent e)
     {
         return true;

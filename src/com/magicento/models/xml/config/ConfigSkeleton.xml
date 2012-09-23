@@ -129,6 +129,12 @@
                 </item>
             </quote>
         </sales>
+        <rewrite>
+            <___>
+                <from/>
+                <to/>
+            </___>
+        </rewrite>
     </global>
     <frontend help="Configuration applied only to the frontend">
         <routers help="Inside this element you can create custom frontNames (the first part of the URL after the domain)">

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <${MODULENAME}>
+            <version>${VERSION}</version>
+        </${MODULENAME}>
+    </modules>
+    <global>
+        #if(${INCLUDEMODEL} != "")
+        <models>
+            <${GROUP}>
+                <class>${MODULENAME}_Model</class>
+            </${GROUP}>
+        </models>#end
+        #if(${INCLUDEBLOCK} != "")
+        <blocks>
+            <${GROUP}>
+                <class>${MODULENAME}_Block</class>
+            </${GROUP}>
+        </blocks>#end
+        #if(${INCLUDEHELPER} != "")
+        <helpers>
+            <${GROUP}>
+                <class>${MODULENAME}_Helper</class>
+            </${GROUP}>
+        </helpers>#end
+        #if(${INCLUDEINSTALLER} != "")
+        <resources>
+            <${GROUP}_setup>
+                <setup>
+                    <module>${MODULENAME}</module>
+                </setup>
+            </${GROUP}_setup>
+        </resources>#end
+    </global>
+</config>

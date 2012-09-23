@@ -18,11 +18,10 @@ public class SetMagePathAction extends MagicentoActionAbstract
 {
     /**
      * forces the setting to Mage.php, useful if the magicento form in the settings IDE is not working properly
-     * @param e
      */
-    public void actionPerformed(AnActionEvent e)
+    public void executeAction()
     {
-        setEvent(e);
+
         Project project = getProject();
         if(project != null)
         {
@@ -34,23 +33,26 @@ public class SetMagePathAction extends MagicentoActionAbstract
 
                 pathToMage = Messages.showInputDialog(project, "Absolute path to Mage.php", "Path to Mage.php" , Messages.getQuestionIcon(), pathToMage ,null);
 
-                File f = new File(pathToMage);
-                while( ! f.isFile() )
+                if(pathToMage != null && ! pathToMage.isEmpty())
                 {
-                    IdeHelper.showDialog(pathToMage + " is not correct!", "Path to Mage.php incorrect", Messages.getInformationIcon());
-                    pathToMage = Messages.showInputDialog(_project, "Absolute path to Mage.php (empty or cancel for disabling magicento on this project)", "Path to Mage.php" , Messages.getQuestionIcon(), pathToMage ,null);
+                    File f = new File(pathToMage);
+                    while( ! f.isFile() )
+                    {
+                        IdeHelper.showDialog(pathToMage + " is not correct!", "Path to Mage.php incorrect", Messages.getInformationIcon());
+                        pathToMage = Messages.showInputDialog(_project, "Absolute path to Mage.php (empty or cancel for disabling magicento on this project)", "Path to Mage.php" , Messages.getQuestionIcon(), pathToMage ,null);
 
-                    // if user removes the path, disable Magicento for this project
-                    if( pathToMage == null || pathToMage.isEmpty() ) {
-                        getMagicentoComponent().disableMagicento();
-                        break;
+                        // if user removes the path, disable Magicento for this project
+                        if( pathToMage == null || pathToMage.isEmpty() ) {
+                            getMagicentoComponent().disableMagicento();
+                            break;
+                        }
+
+                        f = new File(pathToMage);
+
                     }
 
-                    f = new File(pathToMage);
-
+                    settings.setPathToMage(pathToMage);
                 }
-
-                settings.setPathToMage(pathToMage);
 
             }
         }

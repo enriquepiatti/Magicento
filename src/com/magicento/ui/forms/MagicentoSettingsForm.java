@@ -1,5 +1,11 @@
 package com.magicento.ui.forms;
 
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
 import com.intellij.ide.DataManager;
@@ -10,12 +16,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.magicento.helpers.IdeHelper;
 import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 /**
  * @author Enrique Piatti
@@ -27,13 +38,33 @@ public class MagicentoSettingsForm implements Configurable {
     private JCheckBox enabledCheckBox;
     private JCheckBox phpEnabledCheckBox;
     private JTextField pathToPhpTextField;
+    private JRadioButton usePHPInterpreterRadioButton;
+    private JRadioButton useHTTPRadioButton;
+    private JTextField urlToLocalMagentoTextField;
+    // private TextFieldWithBrowseButton myProcessorPathField;
+    private Project project;
 
-    public MagicentoSettingsForm() {
+    public MagicentoSettingsForm(@NotNull final Project currentProject) {
+
+        project = currentProject;
 
         phpEnabledCheckBox.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                pathToPhpTextField.setEditable(((JCheckBox) e.getSource()).isSelected());
+                //pathToPhpTextField.setEditable(((JCheckBox) e.getSource()).isSelected());
+                _updatePhpSection();
+            }
+        });
+        useHTTPRadioButton.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                _updatePhpSection();
+            }
+        });
+        usePHPInterpreterRadioButton.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                _updatePhpSection();
             }
         });
     }
@@ -57,31 +88,11 @@ public class MagicentoSettingsForm implements Configurable {
     @Override
     public JComponent createComponent()
     {
-        // Add listener to the Default Font button
-//        MyButtonListener actionListener = new MyButtonListener();
-//        actionListener.myFontName = myFontName;
-//        actionListener.myFontSize = myFontSize;
-//        MyDefaultFontButton.addActionListener(actionListener);
-        // Define a set of possible values for combo boxes.
-//        UISettings settings = UISettings.getInstance();
-//        myFontName.setModel(new DefaultComboBoxModel(UIUtil.getValidFontNames(false)));
-//        myFontSize.setModel(new DefaultComboBoxModel(UIUtil.getStandardFontSizes()));
-//        myFontName.setSelectedItem(settings.FONT_FACE);
-//        myFontSize.setSelectedItem(String.valueOf(settings.FONT_SIZE));
-
-        Project project = ProjectUtil.guessCurrentProject(null);
-
-        //String defaultPathToMagento = MagicentoProjectComponent.getInstance(project).getDefaultPathToMagento();
-        //String pathToMagento = PropertiesComponent.getInstance(project).getValue("Magicento.pathToMagento", defaultPathToMagento);
 
         MagicentoSettings magicentoSettings = MagicentoSettings.getInstance(project);
 
-        pathToMageTextField.setText("");
-        enabledCheckBox.setSelected(false);
-        phpEnabledCheckBox.setSelected(false);
-        pathToPhpTextField.setText("");
-
-        if(magicentoSettings != null){
+        if(magicentoSettings != null)
+        {
             if(magicentoSettings.getPathToMage() != null){
                 pathToMageTextField.setText(magicentoSettings.getPathToMage());
             }
@@ -90,18 +101,53 @@ public class MagicentoSettingsForm implements Configurable {
             }
             enabledCheckBox.setSelected(magicentoSettings.enabled);
             phpEnabledCheckBox.setSelected(magicentoSettings.phpEnabled);
+            useHTTPRadioButton.setSelected(magicentoSettings.useHttp);
+            if(magicentoSettings.urlToMagento != null){
+                urlToLocalMagentoTextField.setText(magicentoSettings.urlToMagento);
+            }
+        }
+        else {
+            pathToMageTextField.setText("");
+            enabledCheckBox.setSelected(false);
+            phpEnabledCheckBox.setSelected(false);
+            pathToPhpTextField.setText("");
+            urlToLocalMagentoTextField.setText("");
         }
 
-        pathToPhpTextField.setEditable(phpEnabledCheckBox.isSelected());
+        _updatePhpSection();
 
         myComponent = (JComponent) magicentoPanel;
+
+
         return myComponent;
 
-        // PropertiesComponent.getInstance(Project)
+    }
+
+
+    protected void _updatePhpSection()
+    {
+        boolean phpEnabled = phpEnabledCheckBox.isSelected();
+        useHTTPRadioButton.setEnabled(phpEnabled);
+        usePHPInterpreterRadioButton.setEnabled(phpEnabled);
+        pathToPhpTextField.setEditable(phpEnabled && usePHPInterpreterRadioButton.isSelected());
+        urlToLocalMagentoTextField.setEditable(phpEnabled && useHTTPRadioButton.isSelected());
     }
 
     @Override
-    public boolean isModified() {
+    public boolean isModified()
+    {
+        MagicentoSettings magicentoSettings = MagicentoSettings.getInstance(project);
+        if(magicentoSettings != null){
+            if( magicentoSettings.getPathToMage() != null && magicentoSettings.getPathToMage().equals(pathToMageTextField.getText()) &&
+                magicentoSettings.enabled == enabledCheckBox.isSelected() &&
+                magicentoSettings.phpEnabled == phpEnabledCheckBox.isSelected() &&
+                magicentoSettings.pathToPhp != null && magicentoSettings.pathToPhp.equals(pathToPhpTextField.getText()) &&
+                magicentoSettings.useHttp == useHTTPRadioButton.isSelected() &&
+                magicentoSettings.urlToMagento != null && magicentoSettings.urlToMagento.equals(urlToLocalMagentoTextField.getText())
+              ) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -114,7 +160,10 @@ public class MagicentoSettingsForm implements Configurable {
 
             if(myComponent != null && dataManager != null && PlatformDataKeys.PROJECT != null){
                 //Project projectGuessed = ProjectUtil.guessCurrentProject(null);
-                Project project = PlatformDataKeys.PROJECT.getData(dataManager.getDataContext(myComponent));
+//                Project project = PlatformDataKeys.PROJECT.getData(dataManager.getDataContext(myComponent));
+//                if(project == null){
+//                    project = ProjectUtil.guessCurrentProject(myComponent);
+//                }
                 if(project != null){
 
                     String pathToMage = null;
@@ -148,6 +197,8 @@ public class MagicentoSettingsForm implements Configurable {
                         settings.setPathToPhp(pathToPhpTextField.getText());
                         settings.enabled = enabled;
                         settings.phpEnabled = phpEnabled;
+                        settings.useHttp = useHTTPRadioButton.isSelected();
+                        settings.setUrlToMagento(urlToLocalMagentoTextField.getText());
 
                     }
                     else {

@@ -1,8 +1,13 @@
 package com.magicento.extensions;
 
 //import com.magicento.helpers.MagentoConfigXml;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import com.intellij.psi.formatter.xml.XmlCodeStyleSettings;
+import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
+import com.magicento.helpers.IdeHelper;
 import com.magicento.helpers.XmlHelper;
 import com.magicento.models.xml.MagentoXml;
 import com.magicento.models.xml.MagentoXmlFactory;
@@ -35,10 +40,10 @@ import java.util.regex.Pattern;
  */
 public class MagicentoXmlCompletionContributor extends CompletionContributor {
 
-    private static final String INTELLIJ_IDEA_RULEZZZ = "IntellijIdeaRulezzz ";
-    private static final Pattern SUFFIX_PATTERN = Pattern.compile("^(.*)\\b(\\w+)$");
+    //private static final String INTELLIJ_IDEA_RULEZZZ = "IntellijIdeaRulezzz ";
+    //private static final Pattern SUFFIX_PATTERN = Pattern.compile("^(.*)\\b(\\w+)$");
 
-    private static final Icon myIcon = IconLoader.getIcon("magento.png");
+    private static final Icon myIcon = MagicentoIcons.MAGENTO_ICON_16x16; //IconLoader.getIcon("/icons/magento.png");
 
 
     private static final InsertHandler<LookupElement> INSERT_HANDLER = new InsertHandler<LookupElement>()
@@ -77,6 +82,16 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
 
                 CodeStyleManager codeStyleManager = CodeStyleManager.getInstance(context.getProject());
                 //codeStyleManager.reformatText(psiFile, startOffset, tailOffset);
+
+                XmlCodeStyleSettings xmlSettings = IdeHelper.getXmlSettings(psiElement.getProject());
+                if(xmlSettings != null){
+                    boolean wrap = xmlSettings.XML_TEXT_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP;
+                    if( wrap){
+                        IdeHelper.showDialog("It's not safe to use wrap the text in xml files for magento projects.\n" +
+                                "Please change this going to Settings > Code Style > Xml > Other > Wrap text", "Warning: Wrap Text in XML files");
+                    }
+                }
+
                 codeStyleManager.reformat(psiElement);
             }
 
@@ -135,7 +150,7 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                 if( prevSibling != null && ! prefix.startsWith("<") )
                 {
                     if( prevSibling.getText().equals("<") ||
-                        prevSibling.getNode().getElementType().toString() == "XML_START_TAG_START" )
+                        prevSibling.getNode().getElementType() == XmlElementType.XML_START_TAG_START )
                     {
                         result = _result.withPrefixMatcher("<"+prefix);
                     }
@@ -220,104 +235,5 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
         super.fillCompletionVariants(parameters, result);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
-    // Ejemplo de como podriamos hacerlo con fillCompletionVariants en vez de registrar un CompletionProvider con extend en el constructor
-//    public boolean fillCompletionVariants(final CompletionParameters parameters, final CompletionResultSet result, String nada)
-//    {
-//        final PsiElement position = parameters.getPosition();
-//        if ( ! XmlHelper.isXmlFile( parameters.getOriginalFile() ) ) {
-//            return true;
-//        }
-//
-//        if (parameters.getCompletionType() == CompletionType.BASIC && position instanceof XmlToken)
-//        {
-//            ApplicationManager.getApplication().runReadAction(new Runnable() {
-//                public void run() {
-//                    completeResults(position, result);
-//                }
-//            });
-//            return false;
-//        }
-//        return true;
-//    }
 
-    private void completeResults(PsiElement position, CompletionResultSet result)
-    {
-        XmlToken token = (XmlToken) position;
-        final PsiElement parent = token.getParent();
-
-        if (validAttribute(token, parent)) {
-            XmlAttribute attribute = (XmlAttribute) parent;
-            PsiElement tag = attribute.getParent();
-
-            if (XmlHelper.isXmlTag(tag)) {
-                completeWithAttributeNames(result, parent);
-            }
-        } else if (validAttributeValue(token, parent)) {
-            completeWithTagNames((XmlAttributeValue) parent, result);
-        }
-    }
-
-    private boolean validAttributeValue(XmlToken token, PsiElement parent)
-    {
-        return token.getTokenType().toString().equals("XML_ATTRIBUTE_VALUE_TOKEN") && parent instanceof XmlAttributeValue;
-    }
-
-    private boolean validAttribute(XmlToken token, PsiElement parent)
-    {
-        return token.getTokenType().toString().equals("XML_NAME") && parent instanceof XmlAttribute;
-    }
-
-
-    private void completeWithTagNames(XmlAttributeValue attributeValue, CompletionResultSet result)
-    {
-        String suffix = null;
-        String baseExpression = getValueLeftOfCursor(attributeValue);
-        Matcher suffixMatcher = SUFFIX_PATTERN.matcher(baseExpression);
-        if (suffixMatcher.matches()) {
-            baseExpression = suffixMatcher.group(1);
-            suffix = suffixMatcher.group(2);
-        }
-
-        List<String> displayValues = null;//XcordionReflectionUtils.getDisplayValues(attributeValue, suffix, baseExpression);
-
-        for (String displayValue : displayValues) {
-            result.addElement(new LookupItem<String>(displayValue, displayValue));
-        }
-    }
-
-    private String getValueLeftOfCursor(PsiElement psiElement)
-    {
-        return psiElement.getText().substring(1, psiElement.getText().indexOf(INTELLIJ_IDEA_RULEZZZ));
-    }
-
-    private void completeWithAttributeNames(CompletionResultSet result, PsiElement parent)
-    {
-       /* for (XcordionNamespace namespace : XcordionNamespace.values()) {
-            String namespacePrefix = ((XmlTag) parent.getParent().getParent()).getPrefixByNamespace(namespace.getNamespace());
-            if (namespacePrefix == null) {
-                continue;
-            }
-            for (XcordionAttribute xattribute : namespace.getAttributes()) {
-                String attributeName = namespacePrefix + ":" + xattribute.getLocalName();
-                result.addElement(new AttributeLookupItem(attributeName, attributeName));
-            }
-        } */
-    }
-
-    private static class AttributeLookupItem extends LookupItem<String>
-    {
-        public AttributeLookupItem(String attributeName, String attributeName1) {
-            super(attributeName, attributeName1);
-        }
-
-//        @Override
-//        public XmlAttributeInsertHandler<AttributeLookupItem> getInsertHandler() {
-//            return new XmlAttributeInsertHandler<AttributeLookupItem>();
-//        }
-
-//        @Override
-//        public InsertHandler<? extends LookupItem> getInsertHandler() {
-//            return new XmlAttributeInsertHandler<AttributeLookupItem>();
-//        }
-    }
 }

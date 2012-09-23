@@ -52,7 +52,11 @@ public class XmlHelper {
 
     public static boolean isXmlTagIncomplete(XmlTag xmlTag)
     {
-        return xmlTag.getLastChild() instanceof PsiErrorElement;	// getErrorDescription() == "Tag start is not closed"
+        if(xmlTag != null){
+            return xmlTag.getLastChild() instanceof PsiErrorElement;	// getErrorDescription() == "Tag start is not closed"
+        }
+        return false;
+
         // xmlTag.getNextSibling() instanceof PsiErrorElement
 
         // xmlTag.getFirstChild().getText() == "<" || xmlTag.getFirstChild().getNode().getElementType().toString() == "XML_START_TAG_START"

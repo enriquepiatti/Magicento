@@ -39,8 +39,8 @@ public class GotoClassesOfFactoryAction extends MagicentoActionAbstract {
         return true;
     }
 
-    public void actionPerformed(AnActionEvent e) {
-        setEvent(e);
+    public void executeAction()
+    {
         File configXml = getMagicentoComponent().getCachedConfigXml();
         if(configXml != null && configXml.exists())
         {
@@ -50,7 +50,7 @@ public class GotoClassesOfFactoryAction extends MagicentoActionAbstract {
 
             //final GotoFactoryModel model = new GotoFactoryModel(project, configXml);
             final GotoClassModel2 model = new GotoClassModel2(project);
-            showNavigationPopup(e, model, new GotoActionCallback<Language>() {
+            showNavigationPopup(getEvent(), model, new GotoActionCallback<Language>() {
                 @Override
                 protected ChooseByNameFilter<Language> createFilter(@NotNull ChooseByNamePopup popup) {
                     return new ChooseByNameLanguageFilter(popup, model, GotoClassSymbolConfiguration.getInstance(project), project);

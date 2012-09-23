@@ -14,6 +14,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
+import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
 import com.magicento.helpers.MagentoParser;
@@ -41,8 +42,7 @@ import java.util.Map;
  */
 public class MagicentoPhpCompletionContributor extends CompletionContributor {
 
-    // TODO: move icon to new folder "resources" and load with a constant and helper
-    private static final Icon myIcon = IconLoader.getIcon("magento.png");
+    private static final Icon myIcon = MagicentoIcons.MAGENTO_ICON_16x16; //IconLoader.getIcon("/icons/magento.png");
 
     public MagicentoPhpCompletionContributor()
     {
@@ -122,7 +122,7 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
         {
             PsiElement element = null;
             // autcomplete works only if cursor is over the oparameter list of Mage::getStoreConfig([HERE])
-            if(PsiPhpHelper.isElementType(currentElement, PsiPhpHelper.PARAMETER_LIST)){
+            if(PsiPhpHelper.isParameterList(currentElement)){
                 element = currentElement;
             }
             if(element == null){
@@ -169,7 +169,7 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
         if(currentElement != null)
         {
             PsiElement element = null;
-            if(PsiPhpHelper.isElementType(currentElement, PsiPhpHelper.PARAMETER_LIST)){
+            if(PsiPhpHelper.isParameterList(currentElement)){
                 element = currentElement;
             }
             if(element == null){

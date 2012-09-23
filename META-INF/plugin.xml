@@ -4,17 +4,30 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>0.6</version>
+  <version>0.8</version>
   <change-notes>
       <![CDATA[
         <p>
-            Bugfixes
-            <br>
-            Autocomplete for config strings inside Mage::getStoreConfig('[USE CTRL+SPACE HERE]');
-            <br>
-            Solved ambiguity in the setting for the path to Mage.php, now it uses allways the absolute path to Mage.php
-            <br>
-            More autocomplete for config.xml
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Fixed bug for settings with multiple projects</li>
+                        <li>Fixed bug for Access is allowed from event dispatch thread only</li>
+                        <li>Fixed bug in magicento settings panel</li>
+                    </ul>
+                </li>
+                <li>New action for creating a new module. Just use Alt+M (Option+M) and complete the form</li>
+                <li>Magicento now will detect automatically when you have multiple rewrites on the same class, and will show you a warning</li>
+                <li>Autocomplete for "sections/tab" in system.xml</li>
+                <li>Added goto observers feature: use Ctrl+B (or middle click) over the event name in <br/>
+                    Mage::dispatchEvent('EVENT_NAME', $params);
+	            </li>
+	            <li>New action for copying the current template to a new package/theme, just use Alt+M (Option+M) when editing any .phtml file</li>
+                <li>New action for comparing the current file with the original one, it works for any file type. For design it will try to compare against "base/default" for frontend and against "default/default" for adminhtml. For files inside /code/local|community it will try to compare against /code/core/</li>
+                <li>New setting option for executing PHP code in magento using an HTTP request directly (useful when PHP is not accesible directly for example when using VM).</li>
+                <li>New action for setting the store (used for evaluating code in magento), just use Alt+M (Option+M)</li>
+                <li>New action for enabling/disabling template hints (Alt+M)</li>
+            </ul>
         </p>
       ]]>
   </change-notes>
@@ -52,6 +65,17 @@
               text="Go to Classes of Factory" description="Find models, blocks and helpers matching the factory "/>
       <action id="SetMagePath" class="com.magicento.actions.SetMagePathAction" text="Set Path to Mage.php"
               description="set path to magento"/>
+      <action id="SetStore" class="com.magicento.actions.SetStoreAction" text="Set Store"
+              description="set magento store (used for evaluating code in magento)"/>
+      <action id="CopyTemplate" class="com.magicento.actions.CopyTemplateAction" text="Copy Template"
+              description="copy template to another package/theme"/>
+      <action id="CreateModule" class="com.magicento.actions.CreateModuleAction" text="Create Module"
+              description="create new module with skeleton files"/>
+      <action id="ToggleTemplateHints" class="com.magicento.actions.ToggleTemplateHintsAction"
+              text="Toggle Template Hints"
+              description="enable/disable template hints in magento (included admin template hints)"/>
+      <action id="CompareWithOriginal" class="com.magicento.actions.CompareWithOriginalAction"
+              text="Compare with Original" description="compare current file with original from magento"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">
@@ -65,5 +89,8 @@
     <!--<gotoSymbolContributor implementation="" id="magicentoFactoryGotoSymbolContributor" />-->
     <documentationProvider implementation="com.magicento.extensions.MagicentoXmlDocumentationProvider" id="magicentoConfigXmlDocumentation" />
     <gotoDeclarationHandler implementation="com.magicento.extensions.MagicentoGotoDeclarationHandler" />
+
+    <fileTemplateGroup implementation="com.magicento.extensions.MagicentoTemplateFactory"/>
+
   </extensions>
 </idea-plugin>

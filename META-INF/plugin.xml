@@ -4,10 +4,17 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>0.8</version>
+  <version>0.8.2</version>
   <change-notes>
       <![CDATA[
         <p>
+            <span>0.8.2</span>
+            <ul>
+                <li>Bugfixes for PHPStorm 5</li>
+            </ul>
+        </p>
+        <p>
+            <span>0.8</span>
             <ul>
                 <li>Bugfixes:
                     <ul>

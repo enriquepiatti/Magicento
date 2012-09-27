@@ -74,6 +74,8 @@ public class MagentoConfigXml extends MagentoXml {
 
     private void checkRewriteConflicts(Document configXml)
     {
+        // with XPpath 2: [name() = following-sibling::*/name() and not(name() = preceding-sibling::*/name())]
+
         String xpath = "/config/global/*/*/rewrite/*";
         List<Element> rewrites = XmlHelper.findXpath(configXml, xpath);
         if(rewrites != null && rewrites.size() > 0){

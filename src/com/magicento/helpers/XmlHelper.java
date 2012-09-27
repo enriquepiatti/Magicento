@@ -341,4 +341,18 @@ public class XmlHelper {
         return value;
     }
 
+
+    public static XmlTag findSubTag(XmlTag rootTag, String path)
+    {
+        String[] pathElements = path.split("/");
+
+        XmlTag curTag = rootTag;
+        for (String curTagName : pathElements) {
+            curTag = curTag.findFirstSubTag(curTagName);
+            if (curTag == null) break;
+        }
+        return curTag;
+    }
+
+
 }

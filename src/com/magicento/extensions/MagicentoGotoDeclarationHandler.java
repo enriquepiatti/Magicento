@@ -43,7 +43,7 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
         return getGotoDeclarationTargets(sourceElement, editor);
     }
 
-    @Override
+
     public PsiElement[] getGotoDeclarationTargets(PsiElement sourceElement, Editor editor)
     {
 

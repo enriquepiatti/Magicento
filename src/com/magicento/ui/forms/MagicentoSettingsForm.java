@@ -75,7 +75,6 @@ public class MagicentoSettingsForm implements Configurable {
         return "Magicento";
     }
 
-    @Override
     public Icon getIcon() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

@@ -7,8 +7,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.containers.SortedList;
-import com.intellij.xml.util.XmlUtil;
-import org.apache.commons.collections.comparators.ComparableComparator;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -229,7 +227,7 @@ public class MagentoXmlTag extends MagentoXmlElement {
         if(context != null){
             XmlFile xmlFile = (XmlFile) context.getContainingFile();
             XmlTag root = xmlFile.getRootTag();
-            return XmlUtil.findSubTag(root, path);
+            return XmlHelper.findSubTag(root, path);
         }
         return null;
     }
@@ -284,7 +282,8 @@ public class MagentoXmlTag extends MagentoXmlElement {
     {
         List<Element> nodes = getAllNodesFromMergedXml(xpath);
         if(nodes != null){
-            List<String> allNames = new SortedList<String>(new ComparableComparator()); // insert these nodes in alphabetical order
+            //List<String> allNames = new SortedList<String>(new ComparableComparator()); // insert these nodes in alphabetical order
+            List<String> allNames = new SortedList<String>(String.CASE_INSENSITIVE_ORDER); // insert these nodes in alphabetical order
             for (int i = 0; i < nodes.size(); i++) {
                 Element node = nodes.get(i);
                 //names.add(node.getName());

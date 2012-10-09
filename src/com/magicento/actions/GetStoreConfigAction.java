@@ -26,7 +26,7 @@ public class GetStoreConfigAction extends MagicentoPhpActionAbstract {
         // TODO: add support for multiple stores
         String php = "echo "+getStoreConfig()+";"; //"var_dump("+getStoreConfig()+");";
         String output = getMagicentoComponent().executePhpWithMagento(php);
-        IdeHelper.showDialog(output, "getStoreConfig");
+        IdeHelper.showDialog(getProject(), output, "getStoreConfig");
     }
 
     public String getStoreConfig()

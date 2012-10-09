@@ -23,7 +23,7 @@ public class EvaluateInMagentoAction extends MagicentoPhpActionAbstract {
         if( inputText != null && inputText != "" ) {
             String php = "var_dump("+inputText+");";
             String output = getMagicentoComponent().executePhpWithMagento(php);
-            IdeHelper.showDialog(output, "Result of code evaluated in Magento");
+            IdeHelper.showDialog(getProject(), output, "Result of code evaluated in Magento");
         }
     }
 

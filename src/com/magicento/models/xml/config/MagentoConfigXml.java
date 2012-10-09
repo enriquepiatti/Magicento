@@ -1,5 +1,6 @@
 package com.magicento.models.xml.config;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.magicento.helpers.IdeHelper;
 import com.magicento.helpers.Magento;
@@ -10,6 +11,7 @@ import com.magicento.models.xml.MagentoXmlType;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +28,10 @@ public class MagentoConfigXml extends MagentoXml {
 
     public static MagentoXmlType TYPE = MagentoXmlType.CONFIG;
 
+    public MagentoConfigXml(Project project) {
+        super(project);
+    }
+
     protected void _init()
     {
         skeletonName = "ConfigSkeleton";
@@ -41,7 +47,7 @@ public class MagentoConfigXml extends MagentoXml {
     }
 
     @Override
-    protected String getMergedXml(Project project)
+    protected String getMergedXml()
     {
         // TODO: execute PHP only if user has enabled this feature
         // MagicentoProjectComponent magicentoProject = MagicentoProjectComponent.getInstance(project);
@@ -54,25 +60,30 @@ public class MagentoConfigXml extends MagentoXml {
         Document configXml = Magento.getInstance(project).loadModules();
 
         // check for possible errors
-        checkConfigXml(configXml);
+        checkConfigXml(configXml, project);
 
         return XmlHelper.getXmlStringFromDocument(configXml);
 
     }
 
-    private void checkConfigXml(Document configXml)
+    private void checkConfigXml(Document configXml, Project project)
     {
-        checkRewriteConflicts(configXml);
-        checkMultilineNodes(configXml);
+        String error = checkRewriteConflicts(configXml);
+        if(error != null){
+            // IdeHelper.showDialog(project, error, "Warning: duplicate rewrites");
+            IdeHelper.showNotification(error, NotificationType.WARNING, project);
+        }
+        error = checkMultilineNodes(configXml);
     }
 
-    private void checkMultilineNodes(Document configXml) {
+    private String checkMultilineNodes(Document configXml) {
         // TODO: we should check here for invalid nodes like:
         // <product>Namespace_Module_Model_Product
         // </product>
+        return null;
     }
 
-    private void checkRewriteConflicts(Document configXml)
+    private String checkRewriteConflicts(Document configXml)
     {
         // with XPpath 2: [name() = following-sibling::*/name() and not(name() = preceding-sibling::*/name())]
 
@@ -110,10 +121,12 @@ public class MagentoConfigXml extends MagentoXml {
                 message += (duplicatedModels.size() > 0 ? "Models:\n"+StringUtils.join(duplicatedModels, "\n  ") : "");
                 message += (duplicatedHelpers.size() > 0 ? "Helpers:\n"+StringUtils.join(duplicatedHelpers, "\n  ") : "");
                 // TODO find a more friendly UI for showing and solving these rewrite errors:
-                IdeHelper.showDialog(message, "Warning: duplicate rewrites");
+                // IdeHelper.showDialog(message, "Warning: duplicate rewrites");
+                return message;
                 // IdeHelper.logError(message);
             }
         }
+        return null;
     }
 
 }

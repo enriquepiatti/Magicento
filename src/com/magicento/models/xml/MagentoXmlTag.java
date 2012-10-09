@@ -244,7 +244,7 @@ public class MagentoXmlTag extends MagentoXmlElement {
         if(context != null){
             // suggest the rest of the model ids (for <rewrite>)
             //File configFile = Magicento.getCachedConfigXml(context.getProject());
-            File configFile = getManager().getMergedXmlFile(context.getProject());
+            File configFile = getManager().getMergedXmlFile(/*context.getProject()*/);
             //String xpath = "/config/global/blocks/* | /config/global/helpers/*";
             //String xpath = "/config/global/models/*";
             nodes = XmlHelper.findXpath(configFile, xpath);

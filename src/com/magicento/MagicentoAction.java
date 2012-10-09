@@ -55,6 +55,9 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
         String[] actionIds = {
                 "GotoMagentoClass",
                 "AddVarPhpDoc",
+                "RemoveFromCoreResource",
+                "GoToBlockFromTemplate",
+                "AddVarThisToTemplate",
                 "CopyTemplate",
                 "GetStoreConfig",
                 "CompareWithOriginal",

@@ -48,7 +48,7 @@ public class PHP {
     public static String executeWithCommandLine(String pathToPhp, String phpCode)
     {
         if(pathToPhp != null && ! pathToPhp.isEmpty() && phpCode != null && ! phpCode.isEmpty()){
-            // TODO: this won't work if the server in on a VM, we need SSH in that case, and we need to implement the connection by ourselves with jsch for example
+
             GeneralCommandLine commandLine = new GeneralCommandLine(pathToPhp, "-r", phpCode);
             try {
                 String output = ScriptRunnerUtil.getProcessOutput(commandLine);

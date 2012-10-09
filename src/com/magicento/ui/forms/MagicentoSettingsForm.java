@@ -5,6 +5,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.WindowManager;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,6 +43,7 @@ public class MagicentoSettingsForm implements Configurable {
     private JRadioButton usePHPInterpreterRadioButton;
     private JRadioButton useHTTPRadioButton;
     private JTextField urlToLocalMagentoTextField;
+    private JButton pathToMageButton;
     // private TextFieldWithBrowseButton myProcessorPathField;
     private Project project;
 
@@ -65,6 +68,30 @@ public class MagicentoSettingsForm implements Configurable {
             @Override
             public void stateChanged(ChangeEvent e) {
                 _updatePhpSection();
+            }
+        });
+        pathToMageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = new JFileChooser();
+                String startPath = "";
+                if (pathToMageTextField != null) {
+                    startPath = pathToMageTextField.getText();
+                }
+                if(startPath == null || startPath.isEmpty() || ! (new File(startPath)).exists()){
+                    MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
+                    if(magicento != null){
+                        startPath = magicento.getDefaultPathToMagento();
+                    }
+                }
+                if(startPath != null && ! startPath.isEmpty()){
+                    chooser.setCurrentDirectory(new File(startPath));
+                }
+                chooser.setFileFilter(new FileNameExtensionFilter("PHP Files", "php"));
+                chooser.showOpenDialog(WindowManager.getInstance().suggestParentWindow(project));
+                if (chooser.getSelectedFile() != null) {
+                    pathToMageTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
             }
         });
     }
@@ -92,8 +119,9 @@ public class MagicentoSettingsForm implements Configurable {
 
         if(magicentoSettings != null)
         {
-            if(magicentoSettings.getPathToMage() != null){
-                pathToMageTextField.setText(magicentoSettings.getPathToMage());
+            String pathToMage = magicentoSettings.pathToMage;
+            if(pathToMage != null){
+                pathToMageTextField.setText(pathToMage);
             }
             if(magicentoSettings.pathToPhp != null){
                 pathToPhpTextField.setText(magicentoSettings.pathToPhp);
@@ -137,7 +165,8 @@ public class MagicentoSettingsForm implements Configurable {
     {
         MagicentoSettings magicentoSettings = MagicentoSettings.getInstance(project);
         if(magicentoSettings != null){
-            if( magicentoSettings.getPathToMage() != null && magicentoSettings.getPathToMage().equals(pathToMageTextField.getText()) &&
+            String pathToMage = magicentoSettings.pathToMage; // use property directly to avoid validation here magicentoSettings.getPathToMage();
+            if( pathToMage != null && pathToMage.equals(pathToMageTextField.getText()) &&
                 magicentoSettings.enabled == enabledCheckBox.isSelected() &&
                 magicentoSettings.phpEnabled == phpEnabledCheckBox.isSelected() &&
                 magicentoSettings.pathToPhp != null && magicentoSettings.pathToPhp.equals(pathToPhpTextField.getText()) &&
@@ -185,7 +214,7 @@ public class MagicentoSettingsForm implements Configurable {
                     {
                         if(pathToMage != null){
                             // clear cache path to magento was changed
-                            if(settings.getPathToMage() == null || ! settings.getPathToMage().equals(pathToMage)){
+                            if(settings.pathToMage == null || ! settings.pathToMage.equals(pathToMage)){
                                 MagicentoProjectComponent magicentoProject = MagicentoProjectComponent.getInstance(project);
                                 if(magicentoProject != null){
                                     magicentoProject.clearAllCache();

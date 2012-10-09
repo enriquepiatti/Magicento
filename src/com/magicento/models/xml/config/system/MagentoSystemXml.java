@@ -20,6 +20,10 @@ public class MagentoSystemXml extends MagentoXml {
 
     public static MagentoXmlType TYPE = MagentoXmlType.SYSTEM;
 
+    public MagentoSystemXml(Project project) {
+        super(project);
+    }
+
     protected void _init()
     {
         skeletonName = "SystemSkeleton";
@@ -36,7 +40,7 @@ public class MagentoSystemXml extends MagentoXml {
     }
 
     @Override
-    protected String getMergedXml(Project project)
+    protected String getMergedXml()
     {
 
         if(project == null){

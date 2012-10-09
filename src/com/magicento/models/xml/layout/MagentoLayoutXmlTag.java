@@ -5,6 +5,7 @@ import com.magicento.models.xml.MagentoXmlTag;
 /**
  * @author Enrique Piatti
  */
-abstract public class MagentoLayoutXmlTag extends MagentoXmlTag {
+public class MagentoLayoutXmlTag extends MagentoXmlTag {
+
 
 }

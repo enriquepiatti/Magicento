@@ -248,35 +248,6 @@ public class AddVarPhpDocAction extends MagicentoActionAbstract {
     }
 
 
-    protected void addNewLineAfterCaret()
-    {
-        ActionManager actionManager = ActionManagerImpl.getInstance();
-        final AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_START_NEW_LINE);
-        AnActionEvent event = new AnActionEvent(null, getDataContext(), IdeActions.ACTION_EDITOR_START_NEW_LINE, getEvent().getPresentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
-    }
-
-    protected void addNewLineBeforeCaret()
-    {
-        ActionManager actionManager = ActionManagerImpl.getInstance();
-        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_UP);
-        AnActionEvent event = new AnActionEvent(null, getDataContext(), IdeActions.ACTION_EDITOR_COMPLETE_STATEMENT, getEvent().getPresentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
-
-        addNewLineAfterCaret();
-    }
-
-    private void writeStringInCaret(String text)
-    {
-        final String write = text;
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
-                getDocument().insertString(getCaretModel().getOffset(), write);
-            }
-        });
-    }
-
     private boolean isMethodReturningThis(String methodName)
     {
         // TODO: add more methods returning $this

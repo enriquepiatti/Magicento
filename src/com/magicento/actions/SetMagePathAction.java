@@ -38,7 +38,7 @@ public class SetMagePathAction extends MagicentoActionAbstract
                     File f = new File(pathToMage);
                     while( ! f.isFile() )
                     {
-                        IdeHelper.showDialog(pathToMage + " is not correct!", "Path to Mage.php incorrect", Messages.getInformationIcon());
+                        IdeHelper.showDialog(project, pathToMage + " is not correct!", "Path to Mage.php incorrect", Messages.getInformationIcon());
                         pathToMage = Messages.showInputDialog(_project, "Absolute path to Mage.php (empty or cancel for disabling magicento on this project)", "Path to Mage.php" , Messages.getQuestionIcon(), pathToMage ,null);
 
                         // if user removes the path, disable Magicento for this project

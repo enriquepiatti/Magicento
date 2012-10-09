@@ -16,6 +16,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.StringLenComparator;
 import com.magicento.models.xml.config.system.MagentoSystemXml;
+import com.magicento.models.xml.layout.MagentoLayoutXml;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -114,11 +115,24 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
         return getCachedXml(MagentoSystemXml.TYPE);
     }
 
+    public File getCachedLayoutXml(String area, String packageName, String theme)
+    {
+        MagentoXml magentoXml = MagentoXmlFactory.getInstance(MagentoLayoutXml.TYPE, _project);
+        if(magentoXml != null && magentoXml instanceof MagentoLayoutXml){
+            MagentoLayoutXml layout = (MagentoLayoutXml)magentoXml;
+            layout.setArea(area);
+            layout.setPackageName(packageName);
+            layout.setTheme(theme);
+            return layout.getMergedXmlFile();
+        }
+        return null;
+    }
+
     protected File getCachedXml(MagentoXmlType xmlType)
     {
         MagentoXml magentoXml = MagentoXmlFactory.getInstance(xmlType, _project);
         if(magentoXml != null){
-            return magentoXml.getMergedXmlFile(_project);
+            return magentoXml.getMergedXmlFile();
         }
         return null;
     }
@@ -154,7 +168,8 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
     {
         String projectPath = _project.getBaseDir().getPath();
         if(projectPath == null || projectPath.isEmpty()){
-            projectPath = _project.getLocation();
+            // projectPath = _project.getLocation();
+            projectPath = _project.getPresentableUrl();  // getBasePath()
         }
        return projectPath;
     }
@@ -186,7 +201,7 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
     public void showMessage(String message, String title, Icon icon)
     {
         // Messages.showMessageDialog(message, title, icon);
-        IdeHelper.showDialog(message, title, icon);
+        IdeHelper.showDialog(_project, message, title, icon);
     }
 
     public void showMessageError(String message)
@@ -223,7 +238,7 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
                 // Project[] projects = ProjectManager.getInstance().getOpenProjects();
                 //if(projects.length > 0){
                 //Project project = projects[0];
-                IdeHelper.showDialog(pathToMage + " is not correct!", "Path to Mage.php incorrect", Messages.getInformationIcon());
+                IdeHelper.showDialog(_project, pathToMage + " is not correct!", "Path to Mage.php incorrect", Messages.getInformationIcon());
                 pathToMage = Messages.showInputDialog(_project, "Absolute path to Mage.php (empty or cancel for disabling magicento on this project)", "Path to Mage.php" , Messages.getQuestionIcon(), pathToMage ,null);
 
                 // if user removes the path, disable Magicento for this project
@@ -337,7 +352,7 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
 
 
     /**
-     * TODO: move this method to another class?
+     * TODO: split (simplify) this method and move to another class?
      *
      * @param factory uri of the class
      * @param xmlFile config.xml (merged)
@@ -496,30 +511,97 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
             }
         }
 
-        if( ! secondPart.isEmpty()){
+//        if( ! secondPart.isEmpty()){
+
+//            if (empty($className)) {
+//                $className = 'mage_'.$group.'_'.$groupType;
+//            }
+
+            List<String> defaultGroupsFromMagento = new ArrayList<String>();
+            defaultGroupsFromMagento.add("admin");
+            defaultGroupsFromMagento.add("adminhtml");
+            defaultGroupsFromMagento.add("api");
+            defaultGroupsFromMagento.add("api2");
+            defaultGroupsFromMagento.add("backup");
+            defaultGroupsFromMagento.add("bundle");
+            defaultGroupsFromMagento.add("captcha");
+            defaultGroupsFromMagento.add("catalog");
+            defaultGroupsFromMagento.add("centinel");
+            defaultGroupsFromMagento.add("checkout");
+            defaultGroupsFromMagento.add("cms");
+            defaultGroupsFromMagento.add("compiler");
+            defaultGroupsFromMagento.add("connect");
+            defaultGroupsFromMagento.add("contacts");
+            defaultGroupsFromMagento.add("cron");
+            defaultGroupsFromMagento.add("customer");
+            defaultGroupsFromMagento.add("dataflow");
+            defaultGroupsFromMagento.add("directory");
+            defaultGroupsFromMagento.add("downloadable");
+            defaultGroupsFromMagento.add("eav");
+            defaultGroupsFromMagento.add("page");
+            defaultGroupsFromMagento.add("payment");
+            defaultGroupsFromMagento.add("paypal");
+            defaultGroupsFromMagento.add("rule");
+            defaultGroupsFromMagento.add("sales");
+            defaultGroupsFromMagento.add("shipping");
+            defaultGroupsFromMagento.add("tax");
+            defaultGroupsFromMagento.add("usa");
+            defaultGroupsFromMagento.add("wishlist");
+
+            for(int i=defaultGroupsFromMagento.size()-1; i>=0; i--){
+                String defaultGroup = defaultGroupsFromMagento.get(i);
+                if( ! secondPart.isEmpty() || exactMatch){
+                    if( ! defaultGroup.equals(firstPart)){
+                        defaultGroupsFromMagento.remove(i);
+                    }
+                }
+                else {
+                    if( ! defaultGroup.startsWith(firstPart)){
+                        defaultGroupsFromMagento.remove(i);
+                    }
+                }
+            }
+
+
             // Add always the default className (magento uses this if there isn't any <class> in <helper> <models> or <blocks>
             if(searchBlocks){
-                MagentoClassInfo genericBlock = new MagentoClassInfo();
-                genericBlock.name = Magicento.uc_words("Mage_"+firstPart+"_Block_"+secondPart);
-                genericBlock.setType("block");
-                genericBlock.uriFirstPart = firstPart;
-                classes.add(genericBlock);
+                if( ! secondPart.isEmpty() || exactMatch){
+                    MagentoClassInfo genericBlock = new MagentoClassInfo();
+                    genericBlock.name = Magicento.uc_words("Mage_"+firstPart+"_Block_"+secondPart);
+                    genericBlock.setType("block");
+                    genericBlock.uriFirstPart = firstPart;
+                    classes.add(genericBlock);
+                }
             }
             if(searchHelpers){
-                MagentoClassInfo genericHelper = new MagentoClassInfo();
-                genericHelper.name = Magicento.uc_words("Mage_"+firstPart+"_Helper_"+secondPart);
-                genericHelper.setType("helper");
-                genericHelper.uriFirstPart = firstPart;
-                classes.add(genericHelper);
+
+                for(String defaultGroup : defaultGroupsFromMagento)
+                {
+                    MagentoClassInfo genericHelper = new MagentoClassInfo();
+                    genericHelper.name = Magicento.uc_words("Mage_"+defaultGroup+"_Helper_"+secondPart);
+                    genericHelper.setType("helper");
+                    genericHelper.uriFirstPart = defaultGroup;
+                    classes.add(genericHelper);
+                }
+
+                if( ! secondPart.isEmpty() || exactMatch){
+                    MagentoClassInfo genericHelper = new MagentoClassInfo();
+                    genericHelper.name = Magicento.uc_words("Mage_"+firstPart+"_Helper_"+secondPart);
+                    genericHelper.setType("helper");
+                    genericHelper.uriFirstPart = firstPart;
+                    classes.add(genericHelper);
+                }
             }
             if(searchModels){
-                MagentoClassInfo genericModel = new MagentoClassInfo();
-                genericModel.name = Magicento.uc_words("Mage_"+firstPart+"_Model_"+secondPart);
-                genericModel.setType("model");
-                genericModel.uriFirstPart = firstPart;
-                classes.add(genericModel);
+                if( ! secondPart.isEmpty() || exactMatch){
+                    MagentoClassInfo genericModel = new MagentoClassInfo();
+                    genericModel.name = Magicento.uc_words("Mage_"+firstPart+"_Model_"+secondPart);
+                    genericModel.setType("model");
+                    genericModel.uriFirstPart = firstPart;
+                    classes.add(genericModel);
+                }
             }
-        }
+//        }
 
         if(classes.size() > 0)
         {

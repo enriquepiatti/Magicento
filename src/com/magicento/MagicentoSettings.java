@@ -1,5 +1,6 @@
 package com.magicento;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
@@ -29,6 +30,9 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
     public String store = "";
 
     protected String relativePathToMage = "/app/Mage.php";
+    protected boolean isPathToMageValid = false;
+
+    protected Project project;
 
     public static MagicentoSettings getInstance() {
         return getInstance(guessProject());
@@ -42,10 +46,12 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
                 return null;
             }
         }
+
         MagicentoSettings settings = ServiceManager.getService(project, MagicentoSettings.class);
         if(settings == null){
             IdeHelper.logError("Cannot find Magicento Settings");
         }
+        settings.project = project;
         return settings;
     }
 
@@ -62,7 +68,7 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
         }
         catch(Exception e){
             IdeHelper.logError(e.getMessage());
-            IdeHelper.showDialog("Cannot read the saved settings for Magicento. Please try saving them again from File > Settings > Magicento", "Error in Magicento Settings");
+            IdeHelper.showDialog(null,"Cannot read the saved settings for Magicento. Please try saving them again from File > Settings > Magicento", "Error in Magicento Settings");
         }
         if(pathToMage == null || pathToMage.isEmpty())
         {
@@ -122,6 +128,7 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
      */
     public String getPathToMagento()
     {
+        checkPathToMage();
         if(pathToMage != null && pathToMage.length() > relativePathToMage.length()){
             return pathToMage.substring( 0, pathToMage.length() - relativePathToMage.length() );
         }
@@ -134,6 +141,7 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
      */
     public String getPathToMage()
     {
+        checkPathToMage();
         return pathToMage;
     }
 
@@ -147,6 +155,8 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
             path = path.trim().replace("\\", "/");
         }
         pathToMage = path;
+        isPathToMageValid = false;
+        checkPathToMage();
 
 //        File f = new File(pathToMage);
 //        if( f.isFile() ){
@@ -165,6 +175,28 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
         }
         urlToMagento = url;
     }
+
+    protected void checkPathToMage()
+    {
+        if(project != null && enabled){
+            if( ! isPathToMageValid()){
+                IdeHelper.showNotification("Path to Mage.php is not valid: "+pathToMage, NotificationType.WARNING, project);
+            }
+        }
+    }
+
+    public boolean isPathToMageValid()
+    {
+        if(pathToMage == null){
+            isPathToMageValid = false;
+        }
+        else if( ! isPathToMageValid){
+            File f = new File(pathToMage);
+            isPathToMageValid = f.exists() && f.isFile();
+        }
+        return isPathToMageValid;
+    }
+
 }
 
 

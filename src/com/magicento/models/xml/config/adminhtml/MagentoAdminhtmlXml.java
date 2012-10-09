@@ -18,6 +18,10 @@ public class MagentoAdminhtmlXml extends MagentoXml {
 
     public static MagentoXmlType TYPE = MagentoXmlType.ADMINHTML;
 
+    public MagentoAdminhtmlXml(Project project) {
+        super(project);
+    }
+
     protected void _init()
     {
         skeletonName = "AdminhtmlSkeleton";
@@ -26,7 +30,7 @@ public class MagentoAdminhtmlXml extends MagentoXml {
         //fallbackClassName = "MagentoSystemXmlTag";
         super._init();
 
-        getMergedXmlFile(ProjectUtil.guessCurrentProject(null));
+        getMergedXmlFile();
     }
 
     protected MagentoXmlTag _createRootTag()
@@ -36,7 +40,7 @@ public class MagentoAdminhtmlXml extends MagentoXml {
     }
 
     @Override
-    protected String getMergedXml(Project project)
+    protected String getMergedXml()
     {
 
         if(project == null){

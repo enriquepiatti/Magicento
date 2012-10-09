@@ -108,7 +108,7 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
                 else {
                     String message = "File " + directoryPath + "/" + fileName + " already exists";
                     IdeHelper.logError(message);
-                    IdeHelper.showDialog(message, "Cannot create new module");
+                    IdeHelper.showDialog(project, message, "Cannot create new module");
                 }
             }
         }

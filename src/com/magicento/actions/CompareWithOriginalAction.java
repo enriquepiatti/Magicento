@@ -30,7 +30,8 @@ public class CompareWithOriginalAction extends CompareFiles implements IMagicent
         //final Project project = e.getData(PlatformDataKeys.PROJECT);
         final VirtualFile currentFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
         if(currentFile != null){
-            return getOriginalFile(currentFile) != null;
+            VirtualFile originalFile = getOriginalFile(currentFile);
+            return  originalFile!= null && currentFile != originalFile;
         }
         return false;
     }
@@ -102,6 +103,19 @@ public class CompareWithOriginalAction extends CompareFiles implements IMagicent
     }
 
 
+    protected boolean isTemplateFile(@NotNull VirtualFile file)
+    {
+        String fullPath = file.getPath().replace("\\", "/");
+        return fullPath.contains("/app/design/");
+    }
+
+    protected boolean isClassFile(@NotNull VirtualFile file)
+    {
+        String fullPath = file.getPath().replace("\\", "/");
+        return fullPath.contains("/app/code/");
+    }
+
+
     protected VirtualFile getOriginalFile(@NotNull VirtualFile file)
     {
 //        String extension = file.getExtension();
@@ -111,11 +125,10 @@ public class CompareWithOriginalAction extends CompareFiles implements IMagicent
 //        else if(extension.equals("phtml")){
 //            return getOriginalTemplateFile(file);
 //        }
-        String fullPath = file.getPath().replace("\\", "/");
-        if(fullPath.contains("/app/code/")){
+        if(isClassFile(file)){
             return getOriginalCoreFile(file);
         }
-        else if(fullPath.contains("/app/design/")){
+        else if(isTemplateFile(file)){
             return getOriginalTemplateFile(file);
         }
         return null;

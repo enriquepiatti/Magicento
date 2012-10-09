@@ -32,7 +32,7 @@ public class DefaultIdIdXmlTag extends IdXmlTag {
             String parentName = parent.getName();
             MagentoXml magentoXml = MagentoXmlFactory.getInstance(MagentoXmlType.SYSTEM, getProject());
             if(magentoXml != null){
-                File systemFile = magentoXml.getMergedXmlFile(getProject());
+                File systemFile = magentoXml.getMergedXmlFile();
                 List<Element> nodes = XmlHelper.findXpath(systemFile, "config/sections/"+parentName+"/groups/*");
                 if(nodes != null){
                     for(Element node : nodes){

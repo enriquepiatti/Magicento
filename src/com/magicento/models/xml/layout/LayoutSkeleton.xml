@@ -1,0 +1,38 @@
+<layout>
+    <___>
+        <___>
+
+        </___>
+        <block>
+            <___>
+                <block>
+                    <action>
+                        <___/>
+                    </action>
+                </block>
+                <action>
+                    <___/>
+                </action>
+            </___>
+            <block>
+                <action>
+                    <___/>
+                </action>
+            </block>
+            <action>
+                <___/>
+            </action>
+        </block>
+        <reference>
+            <___>
+
+            </___>
+            <block></block>
+            <action>
+                <___/>
+            </action>
+        </reference>
+        <update/>
+        <remove/>
+    </___>
+</layout>

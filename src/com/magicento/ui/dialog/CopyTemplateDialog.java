@@ -6,6 +6,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.magicento.MagicentoSettings;
 import com.magicento.helpers.FileHelper;
 import com.magicento.helpers.JavaHelper;
+import com.magicento.helpers.Magicento;
 import com.magicento.models.layout.Template;
 import org.jetbrains.annotations.NotNull;
 
@@ -85,26 +86,12 @@ public class CopyTemplateDialog extends DialogWrapper {
     @NotNull
     protected String[] getAllPackages()
     {
-        MagicentoSettings settings = MagicentoSettings.getInstance(project);
-        if(settings != null){
-            String pathToMagento = settings.getPathToMagento();
-            String currentArea = template.getArea();
-            File areaDirectory = new File(pathToMagento+"/app/design/"+currentArea);
-            return FileHelper.getSubdirectories(areaDirectory);
-        }
-        return new String[]{};
+        return Magicento.getAllPackages(project, template.getArea());
     }
 
     protected String[] getAllThemesFromPackage(String packageName)
     {
-        MagicentoSettings settings = MagicentoSettings.getInstance(project);
-        if(settings != null){
-            String pathToMagento = settings.getPathToMagento();
-            String currentArea = template.getArea();
-            File areaDirectory = new File(pathToMagento+"/app/design/"+currentArea+"/"+packageName);
-            return FileHelper.getSubdirectories(areaDirectory);
-        }
-        return new String[]{};
+        return Magicento.getAllThemesFromPackage(project, template.getArea(), packageName);
     }
 
     public String getPackage()

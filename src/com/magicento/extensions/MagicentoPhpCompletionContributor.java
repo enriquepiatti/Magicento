@@ -206,6 +206,7 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
             MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
             if(magicento != null)
             {
+                boolean isHelper = false;
                 if(MagentoParser.isBlockUri(currentElement)){
                     classes = magicento.findBlocksOfFactoryUri(uri);
                 }
@@ -216,6 +217,7 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                     classes = magicento.findResourceModelsOfFactoryUri(uri);
                 }
                 else if(MagentoParser.isHelperUri(currentElement)){
+                    isHelper = true;
                     classes = magicento.findHelpersOfFactoryUri(uri);
                 }
                 else {
@@ -228,6 +230,9 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                     for(MagentoClassInfo classInfo : classes)
                     {
                         String valueToInsert = classInfo.getUri();
+                        if(isHelper && valueToInsert.endsWith("/data")){
+                            valueToInsert = valueToInsert.substring(0, valueToInsert.length()-5);
+                        }
                         String presentableText = valueToInsert;
                         count++;
                         LookupElement element = LookupElementBuilder.create("", valueToInsert)

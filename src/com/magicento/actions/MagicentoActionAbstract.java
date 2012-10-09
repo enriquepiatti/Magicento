@@ -1,6 +1,8 @@
 package com.magicento.actions;
 
 import com.intellij.ide.IdeView;
+import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.util.PsiNavigateUtil;
@@ -345,6 +347,41 @@ public abstract class MagicentoActionAbstract extends AnAction implements IMagic
     }
 
     public abstract void executeAction();
+
+
+    protected void addNewLineAfterCaret()
+    {
+        ActionManager actionManager = ActionManagerImpl.getInstance();
+        final AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_START_NEW_LINE);
+        AnActionEvent event = new AnActionEvent(null, getDataContext(), IdeActions.ACTION_EDITOR_START_NEW_LINE, getEvent().getPresentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+    }
+
+    protected void addNewLineBeforeCaret()
+    {
+        ActionManager actionManager = ActionManagerImpl.getInstance();
+        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_UP);
+        AnActionEvent event = new AnActionEvent(null, getDataContext(), IdeActions.ACTION_EDITOR_COMPLETE_STATEMENT, getEvent().getPresentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+
+        addNewLineAfterCaret();
+    }
+
+    protected void writeStringInCaret(String text)
+    {
+        writeStringAtPosition(text, getCaretModel().getOffset());
+    }
+
+    protected void writeStringAtPosition(String text, final int position)
+    {
+        final String write = text;
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            @Override
+            public void run() {
+                getDocument().insertString(position, write);
+            }
+        });
+    }
 
 
 }

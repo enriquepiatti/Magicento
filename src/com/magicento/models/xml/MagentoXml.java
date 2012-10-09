@@ -36,12 +36,20 @@ abstract public class MagentoXml {
     protected MagentoXmlTag xml;
 
     protected boolean isCacheInvalid = true;
+
+    public String getMergedXmlFilename()
+    {
+        return mergedXmlFilename;
+    }
+
     protected String mergedXmlFilename = "";
 
     public static MagentoXmlType TYPE = null;
 
+    protected Project project;
 
-    public MagentoXml(){
+    public MagentoXml(Project project){
+        this.project = project;
         _init();
     }
 
@@ -65,11 +73,11 @@ abstract public class MagentoXml {
     }
 
 
-    protected MagentoXmlTag _createRootTag()
-    {
-        //return new ConfigXmlTag();
-        return new MagentoXmlTag();
-    }
+    abstract protected MagentoXmlTag _createRootTag();
+//    {
+//        //return new ConfigXmlTag();
+//        return new MagentoXmlTag();
+//    }
 
     /**
      * each children has its own class, created dinamically according to the node name and parents names.
@@ -250,13 +258,13 @@ abstract public class MagentoXml {
     }
 
 
-    public File getMergedXmlFile(Project project)
+    public File getMergedXmlFile()
     {
         MagicentoProjectComponent magicentoProject = MagicentoProjectComponent.getInstance(project);
-        File cachedFile = magicentoProject.getCachedFile(mergedXmlFilename);
+        File cachedFile = magicentoProject.getCachedFile(getMergedXmlFilename());
 
         if(isCacheInvalid || ! cachedFile.exists() ){
-            String result = getMergedXml(project);
+            String result = getMergedXml();
             if(result == null || result.charAt(0) != '<'){
                 // we are checking if its disabled because when this is requested could be open a popup for inserting the path to magento,
                 // and the user can disable magicento from there if magicento is enabled but is not working
@@ -282,7 +290,7 @@ abstract public class MagentoXml {
     }
 
 
-    abstract protected String getMergedXml(Project project);
+    abstract protected String getMergedXml();
 
 
     public void invalidateCache()

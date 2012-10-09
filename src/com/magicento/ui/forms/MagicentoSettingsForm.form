@@ -18,11 +18,12 @@
     <rowspec value="center:max(d;4px):noGrow"/>
     <rowspec value="top:4dlu:noGrow"/>
     <rowspec value="center:max(d;4px):noGrow"/>
-    <colspec value="fill:172px:noGrow"/>
-    <colspec value="left:4dlu:noGrow"/>
-    <colspec value="fill:d:grow"/>
+    <colspec value="fill:234px:noGrow"/>
+    <colspec value="left:5dlu:noGrow"/>
+    <colspec value="left:557px:grow"/>
+    <colspec value="fill:max(d;4px):noGrow"/>
     <constraints>
-      <xy x="20" y="20" width="760" height="316"/>
+      <xy x="20" y="20" width="824" height="331"/>
     </constraints>
     <properties>
       <enabled value="true"/>
@@ -43,7 +44,7 @@
       </component>
       <component id="93976" class="javax.swing.JCheckBox" binding="enabledCheckBox" default-binding="true">
         <constraints>
-          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <forms/>
         </constraints>
         <properties>
@@ -71,7 +72,7 @@
       </component>
       <component id="d8aa2" class="javax.swing.JCheckBox" binding="phpEnabledCheckBox">
         <constraints>
-          <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="6" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <forms/>
         </constraints>
         <properties>
@@ -107,7 +108,7 @@
       </component>
       <component id="337ed" class="javax.swing.JLabel">
         <constraints>
-          <grid row="12" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+          <grid row="12" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
             <preferred-size width="120" height="40"/>
           </grid>
           <forms/>
@@ -117,15 +118,6 @@
           <text value="* Leave empty if you can run php from anywhere"/>
           <verticalAlignment value="1"/>
         </properties>
-      </component>
-      <component id="c162" class="javax.swing.JTextField" binding="pathToMageTextField">
-        <constraints>
-          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
-          <forms defaultalign-horz="false"/>
-        </constraints>
-        <properties/>
       </component>
       <component id="f3f16" class="javax.swing.JLabel">
         <constraints>
@@ -148,7 +140,7 @@
         <colspec value="left:4dlu:noGrow"/>
         <colspec value="fill:80px:grow"/>
         <constraints>
-          <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="8" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <forms/>
         </constraints>
         <properties/>
@@ -202,7 +194,7 @@
       </component>
       <component id="4730c" class="javax.swing.JLabel">
         <constraints>
-          <grid row="16" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+          <grid row="16" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
             <preferred-size width="120" height="40"/>
           </grid>
           <forms/>
@@ -213,6 +205,40 @@
           <verticalAlignment value="1"/>
         </properties>
       </component>
+      <grid id="bf541" layout-manager="FormLayout">
+        <rowspec value="center:d:grow"/>
+        <colspec value="fill:345px:grow"/>
+        <colspec value="left:4dlu:noGrow"/>
+        <colspec value="fill:max(d;4px):noGrow"/>
+        <constraints>
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="e4eb8" class="javax.swing.JButton" binding="pathToMageButton">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="241" height="26"/>
+              </grid>
+              <forms/>
+            </constraints>
+            <properties>
+              <text value="Browse"/>
+            </properties>
+          </component>
+          <component id="c162" class="javax.swing.JTextField" binding="pathToMageTextField">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+              <forms defaultalign-horz="false"/>
+            </constraints>
+            <properties/>
+          </component>
+        </children>
+      </grid>
     </children>
   </grid>
   <buttonGroups>

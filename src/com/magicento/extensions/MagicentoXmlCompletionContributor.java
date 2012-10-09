@@ -87,7 +87,7 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                 if(xmlSettings != null){
                     boolean wrap = xmlSettings.XML_TEXT_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP;
                     if( wrap){
-                        IdeHelper.showDialog("It's not safe to use wrap the text in xml files for magento projects.\n" +
+                        IdeHelper.showDialog(psiFile.getProject(), "It's not safe to use wrap the text in xml files for magento projects.\n" +
                                 "Please change this going to Settings > Code Style > Xml > Other > Wrap text", "Warning: Wrap Text in XML files");
                     }
                 }

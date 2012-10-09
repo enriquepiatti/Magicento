@@ -2,6 +2,7 @@ package com.magicento.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.helpers.IdeHelper;
 
@@ -28,7 +29,7 @@ public class ToggleTemplateHintsAction extends MagicentoPhpActionAbstract
             "echo $toggle;";
             String result = magicento.executePhpWithMagento(phpCode);
             String text = result.equals("1") ? "Enabled" : "Disabled";
-            IdeHelper.showDialog("Template hints are now "+text, "Template Hints");
+            magicento.showMessage("Template hints are now " + text, "Template Hints", MagicentoIcons.MAGENTO_ICON_16x16);
         }
     }
 

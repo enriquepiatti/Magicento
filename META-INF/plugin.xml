@@ -4,9 +4,26 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>0.8.2</version>
+  <version>0.9</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>Video with all the features: <a href="http://www.magicento.com">www.magicento.com</a></span>
+        </p>
+        <p>
+            <span>0.9</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Fixed bug in notification of duplicate rewrites</li>
+                    </ul>
+                </li>
+                <li>New action for reseting core_resource table so the installer script can be executed again. Just use Alt+M when editing any installer script</li>
+                <li>New action for Going to the Block from any template. Just use Alt+M when editing any template file</li>
+                <li>New action for adding @var $this to any template. Just use Alt+M when editing any template file</li>
+                <li>Starting code completion on layout xml files. In this release only handles are supported.</li>
+            </ul>
+        </p>
         <p>
             <span>0.8.2</span>
             <ul>
@@ -83,6 +100,13 @@
               description="enable/disable template hints in magento (included admin template hints)"/>
       <action id="CompareWithOriginal" class="com.magicento.actions.CompareWithOriginalAction"
               text="Compare with Original" description="compare current file with original from magento"/>
+      <action id="RemoveFromCoreResource" class="com.magicento.actions.RemoveFromCoreResourceAction"
+              text="Remove this installer from core resource table"
+              description="Reset the version of this installer to the previous one so the installer is executed again in Magento"/>
+      <action id="GoToBlockFromTemplate" class="com.magicento.actions.GoToBlockFromTemplateAction" text="Go to Block"
+              description="go to block of current template"/>
+      <action id="AddVarThisToTemplate" class="com.magicento.actions.AddVarThisToTemplateAction" text="Add @var $this"
+              description="add @var $this searching the blocks of the current template"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

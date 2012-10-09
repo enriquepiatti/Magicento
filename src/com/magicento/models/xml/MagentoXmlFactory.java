@@ -2,11 +2,13 @@ package com.magicento.models.xml;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.magicento.models.layout.LayoutFile;
 import com.magicento.models.xml.config.MagentoConfigXml;
 import com.magicento.models.xml.config.adminhtml.MagentoAdminhtmlXml;
 import com.magicento.models.xml.config.system.MagentoSystemXml;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.magicento.models.xml.layout.MagentoLayoutXml;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,13 +51,16 @@ public class MagentoXmlFactory {
         {
             switch(type){
                 case CONFIG:
-                    projectInstances.put(type, new MagentoConfigXml());
+                    projectInstances.put(type, new MagentoConfigXml(project));
                     break;
                 case SYSTEM:
-                    projectInstances.put(type, new MagentoSystemXml());
+                    projectInstances.put(type, new MagentoSystemXml(project));
                     break;
                 case ADMINHTML:
-                    projectInstances.put(type, new MagentoAdminhtmlXml());
+                    projectInstances.put(type, new MagentoAdminhtmlXml(project));
+                    break;
+                case LAYOUT:
+                    projectInstances.put(type, new MagentoLayoutXml(project));
                     break;
             }
         }
@@ -75,6 +80,14 @@ public class MagentoXmlFactory {
         }
         else if( fileName.equals("adminhtml.xml")){
             return MagentoXmlFactory.getInstance(MagentoXmlType.ADMINHTML, project);
+        }
+        else if( fileName.endsWith(".xml") && file.getVirtualFile().getPath().contains("app/design/") ){
+            MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
+            LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
+            layoutXml.setArea(layoutFile.getArea());
+            layoutXml.setPackageName(layoutFile.getPackage());
+            layoutXml.setTheme(layoutFile.getTheme());
+            return layoutXml;
         }
         return null;
     }

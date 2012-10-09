@@ -3,7 +3,9 @@ package com.magicento.helpers;
 import com.magicento.MagicentoProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.magicento.MagicentoSettings;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.regex.Matcher;
@@ -86,6 +88,31 @@ public class Magicento {
             return className;
         }
         return null;
+    }
+
+
+    @NotNull
+    public static String[] getAllPackages(Project project, String area)
+    {
+        MagicentoSettings settings = MagicentoSettings.getInstance(project);
+        if(settings != null){
+            String pathToMagento = settings.getPathToMagento();
+            File areaDirectory = new File(pathToMagento+"/app/design/"+area);
+            return FileHelper.getSubdirectories(areaDirectory);
+        }
+        return new String[]{};
+    }
+
+    @NotNull
+    public static String[] getAllThemesFromPackage(Project project, String area, String packageName)
+    {
+        MagicentoSettings settings = MagicentoSettings.getInstance(project);
+        if(settings != null){
+            String pathToMagento = settings.getPathToMagento();
+            File areaDirectory = new File(pathToMagento+"/app/design/"+area+"/"+packageName);
+            return FileHelper.getSubdirectories(areaDirectory);
+        }
+        return new String[]{};
     }
 
 

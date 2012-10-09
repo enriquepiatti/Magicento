@@ -1,10 +1,17 @@
 package com.magicento.helpers;
 
 import com.intellij.codeInsight.TargetElementUtilBase;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationListener;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
@@ -12,9 +19,13 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.psi.formatter.xml.XmlCodeStyleSettings;
 import com.intellij.psi.util.PsiUtilCore;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.UIUtil;
+import com.magicento.MagicentoIcons;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 
 /**
  * Helper for working easily with the IDE
@@ -22,14 +33,14 @@ import javax.swing.*;
  */
 public class IdeHelper {
 
-    public static void showDialog(final String message, final String title, final Icon icon)
+    public static void showDialog(final Project project, final String message, final String title, final Icon icon)
     {
         final Throwable[] exception = {null};
         UIUtil.invokeAndWaitIfNeeded(new Runnable() {
             @Override
             public void run() {
 //                try {
-                    Messages.showMessageDialog(message, title, icon);
+                    Messages.showMessageDialog(project, message, title, icon);
 //                } catch (Throwable tearingDown) {
 //                    if (exception[0] == null) exception[0] = tearingDown;
 //                }
@@ -38,9 +49,10 @@ public class IdeHelper {
         // if (exception[0] != null) throw exception[0];
     }
 
-    public static void showDialog(String message, String title)
+    public static void showDialog(Project project, String message, String title)
     {
-        showDialog(message, title, Messages.getInformationIcon());
+        //showDialog(message, title, Messages.getInformationIcon());
+        showDialog(project, message, title, MagicentoIcons.MAGENTO_ICON_16x16);
     }
 
     // TODO: this log doesn't work
@@ -104,6 +116,27 @@ public class IdeHelper {
         return null;
     }
 
+
+    public static void showNotification(String message, NotificationType type, @Nullable Project project)
+    {
+        final MessageBus messageBus = project == null ? ApplicationManager.getApplication().getMessageBus() : project.getMessageBus();
+
+//        final NotificationListener listener = new NotificationListener() {
+//            public void hyperlinkUpdate(Notification n, HyperlinkEvent e) {
+//                n.expire();
+//            }
+//        };
+
+        final Notification notification = new Notification("Magicento Notification", "Magicento Notification", message, type, null);
+
+        ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
+            @Override
+            public void run() {
+                //DebugUtil.sleep(1000);
+                messageBus.syncPublisher(Notifications.TOPIC).notify(notification);
+            }
+        });
+    }
 
 
 }

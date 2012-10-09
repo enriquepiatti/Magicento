@@ -8,6 +8,7 @@ import com.magicento.models.xml.config.system.MagentoSystemXml;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFileAdapter;
 import com.intellij.openapi.vfs.VirtualFileEvent;
+import com.magicento.models.xml.layout.MagentoLayoutXml;
 
 /**
  * @author Enrique Piatti
@@ -35,15 +36,18 @@ public class MagicentoFileListener extends VirtualFileAdapter {
             else if(isAdminhtmlXml(event)){
                 MagentoXmlFactory.getInstance(MagentoAdminhtmlXml.TYPE, _project).invalidateCache();
             }
+            else if(isLayoutXml(event)){
+                MagentoXmlFactory.getInstance(MagentoLayoutXml.TYPE, _project).invalidateCache();
+            }
             else if(isModuleXml(event)){
                 Magento.getInstance(_project).invalidateDeclaredModulesCache();
                 MagentoXmlFactory.getInstance(MagentoConfigXml.TYPE, _project).invalidateCache();
                 MagentoXmlFactory.getInstance(MagentoSystemXml.TYPE, _project).invalidateCache();
                 MagentoXmlFactory.getInstance(MagentoAdminhtmlXml.TYPE, _project).invalidateCache();
+                MagentoXmlFactory.getInstance(MagentoLayoutXml.TYPE, _project).invalidateCache();
             }
         }
     }
-
 
 
     public void fileCreated(VirtualFileEvent event){
@@ -89,6 +93,14 @@ public class MagicentoFileListener extends VirtualFileAdapter {
     protected boolean isModuleXml(VirtualFileEvent event)
     {
         if(event.getFileName().endsWith(".xml") && event.getFile().getPath().contains("/app/etc/modules/")){
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isLayoutXml(VirtualFileEvent event)
+    {
+        if(event.getFileName().endsWith(".xml") && event.getFile().getPath().contains("/app/design/")){
             return true;
         }
         return false;

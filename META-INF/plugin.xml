@@ -4,9 +4,26 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>0.9</version>
+  <version>0.9.7</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>0.9.7</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Fixed autodetect for Mage.php</li>
+                        <li>Fixed PHP features using HTTP (it should work fine on Virtual Machines now too)</li>
+                        <li>Fixed Layout xml code completion errors</li>
+                    </ul>
+                </li>
+                <li>Added autocomplete for ->getTable([CTRL+SPACE here]) calls</li>
+                <li>Added autocomplete for ->createBlock([CTRL+SPACE here]) calls</li>
+                <li>Added autocomplete for ->_init([CTRL+SPACE here]) calls on models, resources and collections</li>
+                <li>Added action for flushing Magento cache (Alt+M)</li>
+                <li>Added action for rewriting Blocks, Helpers and Models (Alt+M over the original class to rewrite)</li>
+            </ul>
+        </p>
         <p>
             <span>Video with all the features: <a href="http://www.magicento.com">www.magicento.com</a></span>
         </p>
@@ -107,6 +124,10 @@
               description="go to block of current template"/>
       <action id="AddVarThisToTemplate" class="com.magicento.actions.AddVarThisToTemplateAction" text="Add @var $this"
               description="add @var $this searching the blocks of the current template"/>
+      <action id="FlushCache" class="com.magicento.actions.FlushCacheAction" text="Flush Cache"
+              description="flush magento and storage cache"/>
+      <action id="RewriteClass" class="com.magicento.actions.RewriteClassAction" text="Rewrite Class"
+              description="rewrite this class in the selected module"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

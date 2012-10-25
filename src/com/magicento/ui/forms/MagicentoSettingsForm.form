@@ -18,12 +18,16 @@
     <rowspec value="center:max(d;4px):noGrow"/>
     <rowspec value="top:4dlu:noGrow"/>
     <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
     <colspec value="fill:234px:noGrow"/>
     <colspec value="left:5dlu:noGrow"/>
     <colspec value="left:557px:grow"/>
     <colspec value="fill:max(d;4px):noGrow"/>
     <constraints>
-      <xy x="20" y="20" width="824" height="331"/>
+      <xy x="20" y="20" width="824" height="448"/>
     </constraints>
     <properties>
       <enabled value="true"/>
@@ -68,17 +72,6 @@
         </constraints>
         <properties>
           <text value="&lt;html&gt;Enabled/Disable PHP execution"/>
-        </properties>
-      </component>
-      <component id="d8aa2" class="javax.swing.JCheckBox" binding="phpEnabledCheckBox">
-        <constraints>
-          <grid row="6" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-        <properties>
-          <enabled value="true"/>
-          <selected value="false"/>
-          <text value="Enabled"/>
         </properties>
       </component>
       <component id="e8684" class="javax.swing.JLabel">
@@ -162,7 +155,7 @@
               <forms/>
             </constraints>
             <properties>
-              <text value="Use HTTP"/>
+              <text value="Use HTTP   (useful for VM or when PHP interpreter is not working)"/>
             </properties>
           </component>
         </children>
@@ -190,19 +183,6 @@
         <properties>
           <editable value="true"/>
           <enabled value="true"/>
-        </properties>
-      </component>
-      <component id="4730c" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="16" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
-            <preferred-size width="120" height="40"/>
-          </grid>
-          <forms/>
-        </constraints>
-        <properties>
-          <enabled value="true"/>
-          <text value="* e.g.: http://mymagento.local.com  (this wll request http://mymagento.local.com/.idea/magicento/eval.php)"/>
-          <verticalAlignment value="1"/>
         </properties>
       </component>
       <grid id="bf541" layout-manager="FormLayout">
@@ -239,12 +219,201 @@
           </component>
         </children>
       </grid>
+      <component id="549ba" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="18" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="120" height="40"/>
+          </grid>
+          <forms/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <text value="Folder for PHP with HTTP"/>
+          <verticalAlignment value="1"/>
+        </properties>
+      </component>
+      <grid id="a3e4c" layout-manager="FormLayout">
+        <rowspec value="center:d:grow"/>
+        <rowspec value="top:4dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
+        <rowspec value="top:4dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
+        <rowspec value="top:4dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
+        <colspec value="left:131px:noGrow"/>
+        <colspec value="left:4dlu:noGrow"/>
+        <colspec value="fill:max(d;4px):noGrow"/>
+        <constraints>
+          <grid row="18" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="146e5" class="javax.swing.JRadioButton" binding="useIdeaFolderRadioButton">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text value="Use .idea folder"/>
+            </properties>
+          </component>
+          <component id="e318e" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="120" height="40"/>
+              </grid>
+              <forms/>
+            </constraints>
+            <properties>
+              <enabled value="true"/>
+              <text value="* this wll request http://mymagento.local.com/.idea/magicento/eval.php"/>
+              <verticalAlignment value="1"/>
+            </properties>
+          </component>
+          <component id="3bc2d" class="javax.swing.JRadioButton" binding="useVarFolderRadioButton">
+            <constraints>
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <selected value="false"/>
+              <text value="Use var folder"/>
+            </properties>
+          </component>
+          <component id="8d78e" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="120" height="40"/>
+              </grid>
+              <forms/>
+            </constraints>
+            <properties>
+              <enabled value="true"/>
+              <text value="* this wll request http://mymagento.local.com/var/magicento/eval.php"/>
+              <verticalAlignment value="1"/>
+            </properties>
+          </component>
+          <component id="beaf5" class="javax.swing.JRadioButton" binding="useCustomFolderRadioButton">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <hideActionText value="false"/>
+              <selected value="false"/>
+              <text value="Use custom folder"/>
+            </properties>
+          </component>
+          <grid id="1c1c3" layout-manager="FormLayout">
+            <rowspec value="center:d:grow"/>
+            <colspec value="fill:310px:grow"/>
+            <colspec value="left:4dlu:noGrow"/>
+            <colspec value="fill:max(d;4px):noGrow"/>
+            <constraints>
+              <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="cef75" class="javax.swing.JButton" binding="customFolderHttpButton">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="241" height="26"/>
+                  </grid>
+                  <forms/>
+                </constraints>
+                <properties>
+                  <text value="Browse"/>
+                </properties>
+              </component>
+              <component id="3be2c" class="javax.swing.JTextField" binding="customFolderHttpTextField">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                  <forms defaultalign-horz="false"/>
+                </constraints>
+                <properties/>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <component id="4730c" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="16" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="120" height="40"/>
+          </grid>
+          <forms/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <text value="* e.g.: http://mymagento.local.com  (this wll request http://mymagento.local.com/.idea/magicento/eval.php)"/>
+          <verticalAlignment value="1"/>
+        </properties>
+      </component>
+      <component id="f92bd" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="20" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;* How HTTP feature works?&lt;br/&gt; &#10;It creates a file called eval.php and tries to execute it using HTTP.&lt;br/&gt;&#10;So this file must be accessible via HTTP and it should be ignored by your VCS.&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <grid id="1b7a8" layout-manager="FormLayout">
+        <rowspec value="center:21px:noGrow"/>
+        <colspec value="fill:94px:noGrow"/>
+        <colspec value="left:9dlu:noGrow"/>
+        <colspec value="fill:max(d;4px):noGrow"/>
+        <colspec value="left:4dlu:noGrow"/>
+        <colspec value="fill:max(d;4px):noGrow"/>
+        <constraints>
+          <grid row="6" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="9625a" class="javax.swing.JCheckBox" binding="phpDisableWarningCheckBox">
+            <constraints>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <enabled value="true"/>
+              <selected value="false"/>
+              <text value="Don't show warning when PHP is disabled"/>
+            </properties>
+          </component>
+          <component id="fd94c" class="javax.swing.JCheckBox" binding="phpEnabledCheckBox">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <enabled value="true"/>
+              <selected value="false"/>
+              <text value="Enabled"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
     </children>
   </grid>
   <buttonGroups>
     <group name="buttonGroupPhp">
       <member id="ac4fd"/>
       <member id="c388c"/>
+    </group>
+    <group name="buttonGroupFolderForHttp">
+      <member id="146e5"/>
+      <member id="3bc2d"/>
+      <member id="beaf5"/>
     </group>
   </buttonGroups>
 </form>

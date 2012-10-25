@@ -225,7 +225,7 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
 
             String store = settings.store == null ? "" : settings.store;
 
-            String phpMageApp = "define('PATH_TO_MAGENTO', '.');require_once PATH_TO_MAGENTO.'/app/Mage.php';Mage::app('"+store+"');";
+            String phpMageApp = "require_once PATH_TO_MAGENTO.'/app/Mage.php';Mage::app('"+store+"');";
             String php = phpMageApp;
 
             php += phpCode;
@@ -252,7 +252,12 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
 
             }
 
-            php = "chdir('" + settings.getPathToMagento() + "');" + php;
+            String pathToMagento = settings.useHttp ? "../.." : ".";
+            pathToMagento = "define('PATH_TO_MAGENTO', '"+pathToMagento+"');";
+            php = pathToMagento + php;
+            if( ! settings.useHttp){
+                php = "chdir('" + settings.getPathToMagento() + "');"+php;
+            }
 
             return PHP.execute(php, _project);
         }

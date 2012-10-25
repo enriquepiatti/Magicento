@@ -40,7 +40,11 @@ public abstract class MagicentoPhpActionAbstract extends MagicentoActionAbstract
             executeAction();
         }
         else {
-            IdeHelper.showDialog(getProject(),"You need to enable PHP in magicento settings for this feature.\nGo to File > Settings > Magicento and Enable PHP.", "Feature available with PHP enabled only");
+            MagicentoSettings settings = MagicentoSettings.getInstance(getProject());
+            if(settings != null && settings.showPhpWarning){
+                IdeHelper.showDialog(getProject(),"You need to enable PHP in magicento settings for this feature.\nGo to File > Settings > Magicento and Enable PHP.\n" +
+                        "You can disable this warning going to File > Settings > Magicento too", "Feature available with PHP enabled only");
+            }
         }
     }
 

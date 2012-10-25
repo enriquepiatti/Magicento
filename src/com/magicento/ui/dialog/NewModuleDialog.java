@@ -1,16 +1,13 @@
 package com.magicento.ui.dialog;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.helpers.XmlHelper;
-import com.magicento.models.layout.Template;
 import org.jdom.Element;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;

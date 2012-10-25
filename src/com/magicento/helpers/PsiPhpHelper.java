@@ -5,13 +5,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiWhiteSpace;
-import com.magicento.models.MagentoClassInfo;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.management.remote.rmi._RMIConnection_Stub;
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -330,12 +326,14 @@ public class PsiPhpHelper {
         return findFirstParentOfType(psiElement, types, limits);
     }
 
-    public static PsiElement findFirstParentOfType(PsiElement psiElement, String[] types, String[] limitTypes){
+    public static PsiElement findFirstParentOfType(PsiElement psiElement, String[] types, String[] limitTypes)
+    {
+        // PsiTreeUtil.getParentOfType(psiElement, XmlTag.class, false);
         PsiElement parentElement = psiElement.getParent();
         boolean isRequestingSecuredLimits = false;
         if(limitTypes != null && limitTypes.length > 0){
             for(String limit : limitTypes){
-                if(limit == FILE || limit == CLASS || limit == GROUP_STATEMENT){
+                if(limit.equals(FILE) || limit.equals(CLASS) || limit.equals(GROUP_STATEMENT)){
                     isRequestingSecuredLimits = true;
                     break;
                 }
@@ -442,6 +440,24 @@ public class PsiPhpHelper {
                         return child;
                     }
                 }
+            }
+        }
+        return null;
+    }
+
+    public static PsiElement getClassElement(PsiElement child)
+    {
+        return PsiPhpHelper.findFirstParentOfType(child, PsiPhpHelper.CLASS, PsiPhpHelper.CLASS);
+    }
+
+    public static String getClassName(PsiElement child)
+    {
+        PsiElement psiClass = getClassElement(child);
+        if(psiClass != null)
+        {
+            PsiElement classNameElement = findNextSiblingOfType(psiClass.getFirstChild(), IDENTIFIER);
+            if(classNameElement != null){
+                return classNameElement.getText();
             }
         }
         return null;

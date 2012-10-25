@@ -5,6 +5,7 @@ import org.apache.tools.ant.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +37,27 @@ public class FileHelper
                 @Override
                 public boolean accept(File dir, String name) {
                     return (new File(dir+"/"+name).isDirectory());
+                    // return dir.isDirectory();
                 }
             });
         }
         return new String[]{};
     }
+
+    @NotNull
+    public static File[] getSubdirectoriesFiles(@NotNull File file)
+    {
+        // FileUtils.getPathStack();
+        // file.getAbsolutePath().replace("\\", "/").split("/");
+        if(file.exists() && file.isDirectory()){
+            return file.listFiles( new FileFilter() {
+                public boolean accept(File file) {
+                    return file.isDirectory();
+                }
+            });
+        }
+        return new File[]{};
+    }
+
 
 }

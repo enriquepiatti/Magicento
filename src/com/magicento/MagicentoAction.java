@@ -61,11 +61,13 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
                 "CopyTemplate",
                 "GetStoreConfig",
                 "CompareWithOriginal",
+                "RewriteClass",
                 "EvaluateInMagento",
                 "GotoClassesOfFactory",
                 "CreateModule",
                 "SetMagePath",
                 "SetStore",
+                "FlushCache",
                 "ToggleTemplateHints"
         };
         ActionManager actionManager = ActionManagerImpl.getInstance();

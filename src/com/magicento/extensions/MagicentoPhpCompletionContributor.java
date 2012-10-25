@@ -14,6 +14,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
+import com.intellij.util.containers.ArrayListSet;
 import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
@@ -31,10 +32,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * completion contributor for PHP code
@@ -78,14 +76,17 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                         else if(isFactoryAutocomplete(currentElement))
                         {
                             elements = getAutocompleteForFactory(currentElement, prefix);
-
                         }
                         else if(isGetStoreConfigAutocomplete(currentElement))
                         {
                             elements = getAutocompleteForGetStoreConfig(currentElement, prefix);
                         }
+                        else if(isGetTable(currentElement))
+                        {
+                            elements = getAutocompleteForGetTable(currentElement, prefix);
+                        }
 
-                        if(elements != null)
+                        if(elements != null && elements.size() > 0)
                         {
                             _result.addAllElements(elements);
 //                            for(LookupElement element : elements){
@@ -95,6 +96,48 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                     }
                 }
             });
+    }
+
+
+
+
+    protected PsiElement getParameterListElement(PsiElement currentElement)
+    {
+        PsiElement element = null;
+        if(currentElement != null)
+        {
+            if(PsiPhpHelper.isParameterList(currentElement)){
+                element = currentElement;
+            }
+            if(element == null){
+                element = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.PARAMETER_LIST);
+            }
+        }
+        return element;
+    }
+
+
+
+    protected boolean isGetTable(PsiElement currentElement)
+    {
+        if(currentElement != null)
+        {
+            // autcomplete works only if cursor is over the parameter list of ->getTable([HERE])
+            PsiElement element = getParameterListElement(currentElement);
+            if(element != null)
+            {
+                PsiElement methodReference = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.METHOD_REFERENCE);
+                if(methodReference != null){
+                    if(MagentoParser.isGetTable(methodReference)){
+                        return true;
+                    }
+                    if(MagentoParser.isMethod(methodReference, "_init") && MagentoParser.isResourceModel(methodReference)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     protected List<LookupElement> getAutocompleteForClassName(String filePath)
@@ -120,14 +163,8 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
     {
         if(currentElement != null)
         {
-            PsiElement element = null;
             // autcomplete works only if cursor is over the oparameter list of Mage::getStoreConfig([HERE])
-            if(PsiPhpHelper.isParameterList(currentElement)){
-                element = currentElement;
-            }
-            if(element == null){
-                element = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.PARAMETER_LIST);
-            }
+            PsiElement element = getParameterListElement(currentElement);
             if(element != null)
             {
                 PsiElement methodReference = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.METHOD_REFERENCE);
@@ -168,19 +205,23 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
     {
         if(currentElement != null)
         {
-            PsiElement element = null;
-            if(PsiPhpHelper.isParameterList(currentElement)){
-                element = currentElement;
-            }
-            if(element == null){
-                element = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.PARAMETER_LIST);
-            }
+            // autcomplete works only if cursor is over the parameter list of some Mage::[FACTORY]([CURSOR_HERE])
+            PsiElement element = getParameterListElement(currentElement);
             if(element != null)
             {
                 PsiElement methodReference = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.METHOD_REFERENCE);
                 if(methodReference != null){
                     if(MagentoParser.isFactory(methodReference)){
                         return true;
+                    }
+                    if(MagentoParser.isCreateBlock(methodReference)){
+                        return true;
+                    }
+                    if(MagentoParser.isMethod(methodReference, "_init")){
+                        // resourceModels receives a table uri not a factory
+                        if( ! MagentoParser.isResourceModel(methodReference)){
+                            return true;
+                        }
                     }
                 }
             }
@@ -331,6 +372,85 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
         }
         return elements;
     }
+
+
+    protected List<LookupElement> getAutocompleteForGetTable(PsiElement currentElement, String prefix)
+    {
+        List<LookupElement> elements = new ArrayList<LookupElement>();
+        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
+        if(magicento != null)
+        {
+            String[] parts = prefix.split("/");
+            String modelUri = parts[0];
+            String entityUri = "";
+            if(parts.length > 1){
+                entityUri = parts[1];
+            }
+
+            File configFile = magicento.getCachedConfigXml();
+
+
+            String tablePrefix = "";
+            List<Element> nodes = null;
+            String xpath = null;
+
+            // don't use prefix
+//            xpath = "config/global/resources/db/table_prefix";
+//            nodes = XmlHelper.findXpath(configFile, xpath);
+//            if(nodes != null && nodes.size() > 0)
+//            {
+//                tablePrefix = nodes.get(0).getValue();
+//            }
+
+            Map<String, String> modelsAndResources = new HashMap<String, String>();
+            xpath = "config/global/models/*";
+            if( ! modelUri.isEmpty()){
+                xpath += "[starts-with(name(),'" + modelUri + "')]";
+            }
+
+            nodes = XmlHelper.findXpath(configFile, xpath);
+            if(nodes != null && nodes.size() > 0){
+                for(Element node : nodes)
+                {
+                    Element resourceModel = node.getChild("resourceModel");
+                    if(resourceModel != null){
+                        modelsAndResources.put(node.getName(), resourceModel.getValue());
+                    }
+                }
+            }
+
+            for(Map.Entry<String, String> entry : modelsAndResources.entrySet())
+            {
+                String resource = entry.getValue();
+                xpath = "config/global/models/"+resource+"/entities/*";
+                if( ! entityUri.isEmpty()){
+                    xpath += "[starts-with(name(),'" + entityUri + "')]";
+                }
+                nodes = XmlHelper.findXpath(configFile, xpath);
+                if(nodes != null && nodes.size() > 0){
+                    for(Element node : nodes)
+                    {
+                        Element tableElement = node.getChild("table");
+                        if(tableElement != null){
+                            String table = entry.getKey()+"/"+node.getName();
+                            String tableName = tablePrefix + tableElement.getValue();
+                            LookupElement lookupElement = LookupElementBuilder.create("", table)
+                                    .setPresentableText(table)
+                                    .setIcon(myIcon)
+                                    .setTailText(tableName, true)
+                                    ;
+                            elements.add(lookupElement);
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+        return elements;
+    }
+
 
 
 }

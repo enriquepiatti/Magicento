@@ -28,17 +28,18 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
     public String pathToPhp;
     public String urlToMagento;
     public String store = "";
+    // public String folderForHttp = "";
+    public boolean useVarFolder = false;
+    public boolean useIdeaFolder = true;
+    public boolean showPhpWarning = true;
 
     protected String relativePathToMage = "/app/Mage.php";
     protected boolean isPathToMageValid = false;
 
     protected Project project;
 
-    public static MagicentoSettings getInstance() {
-        return getInstance(guessProject());
-    }
-
-    public static MagicentoSettings getInstance(Project project) {
+    public static MagicentoSettings getInstance(Project project)
+    {
         if(project == null){
             project = guessProject();
             if(project == null){
@@ -52,6 +53,9 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
             IdeHelper.logError("Cannot find Magicento Settings");
         }
         settings.project = project;
+
+        settings.autoSetPathToMage();
+
         return settings;
     }
 
@@ -70,9 +74,14 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
             IdeHelper.logError(e.getMessage());
             IdeHelper.showDialog(null,"Cannot read the saved settings for Magicento. Please try saving them again from File > Settings > Magicento", "Error in Magicento Settings");
         }
+        autoSetPathToMage();
+    }
+
+    protected void autoSetPathToMage()
+    {
         if(pathToMage == null || pathToMage.isEmpty())
         {
-            String defaultPathToMagento = getDefaultPathToMagento();
+            String defaultPathToMagento = getDefaultPathToMagento(project);
             if( defaultPathToMagento != null){
                 setPathToMage(defaultPathToMagento + relativePathToMage);
             }
@@ -82,8 +91,12 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
         }
     }
 
+
     public String getDefaultPathToMagento(Project project)
     {
+        if(project == null){
+            return getDefaultPathToMagento();
+        }
         MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
         if(magicento != null){
             return magicento.getDefaultPathToMagento();
@@ -180,7 +193,10 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
     {
         if(project != null && enabled){
             if( ! isPathToMageValid()){
-                IdeHelper.showNotification("Path to Mage.php is not valid: "+pathToMage, NotificationType.WARNING, project);
+                IdeHelper.showNotification("Path to Mage.php is not valid: "+pathToMage +
+                        "\nGo to File > Settings > Magicento and set the correct path to Mage.php",
+                        NotificationType.WARNING,
+                        project);
             }
         }
     }

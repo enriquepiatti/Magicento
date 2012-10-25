@@ -81,14 +81,15 @@ public class MagentoXmlFactory {
         else if( fileName.equals("adminhtml.xml")){
             return MagentoXmlFactory.getInstance(MagentoXmlType.ADMINHTML, project);
         }
-        else if( fileName.endsWith(".xml") && file.getVirtualFile().getPath().contains("app/design/") ){
-            MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
-            LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
-            layoutXml.setArea(layoutFile.getArea());
-            layoutXml.setPackageName(layoutFile.getPackage());
-            layoutXml.setTheme(layoutFile.getTheme());
-            return layoutXml;
-        }
+        // TODO: fix XMl Layout code completion
+//        else if( fileName.endsWith(".xml") && file.getVirtualFile().getPath().contains("app/design/") ){
+//            MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
+//            LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
+//            layoutXml.setArea(layoutFile.getArea());
+//            layoutXml.setPackageName(layoutFile.getPackage());
+//            layoutXml.setTheme(layoutFile.getTheme());
+//            return layoutXml;
+//        }
         return null;
     }
 

@@ -248,7 +248,9 @@ public class MagentoXmlTag extends MagentoXmlElement {
             //String xpath = "/config/global/blocks/* | /config/global/helpers/*";
             //String xpath = "/config/global/models/*";
             nodes = XmlHelper.findXpath(configFile, xpath);
-            return nodes;
+            if(nodes == null){
+                nodes = new ArrayList<Element>();
+            }
         }
         return nodes;
     }

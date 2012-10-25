@@ -1,0 +1,6 @@
+<?php
+#parse("PHP File Header")
+ 
+class ${CLASSNAME} #if(${EXTENDS} != "")extends ${EXTENDS}#end {
+
+}

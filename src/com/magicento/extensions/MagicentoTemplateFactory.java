@@ -25,7 +25,8 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
         ModuleXml("magicento_module.xml"),
         ConfigXml("magicento_config.xml"),
         Helper("magicento_helper.php"),
-        Installer("magicento_installer.php");
+        Installer("magicento_installer.php"),
+        PhpClass("magicento_class.php");
 
         String file;
         Template(String file) {
@@ -39,16 +40,11 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
 
     public FileTemplateGroupDescriptor getFileTemplatesDescriptor()
     {
-//        String title = "Magicento";
-//        final FileTemplateGroupDescriptor group = new FileTemplateGroupDescriptor(title, MagicentoIcons.MAGENTO_ICON_16x16);
-//
-//        for (Template template : Template.values()) {
-//            group.addTemplate(new FileTemplateDescriptor(template.getFile(), MagicentoIcons.MAGENTO_ICON_16x16));
-//        }
-//
-//        return group;
+        String title = "Magicento";
+        final FileTemplateGroupDescriptor group = new FileTemplateGroupDescriptor(title, MagicentoIcons.MAGENTO_ICON_16x16);
+        group.addTemplate(new FileTemplateDescriptor(Template.PhpClass.getFile(), MagicentoIcons.MAGENTO_ICON_16x16));
 
-          return null;
+        return group;
     }
 
     public static PsiFile createFromTemplate(final PsiDirectory directory, Properties customProperties, String fileName, Template template)
@@ -56,7 +52,13 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
 
         String templateName = template.getFile();
 
-        final FileTemplate fileTemplate = FileTemplateManager.getInstance().getInternalTemplate(templateName);
+        FileTemplate fileTemplate;
+        if(template == Template.PhpClass) {
+            fileTemplate = FileTemplateManager.getInstance().getJ2eeTemplate(templateName);
+        }
+        else {
+            fileTemplate = FileTemplateManager.getInstance().getInternalTemplate(templateName);
+        }
 
         Properties properties = new Properties(FileTemplateManager.getInstance().getDefaultProperties());
         if(customProperties != null){
@@ -108,7 +110,7 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
                 else {
                     String message = "File " + directoryPath + "/" + fileName + " already exists";
                     IdeHelper.logError(message);
-                    IdeHelper.showDialog(project, message, "Cannot create new module");
+                    IdeHelper.showDialog(project, message, "Cannot create new file");
                 }
             }
         }

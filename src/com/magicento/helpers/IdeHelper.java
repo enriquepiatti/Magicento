@@ -89,7 +89,7 @@ public class IdeHelper {
         }
     }
 
-    public static boolean promp(String message, String title)
+    public static boolean prompt(String message, String title)
     {
         // Messages.showOkCancelDialog(myProject, question, myTitle, Messages.getQuestionIcon()) == 0;
         return Messages.showOkCancelDialog(message, title, Messages.getQuestionIcon()) == 0;

@@ -5,6 +5,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlTag;
 import com.magicento.models.MagentoClassInfo;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.omg.CosNaming._BindingIteratorImplBase;
 
 import java.util.HashMap;
 import java.util.List;
@@ -190,20 +192,34 @@ public class MagentoParser {
                     psiElement : PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.METHOD_REFERENCE);
             if(methodReference != null){
                 String methodCall = methodReference.getText();
-                if(methodCall != null && methodCall.startsWith("Mage::"))
-                {
-                    Map<MagentoClassInfo.UriType, String[]> uriTypes = new HashMap<MagentoClassInfo.UriType, String[]>();
-                    uriTypes.put(MagentoClassInfo.UriType.MODEL, new String[]{"getModel", "getSingleton" });
-                    uriTypes.put(MagentoClassInfo.UriType.RESOURCEMODEL, new String[]{"getResourceModel", "getResourceSingleton" });
-                    uriTypes.put(MagentoClassInfo.UriType.HELPER, new String[]{"helper" });
-                    uriTypes.put(MagentoClassInfo.UriType.BLOCK, new String[]{"getSingletonBlock"});
+                if(methodCall != null){
+                    if(methodCall.startsWith("Mage::"))
+                    {
+                        Map<MagentoClassInfo.UriType, String[]> uriTypes = new HashMap<MagentoClassInfo.UriType, String[]>();
+                        uriTypes.put(MagentoClassInfo.UriType.MODEL, new String[]{"getModel", "getSingleton" });
+                        uriTypes.put(MagentoClassInfo.UriType.RESOURCEMODEL, new String[]{"getResourceModel", "getResourceSingleton" });
+                        uriTypes.put(MagentoClassInfo.UriType.HELPER, new String[]{"helper" });
+                        uriTypes.put(MagentoClassInfo.UriType.BLOCK, new String[]{"getSingletonBlock"});
 
-                    for(Map.Entry<MagentoClassInfo.UriType, String[]> entry : uriTypes.entrySet()){
-                        String[] factories = entry.getValue();
-                        for(String factory : factories){
-                            if(methodCall.startsWith("Mage::"+factory)){
-                                return entry.getKey();
+                        for(Map.Entry<MagentoClassInfo.UriType, String[]> entry : uriTypes.entrySet()){
+                            String[] factories = entry.getValue();
+                            for(String factory : factories){
+                                if(methodCall.startsWith("Mage::"+factory)){
+                                    return entry.getKey();
+                                }
                             }
+                        }
+                    }
+                    if(isCreateBlock(methodCall)){
+                        return MagentoClassInfo.UriType.BLOCK;
+                    }
+                    if(isMethod(methodCall, "_init"))
+                    {
+                        if(MagentoParser.isCollection(methodReference)){
+                            return MagentoClassInfo.UriType.MODEL;
+                        }
+                        else if(MagentoParser.isModel(methodReference)){
+                            return MagentoClassInfo.UriType.RESOURCEMODEL;
                         }
                     }
                 }
@@ -270,24 +286,72 @@ public class MagentoParser {
     }
 
 
-    public static boolean isGetStoreConfig(PsiElement methodReference) {
+    public static boolean isMethod(PsiElement methodReference, String method)
+    {
         if(methodReference != null){
-            return isGetStoreConfig(methodReference.getText());
+
+            // we could do this here:
+//            String lastMethod = PsiPhpHelper.getLastChainedMethodName(methodReference);
+//            return (lastMethod != null && lastMethod.equals(method));
+
+            return isMethod(methodReference.getText(), method);
         }
         return false;
     }
 
-    public static boolean isGetStoreConfig(String phpCode)
+    public static boolean isMethod(String phpCode, String method)
     {
         if(phpCode != null)
         {
-            String[] validMethods = {"getStoreConfig"};
+            String[] validMethods = {method};
+            String options = "(" + StringUtils.join(validMethods, "|") + ")";
+            String regex = "^.+->\\s*"+options+"\\s*\\(";
+            //return phpCode.matches(regex);   // for using this we need regex+".*"
+            return JavaHelper.testRegex(regex, phpCode);
+        }
+        return false;
+    }
+
+    public static boolean isMageMethod(PsiElement methodReference, String method)
+    {
+        if(methodReference != null){
+            return isMageMethod(methodReference.getText(), method);
+        }
+        return false;
+    }
+
+    public static boolean isMageMethod(String phpCode, String method)
+    {
+        if(phpCode != null)
+        {
+            String[] validMethods = {method};
             String options = "(" + StringUtils.join(validMethods, "|") + ")";
             String regex = "^Mage\\s*::\\s*"+options+"\\s*\\(";
             //return phpCode.matches(regex);   // for using this we need regex+".*"
             return JavaHelper.testRegex(regex, phpCode);
         }
         return false;
+    }
+
+
+
+    public static boolean isGetTable(PsiElement methodReference) {
+        return isMethod(methodReference, "getTable");
+    }
+
+    public static boolean isGetTable(String phpCode)
+    {
+        return isMethod(phpCode, "getTable");
+    }
+
+
+    public static boolean isGetStoreConfig(PsiElement methodReference) {
+        return isMageMethod(methodReference, "getStoreConfig");
+    }
+
+    public static boolean isGetStoreConfig(String phpCode)
+    {
+        return isMageMethod(phpCode, "getStoreConfig");
     }
 
     public static boolean isEventDispatcherName(PsiElement sourceElement)
@@ -312,4 +376,97 @@ public class MagentoParser {
         }
         return null;
     }
+
+    public static boolean isCreateBlock(PsiElement methodReference) {
+        return isMethod(methodReference, "createBlock");
+    }
+
+    public static boolean isCreateBlock(String phpCode)
+    {
+        return isMethod(phpCode, "createBlock");
+    }
+
+    public static MagentoClassInfo.ClassType getClassType(PsiElement child)
+    {
+        String className = PsiPhpHelper.getClassName(child);
+        if(className != null)
+        {
+            if(className.contains("_Model_"))
+            {
+                if(className.endsWith("Collection")){
+                    return MagentoClassInfo.ClassType.COLLECTION;
+                }
+                if(className.contains("_Resource_") || className.contains("_Mysql4_")){
+                    return MagentoClassInfo.ClassType.RESOURCEMODEL;
+                }
+                return MagentoClassInfo.ClassType.MODEL;
+            }
+
+            if(className.contains("_Block_")){
+                return MagentoClassInfo.ClassType.BLOCK;
+            }
+
+            if(className.contains("_Helper_")){
+                return MagentoClassInfo.ClassType.HELPER;
+            }
+        }
+
+        String filePath = child.getContainingFile().getVirtualFile().getPath().replace("\\", "/");
+        if(filePath.contains("/controllers/")){
+            return MagentoClassInfo.ClassType.CONTROLLER;
+        }
+        if(filePath.contains("/sql/") || filePath.contains("/data/")){
+            return MagentoClassInfo.ClassType.INSTALLER;
+        }
+
+        return null;
+    }
+
+    public static boolean isCollection(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.COLLECTION;
+    }
+
+    public static boolean isResourceModel(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.RESOURCEMODEL;
+    }
+
+    public static boolean isModel(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.MODEL;
+    }
+
+    public static boolean isHelper(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.HELPER;
+    }
+
+    public static boolean isBlock(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.BLOCK;
+    }
+
+    public static boolean isController(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.CONTROLLER;
+    }
+
+    public static boolean isInstaller(PsiElement child)
+    {
+        return getClassType(child) == MagentoClassInfo.ClassType.INSTALLER;
+    }
+
+
+    public static String getModuleNameFromModulePath(@NotNull String modulePath)
+    {
+        modulePath = modulePath.replace("\\", "/");
+        String regex = "^.+?/code/(?:core|community|local)/([a-zA-Z0-9]+/[a-zA-Z0-9]+).*";
+        String moduleName = JavaHelper.extractFirstCaptureRegex(regex, modulePath);
+        if(moduleName != null && ! moduleName.isEmpty()){
+            return moduleName.replace("/", "_");
+        }
+        return null;
+    }
+
 }

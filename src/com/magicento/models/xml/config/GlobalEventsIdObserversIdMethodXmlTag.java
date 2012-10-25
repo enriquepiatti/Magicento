@@ -21,8 +21,10 @@ public class GlobalEventsIdObserversIdMethodXmlTag extends MagentoConfigXmlTag {
     public Map<String, String> getPossibleValues()
     {
         possibleValues = new ArrayList<String>();
-        XmlTag event = getNodeFromContextHierarchy("config/global/events/*");
+        //XmlTag event = getNodeFromContextHierarchy("config/global/events/*");
+        XmlTag event = getNodeFromContextHierarchy("config/*/events/*");
         if(event != null){
+            // TODO: convert to CamelCase before?
             possibleValues.add(event.getName());
         }
         return super.getPossibleValues();

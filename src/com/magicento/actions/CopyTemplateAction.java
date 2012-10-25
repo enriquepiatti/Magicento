@@ -1,24 +1,9 @@
 package com.magicento.actions;
 
-import com.intellij.ide.IdeView;
-import com.intellij.ide.actions.ElementCreator;
-import com.intellij.ide.projectView.impl.AbstractProjectViewPane;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.ex.util.EditorUtil;
-import com.intellij.openapi.fileChooser.FileChooser;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.*;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.impl.file.impl.FileManager;
-import com.intellij.psi.util.PsiUtilBase;
 import com.magicento.MagicentoSettings;
 import com.magicento.helpers.IdeHelper;
 import com.magicento.models.layout.Template;
@@ -61,7 +46,7 @@ public class CopyTemplateAction extends MagicentoActionAbstract
                     String newFilePath = pathToMagento+"/app/design/"+template.getArea()+"/"+packageName+"/"+theme+"/template/"+template.getRelativePath();
                     final File newFile = new File(newFilePath);
                     if(newFile.exists()){
-                        if( ! IdeHelper.promp("File "+newFilePath+" already exists\nDo you want to override it?", "File already exists")){
+                        if( ! IdeHelper.prompt("File " + newFilePath + " already exists\nDo you want to override it?", "File already exists")){
                             return;
                         }
                     }

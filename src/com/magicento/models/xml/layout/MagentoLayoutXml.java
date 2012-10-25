@@ -74,8 +74,10 @@ public class MagentoLayoutXml extends MagentoXml {
             }
             else
             {
-                IdeHelper.showDialog(project, "This feature is supported only with PHP Enabled at the moment.\n" +
-                        "Please enable PHP going to File > Settings > Magicento", "Magicento Layout Error");
+                if(settings.showPhpWarning){
+                    IdeHelper.showDialog(project, "This feature is supported only with PHP Enabled at the moment.\n" +
+                            "Please enable PHP going to File > Settings > Magicento (or disable this warning from there)", "Magicento Layout Error");
+                }
             }
         }
 

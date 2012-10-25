@@ -225,11 +225,25 @@
             </web>
         </default>
     </stores>
+    <websites>
+        <admin/>
+        <default>
+            <web>
+                <routers>
+                    <___>
+                        <area/>
+                        <class/>
+                    </___>
+                </routers>
+            </web>
+        </default>
+    </websites>
     <crontab>
         <jobs>
             <___>
                 <schedule>
                     <cron_expr/>
+                    <config_path/>
                 </schedule>
                 <run>
                     <model/>

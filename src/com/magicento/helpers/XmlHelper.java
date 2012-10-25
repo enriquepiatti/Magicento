@@ -1,17 +1,23 @@
 package com.magicento.helpers;
 
+import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.tools.ant.util.FileUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.DOMBuilder;
 import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
+import org.jetbrains.annotations.NotNull;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -112,6 +118,11 @@ public class XmlHelper {
 
     public static Document getDocumentFromFile(File xmlFile)
     {
+
+//        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+//        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+//        Document document = documentBuilder.parse(xmlFile.getAbsolutePath());
+
         if(xmlFile != null && xmlFile.exists() && xmlFile.isFile()){
             SAXBuilder builder = new SAXBuilder();
             try {
@@ -163,8 +174,14 @@ public class XmlHelper {
         try {
             writer = new FileWriter(filePath);
             XMLOutputter outputter = new XMLOutputter();
+            // outputter.setFormat(Format.getPrettyFormat());
             outputter.output(xmlDocument, writer);
             writer.close();
+
+//            StringWriter out = new StringWriter();
+//            outputter.output(xmlDocument, out);
+            // FileUtils.writeStringToFile(new File(filePath), out.toString(), true);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -342,7 +359,13 @@ public class XmlHelper {
     }
 
 
-    public static XmlTag findSubTag(XmlTag rootTag, String path)
+    /**
+     *
+     * @param rootTag
+     * @param path relative to root
+     * @return
+     */
+    public static XmlTag findSubTag(@NotNull XmlTag rootTag, String path)
     {
         String[] pathElements = path.split("/");
 
@@ -352,6 +375,81 @@ public class XmlHelper {
             if (curTag == null) break;
         }
         return curTag;
+    }
+
+    /**
+     *
+     * @param xmlFile
+     * @param path absolute Path
+     * @return
+     */
+    public static XmlTag findSubTag(XmlFile xmlFile, String path)
+    {
+        XmlTag root = xmlFile.getRootTag();
+        if(root != null){
+            String rootName = root.getName();
+            String relativePath = path.substring(rootName.length()+1);
+            return findSubTag(root, relativePath);
+        }
+        return null;
+    }
+
+
+    /**
+     *
+     * @param xmlFile
+     * @param tagName
+     * @param tagValue
+     * @param path  hierarchy path, this will be the parent of the new tag, ex: root/node1/node2
+     * @return
+     */
+    public static XmlTag createTagInFile(final XmlFile xmlFile, String tagName, String tagValue, String path)
+    {
+        XmlTag root = xmlFile.getRootTag();
+
+        String[] pathElements = path.split("/");
+
+        if(pathElements.length > 0 && pathElements[0].equals(root.getName()))
+        {
+            XmlTag lastExistentParent = root;
+            String curPath = pathElements[0];
+            pathElements = (String[]) ArrayUtils.remove(pathElements, 0); // ArrayUtils.removeElement(pathElements, pathElements[0]);
+            for (String curTagName : pathElements)
+            {
+                lastExistentParent = lastExistentParent.findFirstSubTag(curTagName);
+                if (lastExistentParent == null){
+                    lastExistentParent = createTagInFile(xmlFile, curTagName, "", curPath);
+                    if(lastExistentParent == null){
+                        return null;
+                    }
+                }
+                curPath += "/"+curTagName;
+            }
+            final XmlTag newTag = lastExistentParent.createChildTag(tagName, "", tagValue, false);
+            final XmlTag parent = lastExistentParent;
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    new WriteCommandAction.Simple(xmlFile.getProject(), "Create Xml Tag in File", xmlFile) {
+                        @Override
+                        protected void run() {
+
+ //                           newTag = (XmlTag)parent.add(newTag);
+                            parent.addAfter(newTag, null);
+
+                        }
+                    }.execute();
+                }
+            };
+            runnable.run();
+            // PsiDocumentManager.getInstance(xmlFile.getProject()).commitDocument(document);
+            return findSubTag(xmlFile, path+"/"+newTag.getName());
+
+        }
+        else {
+            return null;
+        }
+
     }
 
 

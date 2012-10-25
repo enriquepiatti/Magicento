@@ -44,6 +44,12 @@ public class MagicentoSettingsForm implements Configurable {
     private JRadioButton useHTTPRadioButton;
     private JTextField urlToLocalMagentoTextField;
     private JButton pathToMageButton;
+    private JRadioButton useIdeaFolderRadioButton;
+    private JTextField customFolderHttpTextField;
+    private JButton customFolderHttpButton;
+    private JCheckBox phpDisableWarningCheckBox;
+    private JRadioButton useVarFolderRadioButton;
+    private JRadioButton useCustomFolderRadioButton;
     // private TextFieldWithBrowseButton myProcessorPathField;
     private Project project;
 
@@ -58,6 +64,15 @@ public class MagicentoSettingsForm implements Configurable {
                 _updatePhpSection();
             }
         });
+        useHTTPRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(useHTTPRadioButton.isSelected()){
+                    String warningMessage = "This will create a file called eval.php accessible via HTTP, make sure you are not adding to VCS or deploying that file!";
+                    IdeHelper.showDialog(project, warningMessage, "WARNING");
+                }
+            }
+        });
         useHTTPRadioButton.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -70,31 +85,58 @@ public class MagicentoSettingsForm implements Configurable {
                 _updatePhpSection();
             }
         });
+        useCustomFolderRadioButton.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                _updatePhpSection();
+            }
+        });
         pathToMageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser chooser = new JFileChooser();
-                String startPath = "";
-                if (pathToMageTextField != null) {
-                    startPath = pathToMageTextField.getText();
-                }
-                if(startPath == null || startPath.isEmpty() || ! (new File(startPath)).exists()){
-                    MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
-                    if(magicento != null){
-                        startPath = magicento.getDefaultPathToMagento();
-                    }
-                }
-                if(startPath != null && ! startPath.isEmpty()){
-                    chooser.setCurrentDirectory(new File(startPath));
-                }
-                chooser.setFileFilter(new FileNameExtensionFilter("PHP Files", "php"));
-                chooser.showOpenDialog(WindowManager.getInstance().suggestParentWindow(project));
-                if (chooser.getSelectedFile() != null) {
-                    pathToMageTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-                }
+                browseButtonListener(e);
+            }
+        });
+        customFolderHttpButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                browseButtonListener(e);
             }
         });
     }
+
+
+    protected void browseButtonListener(ActionEvent e)
+    {
+        JFileChooser chooser = new JFileChooser();
+        Object source = e.getSource();
+        JTextField textField = pathToMageTextField;
+        if(source == customFolderHttpButton){
+            textField = customFolderHttpTextField;
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        }
+        else {
+            chooser.setFileFilter(new FileNameExtensionFilter("PHP Files", "php"));
+        }
+        String startPath = "";
+        if (textField != null) {
+            startPath = textField.getText();
+        }
+        if(startPath == null || startPath.isEmpty() || ! (new File(startPath)).exists()){
+            MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
+            if(magicento != null){
+                startPath = magicento.getDefaultPathToMagento();
+            }
+        }
+        if(startPath != null && ! startPath.isEmpty()){
+            chooser.setCurrentDirectory(new File(startPath));
+        }
+        chooser.showOpenDialog(WindowManager.getInstance().suggestParentWindow(project));
+        if (chooser.getSelectedFile() != null) {
+            textField.setText(chooser.getSelectedFile().getAbsolutePath());
+        }
+    }
+
 
     @Nls
     @Override
@@ -128,20 +170,33 @@ public class MagicentoSettingsForm implements Configurable {
             }
             enabledCheckBox.setSelected(magicentoSettings.enabled);
             phpEnabledCheckBox.setSelected(magicentoSettings.phpEnabled);
+            phpDisableWarningCheckBox.setSelected( ! magicentoSettings.showPhpWarning);
             useHTTPRadioButton.setSelected(magicentoSettings.useHttp);
             if(magicentoSettings.urlToMagento != null){
                 urlToLocalMagentoTextField.setText(magicentoSettings.urlToMagento);
+            }
+            if(magicentoSettings.useVarFolder){
+                useVarFolderRadioButton.setSelected(true);
+            }
+            else {
+                useIdeaFolderRadioButton.setSelected(true);
             }
         }
         else {
             pathToMageTextField.setText("");
             enabledCheckBox.setSelected(false);
             phpEnabledCheckBox.setSelected(false);
+            phpDisableWarningCheckBox.setSelected(false);
             pathToPhpTextField.setText("");
             urlToLocalMagentoTextField.setText("");
+            useIdeaFolderRadioButton.setSelected(true);
         }
 
         _updatePhpSection();
+
+        useCustomFolderRadioButton.setVisible(false);
+        customFolderHttpTextField.setVisible(false);
+        customFolderHttpButton.setVisible(false);
 
         myComponent = (JComponent) magicentoPanel;
 
@@ -154,10 +209,16 @@ public class MagicentoSettingsForm implements Configurable {
     protected void _updatePhpSection()
     {
         boolean phpEnabled = phpEnabledCheckBox.isSelected();
+        boolean httpEnabled = phpEnabled && useHTTPRadioButton.isSelected();
         useHTTPRadioButton.setEnabled(phpEnabled);
         usePHPInterpreterRadioButton.setEnabled(phpEnabled);
-        pathToPhpTextField.setEditable(phpEnabled && usePHPInterpreterRadioButton.isSelected());
-        urlToLocalMagentoTextField.setEditable(phpEnabled && useHTTPRadioButton.isSelected());
+        pathToPhpTextField.setEditable(phpEnabled && ! httpEnabled);
+        urlToLocalMagentoTextField.setEditable(httpEnabled);
+        useIdeaFolderRadioButton.setEnabled(httpEnabled);
+        useVarFolderRadioButton.setEnabled(httpEnabled);
+        useCustomFolderRadioButton.setEnabled(httpEnabled);
+        customFolderHttpTextField.setEditable(httpEnabled && useCustomFolderRadioButton.isSelected());
+        customFolderHttpButton.setEnabled(httpEnabled && useCustomFolderRadioButton.isSelected());
     }
 
     @Override
@@ -171,7 +232,10 @@ public class MagicentoSettingsForm implements Configurable {
                 magicentoSettings.phpEnabled == phpEnabledCheckBox.isSelected() &&
                 magicentoSettings.pathToPhp != null && magicentoSettings.pathToPhp.equals(pathToPhpTextField.getText()) &&
                 magicentoSettings.useHttp == useHTTPRadioButton.isSelected() &&
-                magicentoSettings.urlToMagento != null && magicentoSettings.urlToMagento.equals(urlToLocalMagentoTextField.getText())
+                magicentoSettings.urlToMagento != null && magicentoSettings.urlToMagento.equals(urlToLocalMagentoTextField.getText()) &&
+                magicentoSettings.showPhpWarning == ! phpDisableWarningCheckBox.isSelected() &&
+                magicentoSettings.useVarFolder == useVarFolderRadioButton.isSelected() &&
+                magicentoSettings.useIdeaFolder == useIdeaFolderRadioButton.isSelected()
               ) {
                 return false;
             }
@@ -227,6 +291,9 @@ public class MagicentoSettingsForm implements Configurable {
                         settings.phpEnabled = phpEnabled;
                         settings.useHttp = useHTTPRadioButton.isSelected();
                         settings.setUrlToMagento(urlToLocalMagentoTextField.getText());
+                        settings.showPhpWarning = ! phpDisableWarningCheckBox.isSelected();
+                        settings.useIdeaFolder = useIdeaFolderRadioButton.isSelected();
+                        settings.useVarFolder = useVarFolderRadioButton.isSelected();
 
                     }
                     else {

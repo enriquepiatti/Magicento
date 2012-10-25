@@ -17,6 +17,10 @@ public class MagentoClassInfo {
         MODEL, RESOURCEMODEL, HELPER, BLOCK;
     }
 
+    public enum ClassType {
+        MODEL, RESOURCEMODEL, COLLECTION, HELPER, BLOCK, CONTROLLER, INSTALLER;
+    }
+
     protected String module;
     public String name;
     public String uriFirstPart;

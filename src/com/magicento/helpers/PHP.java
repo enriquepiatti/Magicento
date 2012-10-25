@@ -22,6 +22,7 @@ import java.net.URLConnection;
  */
 public class PHP {
 
+
     public static String execute(String phpCode, Project project)
     {
         String pathToPhp = "php";
@@ -66,11 +67,26 @@ public class PHP {
     public static String executeWithHttp(String domainUrl, String phpCode, Project project)
     {
         MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
-        if(magicento != null){
-            File tempFile = magicento.getCachedFile("eval.php");
+        MagicentoSettings settings = MagicentoSettings.getInstance(project);
+        if(magicento != null && settings != null){
+
+            String fileName = "eval.php";
+
+            File tempFile = null;
+            if(settings.useVarFolder){
+                String relativePath = "/var/magicento/";
+                String path = settings.getPathToMagento() + relativePath + fileName;
+                tempFile = new File(path);
+                domainUrl += relativePath + fileName;
+            }
+            else {
+                tempFile = magicento.getCachedFile(fileName);
+                domainUrl += "/.idea/magicento/eval.php";
+            }
+
             phpCode = "<?php "+phpCode;
             magicento.saveCacheFile(tempFile, phpCode);
-            domainUrl += "/.idea/magicento/eval.php";
+
             URL url = null;
             try {
                 String result = "";

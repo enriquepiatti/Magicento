@@ -22,12 +22,30 @@
     <rowspec value="center:max(d;4px):noGrow"/>
     <rowspec value="top:4dlu:noGrow"/>
     <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:4dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
     <colspec value="fill:234px:noGrow"/>
     <colspec value="left:5dlu:noGrow"/>
     <colspec value="left:557px:grow"/>
     <colspec value="fill:max(d;4px):noGrow"/>
     <constraints>
-      <xy x="20" y="20" width="824" height="448"/>
+      <xy x="20" y="20" width="824" height="671"/>
     </constraints>
     <properties>
       <enabled value="true"/>
@@ -403,6 +421,123 @@
           </component>
         </children>
       </grid>
+      <component id="b8b12" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="22" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <text value="Evaluate in Magento"/>
+        </properties>
+      </component>
+      <component id="e8cf7" class="javax.swing.JCheckBox" binding="useVarDumpCheckBox">
+        <constraints>
+          <grid row="22" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <selected value="true"/>
+          <text value="Use var_dump"/>
+        </properties>
+      </component>
+      <component id="bece3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="26" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;use var_dump will execute your input text inside a var_dump call. &lt;br/&gt;If you don't use var_dump you can write any PHP code with evaluate in Magento action&lt;/html&gt;"/>
+        </properties>
+      </component>
+      <component id="92a05" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="28" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <text value="Layout features"/>
+        </properties>
+      </component>
+      <component id="adefa" class="javax.swing.JCheckBox" binding="layoutEnabledCheckBox">
+        <constraints>
+          <grid row="28" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <selected value="true"/>
+          <text value="Enabled"/>
+        </properties>
+      </component>
+      <component id="6de98" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="30" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="120" height="40"/>
+          </grid>
+          <forms/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <text value="Use packages (comma separated, leave empty for reading all packages):"/>
+          <verticalAlignment value="1"/>
+        </properties>
+      </component>
+      <component id="44056" class="javax.swing.JTextField" binding="packagesTextField">
+        <constraints>
+          <grid row="32" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <editable value="true"/>
+          <enabled value="true"/>
+        </properties>
+      </component>
+      <component id="304be" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="34" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="120" height="40"/>
+          </grid>
+          <forms/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <text value="Use themes (comma separated, leave empty for reading all themes):"/>
+          <verticalAlignment value="1"/>
+        </properties>
+      </component>
+      <component id="e3bd9" class="javax.swing.JTextField" binding="themesTextField">
+        <constraints>
+          <grid row="36" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <editable value="true"/>
+          <enabled value="true"/>
+        </properties>
+      </component>
+      <component id="bf0f3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="24" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
+        <properties>
+          <text value="Current Magento Store ID"/>
+        </properties>
+      </component>
+      <component id="2d8dd" class="javax.swing.JTextField" binding="storeTextField">
+        <constraints>
+          <grid row="24" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="9" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties>
+          <toolTipText value="This will be the store loaded with Mage::app(STORE_HERE) when you are using PHP features, , leave empty if you want to use the default"/>
+        </properties>
+      </component>
     </children>
   </grid>
   <buttonGroups>

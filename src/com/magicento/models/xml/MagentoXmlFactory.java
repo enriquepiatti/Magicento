@@ -2,6 +2,7 @@ package com.magicento.models.xml;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.magicento.MagicentoSettings;
 import com.magicento.models.layout.LayoutFile;
 import com.magicento.models.xml.config.MagentoConfigXml;
 import com.magicento.models.xml.config.adminhtml.MagentoAdminhtmlXml;
@@ -81,15 +82,19 @@ public class MagentoXmlFactory {
         else if( fileName.equals("adminhtml.xml")){
             return MagentoXmlFactory.getInstance(MagentoXmlType.ADMINHTML, project);
         }
-        // TODO: fix XMl Layout code completion
-//        else if( fileName.endsWith(".xml") && file.getVirtualFile().getPath().contains("app/design/") ){
-//            MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
-//            LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
-//            layoutXml.setArea(layoutFile.getArea());
-//            layoutXml.setPackageName(layoutFile.getPackage());
-//            layoutXml.setTheme(layoutFile.getTheme());
-//            return layoutXml;
-//        }
+        else if( (fileName.endsWith(".xml") || fileName.endsWith(".phtml")) && file.getVirtualFile().getPath().contains(MagentoLayoutXml.BASE_PATH) ){
+
+            MagicentoSettings settings = MagicentoSettings.getInstance(project);
+            if(settings != null && settings.layoutEnabled)
+            {
+                MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
+                LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
+                layoutXml.setArea(layoutFile.getArea());
+                layoutXml.setPackageName(layoutFile.getPackage());
+                layoutXml.setTheme(layoutFile.getTheme());
+                return layoutXml;
+            }
+        }
         return null;
     }
 

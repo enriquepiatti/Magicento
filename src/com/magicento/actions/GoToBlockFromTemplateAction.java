@@ -22,6 +22,11 @@ public class GoToBlockFromTemplateAction extends MagicentoActionAbstract {
     @Override
     public void executeAction()
     {
+        if( ! getMagicentoSettings().layoutEnabled){
+            IdeHelper.showDialog(getProject(),"Layout features are disabled. Please enable them going to File > Settings > Magicento", "Magicento");
+            return;
+        }
+
         final VirtualFile file = getVirtualFile();
         Template template = new Template(file);
         MagicentoProjectComponent magicento = getMagicentoComponent();

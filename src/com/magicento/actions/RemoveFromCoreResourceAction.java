@@ -24,23 +24,35 @@ public class RemoveFromCoreResourceAction extends MagicentoPhpActionAbstract {
             if(magicento != null)
             {
                 String resourceName = getResourceName(currentFile);
-                String method = isData(currentFile) ? "setDataVersion" : "setDbVersion";
+                boolean isData = isData(currentFile);
+                String method = isData ? "DataVersion" : "DbVersion";
                 String previousVersion = getFromVersion(currentFile);
-                String phpCode =
-                        "$resName = '"+resourceName+"';" +
-                        "$resource = Mage::getResourceSingleton('core/resource');" +
-                        "$mainTable = $resource->getMainTable();" +
-                        "$conn = $resource->getReadConnection();" +
-                        "echo $conn->delete($mainTable, $conn->quoteInto('code=?', $resName));";
+                String phpCode = "Mage::getResourceSingleton('core/resource')->set"+method+"('"+resourceName+"', '"+previousVersion+"');" +
+                        "echo Mage::getResourceSingleton('core/resource')->get"+method+"('"+resourceName+"');";
 
-                if(previousVersion != null){
-                    phpCode = "echo Mage::getResourceSingleton('core/resource')->"+method+"('"+resourceName+"', '"+previousVersion+"');";
+                boolean isUpgrade = previousVersion != null;
+                if( ! isUpgrade){
+
+                    phpCode =
+                            "$resName = '"+resourceName+"';" +
+                                    "$resource = Mage::getResourceSingleton('core/resource');" +
+                                    "$mainTable = $resource->getMainTable();" +
+                                    "$conn = $resource->getReadConnection();" +
+                                    "echo $conn->delete($mainTable, $conn->quoteInto('code=?', $resName));";
+
+                    if( ! IdeHelper.prompt("Because this is not an upgrade the entire row must be removed from core_resource table, this will reset both, data and normal installer", "Warning: Remove installer")){
+                        return;
+                    }
+
                 }
 
                 String result = magicento.executePhpWithMagento(phpCode);
-                if(result != null){
-                    boolean modified = result.equals("1");
-                    String message = modified ? "Installer was reseted to previous version" : "Error: Installer was not reseted to previous version";
+                if(result != null && ! result.isEmpty()){
+                    String message = "Installer for "+resourceName+" was reseted to "+ result +" version";
+                    if( ! isUpgrade){
+                        boolean modified = result.equals("1");
+                        message = modified ? "Installer for "+resourceName+" was removed from core_resource" : "Error: Installer was not reseted to previous version";
+                    }
                     magicento.showMessage(message,"Magicento - Reset Installer", MagicentoIcons.MAGENTO_ICON_16x16);
                 }
                 else {

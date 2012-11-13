@@ -1,8 +1,6 @@
+<!--We are not using this skeleton for the layout, leave it just for compatibility-->
 <layout>
     <___>
-        <___>
-
-        </___>
         <block>
             <___>
                 <block>
@@ -24,15 +22,14 @@
             </action>
         </block>
         <reference>
-            <___>
-
-            </___>
             <block></block>
             <action>
                 <___/>
             </action>
+            <___></___>
         </reference>
         <update/>
         <remove/>
+        <___></___>
     </___>
 </layout>

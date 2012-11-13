@@ -98,8 +98,6 @@ public class PHP {
                     result += inputLine;
                 }
                 in.close();
-                // strip HTML tags because if xdebug has xdebug.overload_var_dump on (and html_errors is on too) it will beautify the var_dump output
-                result = result.replaceAll("\\<.*?>","");
                 return result;
             } catch (MalformedURLException e) {
                 e.printStackTrace();

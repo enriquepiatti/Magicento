@@ -102,7 +102,7 @@ abstract public class MagentoXml {
                 if(helpAttribute != null){
                     child.setHelp(helpAttribute);
                 }
-                child.setParent(parent);
+                //child.setParent(parent);  // this is done inside addChild
                 child.setManager(this);
                 parent.addChild(child);
                 // recursion:

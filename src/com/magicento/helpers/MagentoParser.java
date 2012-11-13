@@ -2,9 +2,19 @@ package com.magicento.helpers;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.magicento.models.MagentoClassInfo;
+import com.magicento.models.layout.LayoutFile;
+import com.magicento.models.xml.MagentoXml;
+import com.magicento.models.xml.MagentoXmlFactory;
+import com.magicento.models.xml.MagentoXmlTag;
+import com.magicento.models.xml.layout.BlockXmlTag;
+import com.magicento.models.xml.layout.HandleXmlTag;
+import com.magicento.models.xml.layout.MagentoLayoutXml;
+import com.magicento.models.xml.layout.attribute.BlockNameXmlAttribute;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.omg.CosNaming._BindingIteratorImplBase;
 
@@ -388,35 +398,38 @@ public class MagentoParser {
 
     public static MagentoClassInfo.ClassType getClassType(PsiElement child)
     {
-        String className = PsiPhpHelper.getClassName(child);
-        if(className != null)
+        if(child != null)
         {
-            if(className.contains("_Model_"))
+            String className = PsiPhpHelper.getClassName(child);
+            if(className != null)
             {
-                if(className.endsWith("Collection")){
-                    return MagentoClassInfo.ClassType.COLLECTION;
+                if(className.contains("_Model_"))
+                {
+                    if(className.endsWith("Collection")){
+                        return MagentoClassInfo.ClassType.COLLECTION;
+                    }
+                    if(className.contains("_Resource_") || className.contains("_Mysql4_")){
+                        return MagentoClassInfo.ClassType.RESOURCEMODEL;
+                    }
+                    return MagentoClassInfo.ClassType.MODEL;
                 }
-                if(className.contains("_Resource_") || className.contains("_Mysql4_")){
-                    return MagentoClassInfo.ClassType.RESOURCEMODEL;
+
+                if(className.contains("_Block_")){
+                    return MagentoClassInfo.ClassType.BLOCK;
                 }
-                return MagentoClassInfo.ClassType.MODEL;
+
+                if(className.contains("_Helper_")){
+                    return MagentoClassInfo.ClassType.HELPER;
+                }
             }
 
-            if(className.contains("_Block_")){
-                return MagentoClassInfo.ClassType.BLOCK;
+            String filePath = child.getContainingFile().getVirtualFile().getPath().replace("\\", "/");
+            if(filePath.contains("/controllers/")){
+                return MagentoClassInfo.ClassType.CONTROLLER;
             }
-
-            if(className.contains("_Helper_")){
-                return MagentoClassInfo.ClassType.HELPER;
+            if(filePath.contains("/sql/") || filePath.contains("/data/")){
+                return MagentoClassInfo.ClassType.INSTALLER;
             }
-        }
-
-        String filePath = child.getContainingFile().getVirtualFile().getPath().replace("\\", "/");
-        if(filePath.contains("/controllers/")){
-            return MagentoClassInfo.ClassType.CONTROLLER;
-        }
-        if(filePath.contains("/sql/") || filePath.contains("/data/")){
-            return MagentoClassInfo.ClassType.INSTALLER;
         }
 
         return null;
@@ -461,7 +474,7 @@ public class MagentoParser {
     public static String getModuleNameFromModulePath(@NotNull String modulePath)
     {
         modulePath = modulePath.replace("\\", "/");
-        String regex = "^.+?/code/(?:core|community|local)/([a-zA-Z0-9]+/[a-zA-Z0-9]+).*";
+        String regex = "^.+?/app/code/(?:core|community|local)/([a-zA-Z0-9]+/[a-zA-Z0-9]+).*";
         String moduleName = JavaHelper.extractFirstCaptureRegex(regex, modulePath);
         if(moduleName != null && ! moduleName.isEmpty()){
             return moduleName.replace("/", "_");
@@ -469,4 +482,134 @@ public class MagentoParser {
         return null;
     }
 
+
+    public static String getNamespaceModuleFromClassName(String className)
+    {
+        String classNameParts[] = className.split("_");
+        if(classNameParts.length > 3) {
+            return classNameParts[0]+"_"+classNameParts[1];
+        }
+        return null;
+    }
+
+
+    public static String getClassPrefix(String className)
+    {
+        String classNameParts[] = className.split("_");
+        if(classNameParts.length > 3) {
+            return classNameParts[0]+"_"+classNameParts[1]+"_"+classNameParts[2];
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param className
+     * @return
+     */
+    public static String getSecondPartUriFromClassName(String className)
+    {
+        // TODO: this doesn't take into account resource models
+        String prefix = getClassPrefix(className);
+        return getSecondPartUriFromClassName(className, prefix);
+    }
+
+    /**
+     *
+     * @param className
+     * @return
+     */
+    public static String getSecondPartUriFromClassName(String className, String prefix)
+    {
+        String secondPartClassName = className.substring(prefix.length()+1);
+        String secondPart = WordUtils.uncapitalize(secondPartClassName.replace("_", " ")).replace(" ", "_");
+        return secondPart;
+    }
+
+    public static boolean isGetChildInTemplate(PsiElement methodReference)
+    {
+        return isMethod(methodReference, "getChild") || isMethod(methodReference, "getChildHtml");
+    }
+
+    public static boolean isGetBlockInTemplate(PsiElement methodReference)
+    {
+        return isMethod(methodReference, "getBlock") || isMethod(methodReference, "getBlockHtml");
+    }
+
+    public static boolean isBlockNameInLayoutXml(PsiElement psiElement)
+    {
+        if(psiElement != null)
+        {
+            String filePath = psiElement.getContainingFile().getOriginalFile().getVirtualFile().getPath();
+            if(filePath.contains(MagentoLayoutXml.BASE_PATH) && filePath.endsWith(".xml")){
+                if(XmlHelper.isAttributeValue(psiElement))
+                {
+                    XmlAttribute attribute = XmlHelper.getParentOfType(psiElement, XmlAttribute.class, true);
+                    String attrName = XmlHelper.getAttributeName(attribute);
+                    return (attrName != null && attrName.equals("name"));
+                }
+            }
+        }
+        return false;
+
+    }
+
+    public static boolean isBlockNameInTemplate(PsiElement psiElement)
+    {
+        if(psiElement != null)
+        {
+            String filePath = psiElement.getContainingFile().getOriginalFile().getVirtualFile().getPath();
+            if(filePath.contains(MagentoLayoutXml.BASE_PATH) && filePath.endsWith(".phtml"))
+            {
+                PsiElement element = PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.PARAMETER_LIST);
+                if(element != null)
+                {
+                    PsiElement methodReference = PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.METHOD_REFERENCE);
+                    if(methodReference != null){
+                        if(MagentoParser.isGetBlockInTemplate(methodReference)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isBlockAliasInTemplate(PsiElement psiElement)
+    {
+        if(psiElement != null)
+        {
+            String filePath = psiElement.getContainingFile().getOriginalFile().getVirtualFile().getPath();
+            if(filePath.contains(MagentoLayoutXml.BASE_PATH) && filePath.endsWith(".phtml"))
+            {
+                PsiElement element = PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.PARAMETER_LIST);
+                if(element != null)
+                {
+                    PsiElement methodReference = PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.METHOD_REFERENCE);
+                    if(methodReference != null){
+                        if(MagentoParser.isGetChildInTemplate(methodReference)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isHandleNode(PsiElement sourceElement)
+    {
+        MagentoXml magentoXml = MagentoXmlFactory.getInstance(sourceElement);
+        if(magentoXml != null && magentoXml instanceof MagentoLayoutXml)
+        {
+            // MagentoLayoutXml layoutXml = (MagentoLayoutXml)magentoXml;
+            XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, false);
+            if(xmlTag != null){
+                MagentoXmlTag matchedTag = magentoXml.getMatchedTag(xmlTag.getLastChild());
+                return matchedTag != null && matchedTag instanceof HandleXmlTag;
+            }
+        }
+        return false;
+    }
 }

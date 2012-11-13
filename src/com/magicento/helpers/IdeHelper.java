@@ -33,6 +33,8 @@ import javax.swing.event.HyperlinkEvent;
  */
 public class IdeHelper {
 
+    public static final String INTELLIJ_IDEA_RULEZZZ = "IntellijIdeaRulezzz ";
+
     public static void showDialog(final Project project, final String message, final String title, final Icon icon)
     {
         final Throwable[] exception = {null};

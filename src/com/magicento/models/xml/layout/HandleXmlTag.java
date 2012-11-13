@@ -1,26 +1,53 @@
 package com.magicento.models.xml.layout;
 
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.xml.XmlTag;
 import com.magicento.helpers.XmlHelper;
-import com.magicento.models.xml.config.MagentoConfigXmlTag;
+import com.magicento.models.xml.MagentoXmlAttribute;
+import com.magicento.models.xml.layout.attribute.BlockNameXmlAttribute;
+import com.magicento.models.xml.layout.attribute.UpdateHandleXmlAttribute;
 
 import java.util.*;
 
 /**
  * @author Enrique Piatti
  */
-public class IdXmlTag extends MagentoLayoutXmlTag {
+public class HandleXmlTag extends MagentoLayoutXmlTag {
 
     protected Set<String> names;
 
-    public IdXmlTag(){
-        super();
+    @Override
+    protected void initChildren() {
+        MagentoLayoutXmlTag block = new BlockXmlTag();
+
+        MagentoLayoutXmlTag reference = new ReferenceXmlTag();
+
+        MagentoLayoutXmlTag remove = new RemoveXmlTag();
+
+        MagentoLayoutXmlTag update = new UpdateXmlTag();
+
+        MagentoLayoutXmlTag label = new LabelXmlTag();
+
+        addChild(block);
+        addChild(reference);
+        addChild(remove);
+        addChild(update);
+        addChild(label);
+    }
+
+    @Override
+    protected void initAttributes() {
+
+    }
+
+    @Override
+    protected void initName() {
         name = null;
         names = new LinkedHashSet<String>();
-        isRequired = true;
+    }
 
+    @Override
+    protected void initHelp() {
         help = "Handle";
     }
 
@@ -37,6 +64,7 @@ public class IdXmlTag extends MagentoLayoutXmlTag {
     {
         // we need to clear the names because we are reusing this object with different nodes
         names.clear();
+        unique = true;
         return super.getPossibleDefinitions();
     }
 
@@ -73,7 +101,5 @@ public class IdXmlTag extends MagentoLayoutXmlTag {
             names.addAll(nodeNames);
         }
     }
-
-
 
 }

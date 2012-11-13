@@ -4,9 +4,47 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>0.9.7</version>
+  <version>1.0</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>1.0</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Reset installer action was showing an error message even when it was working fine</li>
+                        <li>Flush FPC is working with PHP too and not only with HTTP</li>
+                        <li>PHP features using HTTP can return HTML and XML tags now</li>
+                        <li>Toggle template hints should work on any website and store now too</li>
+                    </ul>
+                </li>
+                <li>Enhanced Go to Block action (now it searches on addItemRenderer actions too)</li>
+                <li>Evaluate in magento can now be used to execute arbitrary PHP code (just go to Magicento Settings and uncheck the new option "use var_dump"). Is your responsability to show or not some output, write valid PHP code (included semicolon)</li>
+                <li>Layout features:
+                    <ul>
+                        <li>XML code completion (use Ctrl+Space on nodes and attributes)</li>
+                        <li>XML documentation (use Ctrl+Q over any node or attrbiute)</li>
+                        <li>Goto template action (use Alt+M when editing some Block)</li>
+                        <li>Goto xml handles (use Ctrl+B or middle click on any handle to go to other declarations of the same handle in another files)</li>
+                        <li>Goto xml layout definitions for block names inside layout xml (use Ctrl+B or middle click over any name=[HERE] on any layout xml file)</li>
+                        <li>Goto xml block definition in layout Action (use Alt+M when editing any Block class to go to the block node definition in layout xml)</li>
+                        <li>Goto xml layout definitions for block names inside templates (use Ctrl+B or middle click over any name in getChild, getChildHtml, getBlock, getBlockHtml([HERE]) call)</li>
+                        <li>Autocomplete for getChild, getChildHtml, getBlock and getBlockHtml on templates (use Ctrl+Space)</li>
+                        <li>Config options for enabling/disabling layout features and choosing packages and themes (File > Settings > Magicento)</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
+         <p>
+            <span>0.9.8</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Fixed Rewrite Class action (it was not generating the correct node inside config.xml)</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
         <p>
             <span>0.9.7</span>
             <ul>
@@ -128,6 +166,10 @@
               description="flush magento and storage cache"/>
       <action id="RewriteClass" class="com.magicento.actions.RewriteClassAction" text="Rewrite Class"
               description="rewrite this class in the selected module"/>
+      <action id="GotoTemplateFromBlock" class="com.magicento.actions.GotoTemplateFromBlockAction"
+              text="Go to template from Block" description="Go to templates using this Block"/>
+      <action id="GoToBlockDefinitionInLayout" class="com.magicento.actions.GoToBlockDefinitionInLayoutAction"
+              text="Goto block definition in layout" description="go to block tag definition in layout xml"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

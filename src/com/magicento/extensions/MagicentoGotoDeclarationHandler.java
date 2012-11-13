@@ -1,9 +1,11 @@
 package com.magicento.extensions;
 
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.xml.XmlFile;
+import com.intellij.psi.xml.XmlTag;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
-import com.magicento.helpers.IdeHelper;
-import com.magicento.helpers.MagentoParser;
+import com.magicento.helpers.*;
 import com.intellij.codeInsight.navigation.NavigationUtil;
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler;
 import com.intellij.ide.util.DefaultPsiElementCellRenderer;
@@ -15,15 +17,18 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import com.magicento.helpers.PsiPhpHelper;
-import com.magicento.helpers.XmlHelper;
 import com.magicento.models.MagentoClassInfo;
+import com.magicento.models.layout.LayoutFile;
+import com.magicento.models.layout.Template;
+import com.magicento.models.xml.MagentoXml;
+import com.magicento.models.xml.MagentoXmlFactory;
+import com.magicento.models.xml.layout.MagentoLayoutXml;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Element;
 
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -57,6 +62,9 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
             project = sourceElement.getProject();
         }
 
+
+        MagicentoSettings settings = MagicentoSettings.getInstance(project);
+
         List<PsiElement> psiElements = new ArrayList<PsiElement>();
 
         // if cursor is over a uri factory (it could be anywhere, php, xml, etc not only inside something like Mage::getModel
@@ -64,6 +72,7 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
         {
             String uri = MagentoParser.getUri(sourceElement);
             MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
+
 
             // we are not using this because this gotodeclaration works everywhere, not only in PHP, an this method tries to guess the uri type based on the factory method
             // List<String> classes = magicento.findClassesOfFactory(sourceElement);
@@ -97,23 +106,25 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
             }
         }
         // is cursor is over a file path (like template paths in layout xml)
-        else if(MagentoParser.isFilePath(sourceElement)){
+        else if(MagentoParser.isFilePath(sourceElement))
+        {
             String filePath = MagentoParser.getFilePath(sourceElement);
 
-            int start = filePath.lastIndexOf('/');
-            String fileName = filePath.substring(start == -1 ? 0 : start+1);
-            // FilenameUtils.getName()
+            List<PsiFile> psiFiles = FileHelper.findPsiFiles(project, filePath);
 
-            PsiFile[] psiFiles = FilenameIndex.getFilesByName(project, fileName, ProjectScope.getProjectScope(project));
-
-            if(psiFiles.length > 0){
-                for(PsiFile psiFile : psiFiles){
-                    String fullPath = psiFile.getVirtualFile().getPath();
-                    if(fullPath.endsWith(filePath)){
-                        psiElements.add(psiFile);
+            // filter by allowed packages and themes
+            Iterator<PsiFile> i = psiFiles.iterator();
+            while (i.hasNext()) {
+                PsiFile file = i.next(); // must be called before i.remove()
+                LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
+                if(layoutFile.isValidLayoutFile()){
+                    if( ! layoutFile.isValidPackageAndTheme(sourceElement.getProject())) {
+                        i.remove();
                     }
                 }
             }
+
+            psiElements.addAll(psiFiles);
 
         }
         // if cursor is over the name of the event in Mage::dispatchEvernt('CURSOR IS HERE')
@@ -153,6 +164,89 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
 
             }
 
+        }
+        else if(settings.layoutEnabled && (MagentoParser.isBlockNameInLayoutXml(sourceElement) || MagentoParser.isBlockNameInTemplate(sourceElement)))
+        {
+            String blockName = sourceElement.getText().replace("\"", "").replace("'", "");
+            if(blockName != null && ! blockName.isEmpty())
+            {
+
+                String[] nodeNames = new String[]{"block"};
+
+                XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, true);
+                if(xmlTag != null){
+                    String currentNodeName = xmlTag.getName();
+                    // if it's a <block> search for remove and reference
+                    if(currentNodeName.equals("block")){
+                        nodeNames = new String[]{"reference", "remove"};
+                    }
+                }
+
+                MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
+                if(xml != null && xml instanceof MagentoLayoutXml)
+                {
+                    MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
+                    psiElements.addAll( layoutXml.findNodesInOriginalXmlByBlockName(blockName, nodeNames));
+                }
+            }
+        }
+        else if(settings.layoutEnabled && MagentoParser.isBlockAliasInTemplate(sourceElement))
+        {
+            String blockName = sourceElement.getText().replace("\"", "").replace("'", "");
+            if(blockName != null && ! blockName.isEmpty())
+            {
+
+                String[] nodeNames = new String[]{"block"};
+
+                // check only children block nodes of the current template block node
+                Set<String> currentTemplateBlockNames = new HashSet<String>();
+                Template template = new Template(sourceElement.getContainingFile().getOriginalFile().getVirtualFile());
+                String area = template.getArea();
+                if(area != null && ! area.isEmpty())
+                {
+                    List<Element> blocks = template.getBlockElements(sourceElement.getProject());
+                    if(blocks != null)
+                    {
+                        for(Element block : blocks)
+                        {
+                            String currentTemplateBlockName = block.getAttributeValue("name");
+                            if(currentTemplateBlockName != null && ! currentTemplateBlockName.isEmpty())
+                            {
+                                currentTemplateBlockNames.add(currentTemplateBlockName);
+                            }
+                        }
+                    }
+                }
+
+                if(currentTemplateBlockNames.size() > 0)
+                {
+                    MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
+                    if(xml != null && xml instanceof MagentoLayoutXml)
+                    {
+                        MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
+                        // search by alias and also by name, then filter using the currentTemplateBlockNames
+                        List<XmlTag> blocks = layoutXml.findNodesInOriginalXmlByBlockAlias(blockName, nodeNames);
+                        blocks.addAll(layoutXml.findNodesInOriginalXmlByBlockName(blockName, nodeNames));
+                        for(XmlTag block : blocks){
+                            String parentBlockName = block.getParentTag().getAttributeValue("name");
+                            if(parentBlockName != null && currentTemplateBlockNames.contains(parentBlockName)){
+                                psiElements.add(block);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if(settings.layoutEnabled && MagentoParser.isHandleNode(sourceElement))
+        {
+            XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, false);
+            String handleName = xmlTag.getName();
+            MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
+            if(xml != null && xml instanceof MagentoLayoutXml)
+            {
+                MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
+                psiElements.addAll( layoutXml.findNodesInOriginalXmlByNodeName(handleName));
+            }
         }
 
 
@@ -194,5 +288,7 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
     {
         return null;
     }
+
+
 
 }

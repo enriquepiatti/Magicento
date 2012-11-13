@@ -19,6 +19,9 @@ public class XmlTagParentsFakeElement extends FakePsiElement /*LightElement*/ {
     protected PsiElement parent;
     protected String name;
 
+
+    protected String attribute;
+
     @Override
     public PsiElement getParent() {
         return parent;
@@ -56,6 +59,14 @@ public class XmlTagParentsFakeElement extends FakePsiElement /*LightElement*/ {
         }
 
         return path;
+    }
+
+    public String getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
     }
 
 }

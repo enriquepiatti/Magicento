@@ -50,6 +50,11 @@ public class MagicentoSettingsForm implements Configurable {
     private JCheckBox phpDisableWarningCheckBox;
     private JRadioButton useVarFolderRadioButton;
     private JRadioButton useCustomFolderRadioButton;
+    private JCheckBox useVarDumpCheckBox;
+    private JCheckBox layoutEnabledCheckBox;
+    private JTextField packagesTextField;
+    private JTextField themesTextField;
+    private JTextField storeTextField;
     // private TextFieldWithBrowseButton myProcessorPathField;
     private Project project;
 
@@ -101,6 +106,15 @@ public class MagicentoSettingsForm implements Configurable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 browseButtonListener(e);
+            }
+        });
+
+        layoutEnabledCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean enable = layoutEnabledCheckBox.isSelected();
+                themesTextField.setEditable(enable);
+                packagesTextField.setEditable(enable);
             }
         });
     }
@@ -181,6 +195,18 @@ public class MagicentoSettingsForm implements Configurable {
             else {
                 useIdeaFolderRadioButton.setSelected(true);
             }
+            useVarDumpCheckBox.setSelected(magicentoSettings.useVarDump);
+            layoutEnabledCheckBox.setSelected(magicentoSettings.layoutEnabled);
+            if(magicentoSettings.packages != null){
+                packagesTextField.setText(magicentoSettings.packages);
+            }
+            if(magicentoSettings.themes != null){
+                themesTextField.setText(magicentoSettings.themes);
+            }
+            if(magicentoSettings.store != null){
+                storeTextField.setText(magicentoSettings.store);
+            }
+
         }
         else {
             pathToMageTextField.setText("");
@@ -190,13 +216,20 @@ public class MagicentoSettingsForm implements Configurable {
             pathToPhpTextField.setText("");
             urlToLocalMagentoTextField.setText("");
             useIdeaFolderRadioButton.setSelected(true);
+            useVarDumpCheckBox.setSelected(true);
         }
 
         _updatePhpSection();
 
+        boolean enable = layoutEnabledCheckBox.isSelected();
+        themesTextField.setEditable(enable);
+        packagesTextField.setEditable(enable);
+
+        // hide custom folder (not supported yet)
         useCustomFolderRadioButton.setVisible(false);
         customFolderHttpTextField.setVisible(false);
         customFolderHttpButton.setVisible(false);
+
 
         myComponent = (JComponent) magicentoPanel;
 
@@ -235,7 +268,12 @@ public class MagicentoSettingsForm implements Configurable {
                 magicentoSettings.urlToMagento != null && magicentoSettings.urlToMagento.equals(urlToLocalMagentoTextField.getText()) &&
                 magicentoSettings.showPhpWarning == ! phpDisableWarningCheckBox.isSelected() &&
                 magicentoSettings.useVarFolder == useVarFolderRadioButton.isSelected() &&
-                magicentoSettings.useIdeaFolder == useIdeaFolderRadioButton.isSelected()
+                magicentoSettings.useIdeaFolder == useIdeaFolderRadioButton.isSelected() &&
+                magicentoSettings.useVarDump == useVarDumpCheckBox.isSelected() &&
+                magicentoSettings.layoutEnabled == layoutEnabledCheckBox.isSelected() &&
+                magicentoSettings.themes != null && magicentoSettings.themes.equals(themesTextField.getText()) &&
+                magicentoSettings.packages != null && magicentoSettings.packages.equals(packagesTextField.getText()) &&
+                magicentoSettings.store != null && magicentoSettings.store.equals(storeTextField.getText())
               ) {
                 return false;
             }
@@ -294,7 +332,11 @@ public class MagicentoSettingsForm implements Configurable {
                         settings.showPhpWarning = ! phpDisableWarningCheckBox.isSelected();
                         settings.useIdeaFolder = useIdeaFolderRadioButton.isSelected();
                         settings.useVarFolder = useVarFolderRadioButton.isSelected();
-
+                        settings.useVarDump = useVarDumpCheckBox.isSelected();
+                        settings.layoutEnabled = layoutEnabledCheckBox.isSelected();
+                        settings.themes = themesTextField.getText().trim();
+                        settings.packages = packagesTextField.getText().trim();
+                        settings.store = storeTextField.getText().trim();
                     }
                     else {
                         IdeHelper.logError("MagicentoSettings is null");

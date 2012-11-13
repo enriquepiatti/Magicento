@@ -21,6 +21,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiUtilCore;
+import com.magicento.MagicentoSettings;
 import com.magicento.helpers.PsiPhpHelper;
 
 import java.util.List;
@@ -290,6 +291,16 @@ public abstract class MagicentoActionAbstract extends AnAction implements IMagic
         return null;
     }
 
+
+    public MagicentoSettings getMagicentoSettings()
+    {
+        Project project = getProject();
+        if(project != null){
+            //return (MagicentoProjectComponent) project.getComponent("MagicentoProjectComponent");
+            return MagicentoSettings.getInstance(project);
+        }
+        return null;
+    }
 
     protected String getWordAtCursor(CharSequence editorText, int cursorOffset)
     {

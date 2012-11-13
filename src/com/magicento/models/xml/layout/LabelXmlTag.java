@@ -3,13 +3,10 @@ package com.magicento.models.xml.layout;
 /**
  * @author Enrique Piatti
  */
-public class LayoutXmlTag extends MagentoLayoutXmlTag {
-
-
+public class LabelXmlTag extends MagentoLayoutXmlTag {
     @Override
     protected void initChildren() {
-        MagentoLayoutXmlTag handle = new HandleXmlTag();
-        addChild(handle);
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -19,12 +16,11 @@ public class LayoutXmlTag extends MagentoLayoutXmlTag {
 
     @Override
     protected void initName() {
-        name = "layout";    // important!
+        name = "label";
     }
 
     @Override
     protected void initHelp() {
-        help = "";
+        help = "It defines the label of the handle which is shown as a descriptive reference in some areas of the admin panel.";
     }
-
 }

@@ -23,6 +23,7 @@ import com.magicento.helpers.Magicento;
 import com.magicento.helpers.PsiPhpHelper;
 import com.magicento.helpers.XmlHelper;
 import com.magicento.models.MagentoClassInfo;
+import com.magicento.models.layout.Template;
 import com.magicento.models.xml.MagentoXml;
 import com.magicento.models.xml.MagentoXmlFactory;
 import com.magicento.models.xml.MagentoXmlTag;
@@ -85,6 +86,12 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                         {
                             elements = getAutocompleteForGetTable(currentElement, prefix);
                         }
+                        else if(isGetChildInTemplate(currentElement)){
+                            elements = getAutocompleteForGetChildInTemplate(currentElement, prefix);
+                        }
+                        else if(MagentoParser.isBlockNameInTemplate(currentElement)){
+                            elements = getAutocompleteForGetBlockInTemplate(currentElement, prefix);
+                        }
 
                         if(elements != null && elements.size() > 0)
                         {
@@ -99,6 +106,26 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
     }
 
 
+
+
+    protected boolean isGetChildInTemplate(@NotNull PsiElement currentElement)
+    {
+
+        return MagentoParser.isBlockAliasInTemplate(currentElement);
+
+//        // autcomplete works only if cursor is over the parameter list of ->getChildHtml([HERE])
+//        PsiElement element = getParameterListElement(currentElement);
+//        if(element != null)
+//        {
+//            PsiElement methodReference = PsiPhpHelper.findFirstParentOfType(currentElement, PsiPhpHelper.METHOD_REFERENCE);
+//            if(methodReference != null){
+//                if(MagentoParser.isGetChildInTemplate(methodReference)){
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+    }
 
 
     protected PsiElement getParameterListElement(PsiElement currentElement)
@@ -298,78 +325,90 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
     protected List<LookupElement> getAutocompleteForGetStoreConfig(PsiElement currentElement, String prefix)
     {
         List<LookupElement> elements = new ArrayList<LookupElement>();
-        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
-        if(magicento != null)
+
+        List<String> paths = Magicento.getStoreConfigPaths(currentElement.getProject(), prefix);
+
+        for(String path : paths)
         {
-            String lastPrefix = prefix;
-            boolean endsWithSlash = prefix.endsWith("/");
-
-            String[] parts = prefix.split("/");
-            if(endsWithSlash){
-                lastPrefix = "";
-            }
-            else if(parts.length > 0){
-                lastPrefix = parts[parts.length-1];
-            }
-
-            // cehck for system config values
-            if(parts.length < 3 || (parts.length == 3 && ! endsWithSlash))
-            {
-                File configFile = magicento.getCachedSystemXml();
-                String xpath = "config/sections/";
-                if(parts.length > 1 || (parts.length == 1 && endsWithSlash)){
-                    xpath += parts[0]+"/groups/";
-                }
-                if(parts.length > 2 || (parts.length == 2 && endsWithSlash)){
-                    xpath += parts[1]+"/fields/";
-                }
-                xpath += "*";
-                if( ! lastPrefix.isEmpty()){
-                    xpath += "[starts-with(name(),'" + lastPrefix + "')]";
-                }
-
-                List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
-                if(nodes != null && nodes.size() > 0){
-                    for(Element node : nodes)
-                    {
-                        String nodeName = node.getName();
-                        String lookup = prefix.substring(0, prefix.length()-lastPrefix.length())+nodeName;
-                        LookupElement element = LookupElementBuilder.create("", lookup)
-                                .setPresentableText(lookup)
-                                .setIcon(myIcon)
-                                ;
-                        elements.add(element);
-                    }
-                }
-
-            }
-
-            // get list of config values from config.xml
-            File configFile = magicento.getCachedConfigXml();
-            String xpath = "config/default/";
-            int limit = endsWithSlash ? parts.length : (parts.length-1);
-            for(int i=0; i<limit; i++){
-                xpath += parts[i]+"/";
-            }
-            xpath += "*";
-            if( ! lastPrefix.isEmpty()){
-                xpath += "[starts-with(name(),'" + lastPrefix + "')]";
-            }
-            List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
-            if(nodes != null && nodes.size() > 0){
-                for(Element node : nodes)
-                {
-                    String nodeName = node.getName();
-                    String lookup = prefix.substring(0, prefix.length()-lastPrefix.length())+nodeName;
-                    LookupElement element = LookupElementBuilder.create("", lookup)
-                            .setPresentableText(lookup)
-                            .setIcon(myIcon)
-                            ;
-                    elements.add(element);
-                }
-            }
-
+            LookupElement element = LookupElementBuilder.create("", path)
+                    .setPresentableText(path)
+                    .setIcon(myIcon)
+                    ;
+            elements.add(element);
         }
+
+//        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
+//        if(magicento != null)
+//        {
+//            String lastPrefix = prefix;
+//            boolean endsWithSlash = prefix.endsWith("/");
+//
+//            String[] parts = prefix.split("/");
+//            if(endsWithSlash){
+//                lastPrefix = "";
+//            }
+//            else if(parts.length > 0){
+//                lastPrefix = parts[parts.length-1];
+//            }
+//
+//            // cehck for system config values
+//            if(parts.length < 3 || (parts.length == 3 && ! endsWithSlash))
+//            {
+//                File configFile = magicento.getCachedSystemXml();
+//                String xpath = "config/sections/";
+//                if(parts.length > 1 || (parts.length == 1 && endsWithSlash)){
+//                    xpath += parts[0]+"/groups/";
+//                }
+//                if(parts.length > 2 || (parts.length == 2 && endsWithSlash)){
+//                    xpath += parts[1]+"/fields/";
+//                }
+//                xpath += "*";
+//                if( ! lastPrefix.isEmpty()){
+//                    xpath += "[starts-with(name(),'" + lastPrefix + "')]";
+//                }
+//
+//                List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
+//                if(nodes != null && nodes.size() > 0){
+//                    for(Element node : nodes)
+//                    {
+//                        String nodeName = node.getName();
+//                        String lookup = prefix.substring(0, prefix.length()-lastPrefix.length())+nodeName;
+//                        LookupElement element = LookupElementBuilder.create("", lookup)
+//                                .setPresentableText(lookup)
+//                                .setIcon(myIcon)
+//                                ;
+//                        elements.add(element);
+//                    }
+//                }
+//
+//            }
+//
+//            // get list of config values from config.xml
+//            File configFile = magicento.getCachedConfigXml();
+//            String xpath = "config/default/";
+//            int limit = endsWithSlash ? parts.length : (parts.length-1);
+//            for(int i=0; i<limit; i++){
+//                xpath += parts[i]+"/";
+//            }
+//            xpath += "*";
+//            if( ! lastPrefix.isEmpty()){
+//                xpath += "[starts-with(name(),'" + lastPrefix + "')]";
+//            }
+//            List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
+//            if(nodes != null && nodes.size() > 0){
+//                for(Element node : nodes)
+//                {
+//                    String nodeName = node.getName();
+//                    String lookup = prefix.substring(0, prefix.length()-lastPrefix.length())+nodeName;
+//                    LookupElement element = LookupElementBuilder.create("", lookup)
+//                            .setPresentableText(lookup)
+//                            .setIcon(myIcon)
+//                            ;
+//                    elements.add(element);
+//                }
+//            }
+//
+//        }
         return elements;
     }
 
@@ -452,5 +491,96 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
     }
 
 
+    @NotNull protected List<LookupElement> getAutocompleteForGetChildInTemplate(PsiElement currentElement, String prefix)
+    {
+        List<LookupElement> elements = new ArrayList<LookupElement>();
+        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
+        if(magicento != null)
+        {
+            Template template = new Template(currentElement.getContainingFile().getOriginalFile().getVirtualFile());
+            String area = template.getArea();
+            if(area != null && ! area.isEmpty()){
+                File layoutXml = magicento.getCachedLayoutXml(area);
+                if(layoutXml != null && layoutXml.exists()){
+                    List<Element> blocks = template.getBlockElements(currentElement.getProject());
+                    if(blocks != null)
+                    {
+                        Set<String> blockNamesChecked = new HashSet<String>();
+                        for(Element block : blocks)
+                        {
+                            String blockName = block.getAttributeValue("name");
+                            if(blockName != null && ! blockName.isEmpty() && ! blockNamesChecked.contains(blockName))
+                            {
+                                blockNamesChecked.add(blockName);
+                                String xpath = "//*[@name='"+blockName+"']/block";
+                                List<Element> blockChildren = XmlHelper.findXpath(layoutXml, xpath);
+                                if(blockChildren != null)
+                                {
+                                    for(Element blockChild : blockChildren){
+                                        // as attr has priority over name
+                                        String name = blockChild.getAttributeValue("as");
+                                        if(name == null || name.isEmpty()){
+                                            name = blockChild.getAttributeValue("name");
+                                        }
+                                        String type = blockChild.getAttributeValue("type");
+                                        LookupElement lookupElement = LookupElementBuilder.create("", name)
+                                                .setPresentableText(name)
+                                                .setIcon(myIcon)
+                                                .setTailText(type, true)
+                                                ;
+                                        elements.add(lookupElement);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        return elements;
+    }
+
+
+    @NotNull protected List<LookupElement> getAutocompleteForGetBlockInTemplate(PsiElement currentElement, String prefix)
+    {
+
+        List<LookupElement> elements = new ArrayList<LookupElement>();
+        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
+        if(magicento != null)
+        {
+            Template template = new Template(currentElement.getContainingFile().getOriginalFile().getVirtualFile());
+            String area = template.getArea();
+            if(area != null && ! area.isEmpty())
+            {
+                File layoutXml = magicento.getCachedLayoutXml(area);
+                if(layoutXml != null && layoutXml.exists())
+                {
+                    // search all blocks
+                    String xpath = "//block";
+                    List<Element> blocks = XmlHelper.findXpath(layoutXml, xpath);
+
+                    if(blocks != null)
+                    {
+                        for(Element block : blocks){
+                            String name = block.getAttributeValue("name");
+                            String type = block.getAttributeValue("type");
+                            if(name != null){
+                                LookupElement lookupElement = LookupElementBuilder.create("", name)
+                                        .setPresentableText(name)
+                                        .setIcon(myIcon)
+                                        .setTailText(type, true)
+                                        ;
+                                elements.add(lookupElement);
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        return elements;
+
+    }
 
 }

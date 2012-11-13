@@ -115,6 +115,11 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
         return getCachedXml(MagentoSystemXml.TYPE);
     }
 
+    public File getCachedLayoutXml(String area)
+    {
+        return getCachedLayoutXml(area, null, null);
+    }
+
     public File getCachedLayoutXml(String area, String packageName, String theme)
     {
         MagentoXml magentoXml = MagentoXmlFactory.getInstance(MagentoLayoutXml.TYPE, _project);

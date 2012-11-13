@@ -3,6 +3,7 @@ package com.magicento.helpers;
 import com.intellij.ide.util.gotoByName.GotoClassModel2;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiWhiteSpace;
 import org.apache.commons.lang.ArrayUtils;
@@ -35,9 +36,13 @@ public class PsiPhpHelper {
     public static final String COMMENT_LINE = "line comment";
     public static final String IDENTIFIER = "identifier";
     public static final String PARAMETER_LIST = "Parameter list";
+    public static final String PARAMETER = "Parameter";
     public static final String STRING = "String";
     public static final String SINGLE_QUOTED_STRING = "single quoted string";
     public static final String DOUBLE_QUOTED_STRING = "double quoted string";
+    public static final String EXTENDS_LIST = "Extends list";
+    public static final String CLASS_REFERENCE = "Class reference";
+
 
 
     @NotNull private static String getElementType(PsiElement psiElement){
@@ -328,32 +333,36 @@ public class PsiPhpHelper {
 
     public static PsiElement findFirstParentOfType(PsiElement psiElement, String[] types, String[] limitTypes)
     {
-        // PsiTreeUtil.getParentOfType(psiElement, XmlTag.class, false);
-        PsiElement parentElement = psiElement.getParent();
-        boolean isRequestingSecuredLimits = false;
-        if(limitTypes != null && limitTypes.length > 0){
-            for(String limit : limitTypes){
-                if(limit.equals(FILE) || limit.equals(CLASS) || limit.equals(GROUP_STATEMENT)){
-                    isRequestingSecuredLimits = true;
-                    break;
+        if(psiElement != null){
+            // PsiTreeUtil.getParentOfType(psiElement, XmlTag.class, false);
+            PsiElement parentElement = psiElement.getParent();
+            boolean isRequestingSecuredLimits = false;
+            if(limitTypes != null && limitTypes.length > 0){
+                for(String limit : limitTypes){
+                    if(limit.equals(FILE) || limit.equals(CLASS) || limit.equals(GROUP_STATEMENT)){
+                        isRequestingSecuredLimits = true;
+                        break;
+                    }
                 }
             }
-        }
-        if( ! isRequestingSecuredLimits ){
-            String[] securityLimits = {FILE, CLASS, GROUP_STATEMENT};
-            limitTypes = (String[]) ArrayUtils.addAll(limitTypes, securityLimits);
-        }
+            if( ! isRequestingSecuredLimits ){
+                String[] securityLimits = {FILE, CLASS, GROUP_STATEMENT};
+                limitTypes = (String[]) ArrayUtils.addAll(limitTypes, securityLimits);
+            }
 //        String[] result = Arrays.copyOf(first, first.length + second.length);
 //        System.arraycopy(second, 0, result, first.length, second.length);
 
-        while(parentElement != null && isNotElementType(parentElement, types) ){
-            if(limitTypes != null){
-                if(isElementType(parentElement, limitTypes))
-                    return null;
+            while(parentElement != null && isNotElementType(parentElement, types) ){
+                if(limitTypes != null){
+                    if(isElementType(parentElement, limitTypes))
+                        return null;
+                }
+                parentElement = parentElement.getParent();
             }
-            parentElement = parentElement.getParent();
+            return parentElement;
         }
-        return parentElement;
+        return null;
+
     }
 
 
@@ -377,6 +386,12 @@ public class PsiPhpHelper {
         return children;
     }
 
+    /**
+     * this returns a list because could be more than one class with the same name
+     * @param className
+     * @param project
+     * @return
+     */
     @NotNull public static List<PsiElement> getPsiElementsFromClassName(String className, Project project)
     {
         List<String> classes = new ArrayList<String>();
@@ -412,14 +427,20 @@ public class PsiPhpHelper {
         return psiElements;
     }
 
+
     @NotNull public static List<PsiElement> findMethodInClass(String methodName, String className, Project project)
+    {
+        return findMethodInClass(methodName, className, project, false);
+    }
+
+    @NotNull public static List<PsiElement> findMethodInClass(String methodName, String className, Project project, boolean inherited)
     {
         List<PsiElement> methods = new ArrayList<PsiElement>();
         if(methodName != null && className != null && ! methodName.isEmpty() && ! className.isEmpty())
         {
             List<PsiElement> classes = getPsiElementsFromClassName(className, project);
             for(PsiElement psiClass : classes){
-                PsiElement method = findMethodInClass(methodName, psiClass);
+                PsiElement method = findMethodInClass(methodName, psiClass, inherited);
                 if(method != null){
                     methods.add(method);
                 }
@@ -431,16 +452,46 @@ public class PsiPhpHelper {
 
     public static PsiElement findMethodInClass(String methodName, PsiElement psiClass)
     {
+        return findMethodInClass(methodName, psiClass, false);
+    }
+
+    public static PsiElement findMethodInClass(String methodName, PsiElement psiClass, boolean inherited)
+    {
         if(methodName != null && ! methodName.isEmpty() && psiClass != null)
         {
             PsiElement[] children = psiClass.getChildren();
+            PsiElement extendsList = null;
             for(PsiElement child : children){
                 if(isClassMethod(child)){
                     if(methodName.equals(((PsiNamedElement) child).getName())){
                         return child;
                     }
                 }
+                else if(inherited && isElementType(child, EXTENDS_LIST))
+                {
+                    extendsList = child;
+                }
             }
+
+            // postponed read of inherited methods so original methods have higher priority
+            if(extendsList != null)
+            {
+                PsiElement[] extendsElements = extendsList.getChildren();
+                for(PsiElement extendsElement : extendsElements){
+                    if(isElementType(extendsElement, CLASS_REFERENCE))
+                    {
+                        List<PsiElement> classes = getPsiElementsFromClassName(extendsElement.getText(), extendsElement.getProject());
+                        for(PsiElement parentClass : classes){
+                            PsiElement method = findMethodInClass(methodName, parentClass, true);
+                            if(method != null){
+                                return method;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
         }
         return null;
     }
@@ -458,6 +509,93 @@ public class PsiPhpHelper {
             PsiElement classNameElement = findNextSiblingOfType(psiClass.getFirstChild(), IDENTIFIER);
             if(classNameElement != null){
                 return classNameElement.getText();
+            }
+        }
+        return null;
+    }
+
+
+    @NotNull public static List<PsiNamedElement> getAllMethodsFromClass(@NotNull PsiElement psiClass, boolean includeInherited)
+    {
+        List<PsiNamedElement> methods = new ArrayList<PsiNamedElement>();
+        PsiElement[] children = psiClass.getChildren();   // getFullListOfChildren
+
+        PsiElement extendsList = null;
+
+        for(PsiElement child : children)
+        {
+            if(isClassMethod(child)){
+                methods.add((PsiNamedElement)child);
+            }
+            else if(includeInherited && isElementType(child, EXTENDS_LIST))
+            {
+                extendsList = child;
+            }
+        }
+
+        // postponed read of inherited methods so the original methos are first on the list
+        if(extendsList != null)
+        {
+            PsiElement[] extendsElements = extendsList.getChildren();
+            for(PsiElement extendsElement : extendsElements){
+                if(isElementType(extendsElement, CLASS_REFERENCE)){
+                    List<PsiElement> classes = getPsiElementsFromClassName(extendsElement.getText(), extendsElement.getProject());
+                    for(PsiElement parentClass : classes){
+                        methods.addAll(getAllMethodsFromClass(parentClass, true));
+                    }
+                    break;
+                }
+            }
+        }
+
+        return methods;
+    }
+
+    public static boolean isMethodProtected(@NotNull PsiElement psiMethod)
+    {
+        return psiMethod.getText().startsWith("protected");
+    }
+
+    public static boolean isMethodPublic(@NotNull PsiElement psiMethod)
+    {
+        return psiMethod.getText().startsWith("public");
+    }
+
+    public static boolean isMethodPrivate(@NotNull PsiElement psiMethod)
+    {
+        return psiMethod.getText().startsWith("private");
+    }
+
+
+    @NotNull public static List<PsiElement> getMethodParameters(@NotNull PsiElement psiMethod)
+    {
+        List<PsiElement> params = new ArrayList<PsiElement>();
+        PsiElement parameterList = findFirstChildOfType(psiMethod, PARAMETER_LIST);
+        if(parameterList != null){
+            PsiElement[] parameters = parameterList.getChildren();
+            for(PsiElement parameter : parameters){
+                if(isElementType(parameter, PARAMETER)){
+                    params.add(parameter);
+//                    PsiElement[] parameterChildren = parameter.getChildren();
+//                    for(PsiElement child : parameterChildren){
+//                        if(isElementType(child, VARIABLE)){
+//                            params.add(child.getText());
+//                        }
+//                    }
+                }
+            }
+        }
+        return params;
+    }
+
+    public static String getParameterName(@NotNull PsiElement parameter)
+    {
+        List<PsiElement> parameterChildren = PsiPhpHelper.getFullListOfChildren(parameter); // parameter.getChildren();
+        if(parameterChildren != null){
+            for(PsiElement child : parameterChildren){
+                if(isElementType(child, VARIABLE)){
+                    return child.getText();
+                }
             }
         }
         return null;

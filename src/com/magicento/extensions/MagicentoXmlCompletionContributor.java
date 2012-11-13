@@ -9,7 +9,9 @@ import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
 import com.magicento.helpers.IdeHelper;
 import com.magicento.helpers.XmlHelper;
+import com.magicento.models.psi.XmlTagParentsFakeElement;
 import com.magicento.models.xml.MagentoXml;
+import com.magicento.models.xml.MagentoXmlAttribute;
 import com.magicento.models.xml.MagentoXmlFactory;
 import com.magicento.models.xml.MagentoXmlTag;
 import com.intellij.codeInsight.completion.*;
@@ -69,8 +71,21 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
 
 
             PsiElement psiElement = psiFile.findElementAt(startOffset);
-            if(psiElement != null){
+            if(psiElement != null)
+            {
                 ASTNode node = psiElement.getNode();
+
+                if(XmlHelper.isAttribute(psiElement.getContext()))
+                {
+                    // if it's attribute definition, put care between quotes
+                    if(XmlHelper.isAttributeName(psiElement)){
+                        pos = document.getText().indexOf('"', startOffset);
+                        if(pos != -1){
+                            editor.getCaretModel().moveToOffset(pos+1);
+                        }
+                    }
+                }
+
                 XmlTag parentElement = PsiTreeUtil.getParentOfType(psiElement, XmlTag.class);
                 if(parentElement != null){
                     psiElement = parentElement;
@@ -88,7 +103,7 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                     boolean wrap = xmlSettings.XML_TEXT_WRAP != CommonCodeStyleSettings.DO_NOT_WRAP;
                     if( wrap){
                         IdeHelper.showDialog(psiFile.getProject(), "It's not safe to use wrap the text in xml files for magento projects.\n" +
-                                "Please change this going to Settings > Code Style > Xml > Other > Wrap text", "Warning: Wrap Text in XML files");
+                                "Please change this going to Settings > Code Style > Xml > Other > Wrap text", "Magicento Warning: Wrap Text in XML files");
                     }
                 }
 
@@ -128,12 +143,6 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                 XmlAttribute attribute = PsiTreeUtil.getParentOfType(currentElement, XmlAttribute.class, false);
                 boolean isAttribute = attribute != null;
 
-                if(isAttribute){
-                    //final XmlAttributeValue attributeValue = PsiTreeUtil.getParentOfType(currentElement, XmlAttributeValue.class, false);
-                    // TODO: add code completion for attributes
-                    return;
-                }
-
 
 //                final PsiElement psiElement = PsiTreeUtil.getParentOfType(currentElement, XmlTag.class, XmlAttributeValue.class);
 //                if(psiElement == null){
@@ -161,24 +170,54 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                 if(matchedTag != null){
 
                     Map<String, String> items = new LinkedHashMap<String, String>();    // we are using LinkedHashMap to preserve order of insertion
-
-                    List<MagentoXmlTag> children = matchedTag.getChildren();
-                    boolean hasChildren = children != null && children.size() > 0;
-                    if(hasChildren){
-                        for(MagentoXmlTag child : children){
-                            // each children tag can have multiple definitions (for example Id tags)
-                            Map<String,String> childItems = child.getPossibleDefinitions();
-                            if(childItems != null){
-                                items.putAll(childItems);
+                    boolean hasChildren = false;
+                    if( ! isAttribute)
+                    {
+                        List<MagentoXmlTag> children = matchedTag.getChildren();
+                        hasChildren = children != null && children.size() > 0;
+                        if(hasChildren){
+                            for(MagentoXmlTag child : children){
+                                // each children tag can have multiple definitions (for example Id tags)
+                                Map<String,String> childItems = child.getPossibleDefinitions();
+                                if(childItems != null){
+                                    items.putAll(childItems);
+                                }
+                            }
+                        }
+                        else {          // it's a leaf node, show the possible values instead of children
+                            Map<String, String> values = matchedTag.getPossibleValues();
+                            if(values != null){
+                                items.putAll(values);
                             }
                         }
                     }
-                    else {          // it's a leaf node, show the possible values instead of children
-                        Map<String, String> values = matchedTag.getPossibleValues();
-                        if(values != null){
-                            items.putAll(values);
+                    else
+                    {
+                        List<MagentoXmlAttribute> attributes = matchedTag.getAttributes();
+                        if(attributes != null){
+                            boolean isAttrValue = XmlHelper.isAttributeValue(currentElement);
+                            boolean isAttrName = XmlHelper.isAttributeName(currentElement);
+                            String attrName = null;
+                            if(isAttrValue){
+                                attrName = XmlHelper.getAttributeName(XmlHelper.getParentOfType(currentElement, XmlAttribute.class, true));
+                            }
+                            Map<String, String> aux = null;
+                            for(MagentoXmlAttribute attr : attributes){
+                                if(isAttrName){
+                                    aux = attr.getPossibleDefinitions();
+                                }
+                                else if(isAttrValue){
+                                    if(attrName != null && attrName.equals(attr.getName())){
+                                        aux = attr.getPossibleValues();
+                                    }
+                                }
+                                if(aux != null){
+                                    items.putAll(aux);
+                                }
+                            }
                         }
                     }
+
 
                     if( ! items.isEmpty()){
 
@@ -190,29 +229,39 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                             count++;
                             String name = entry.getKey();
                             String value = entry.getValue();
-                            XmlTag newTag = XmlElementFactory.getInstance(currentElement.getProject()).createTagFromText(value);
-                            // prefix doesn't contain the initial '<'
-                            //if( true || prefix == null || prefix.isEmpty() || value.startsWith(prefix, 1)){
-                                // value = prefix == null || prefix.isEmpty() ? value : value.substring(1);
-                                // TODO: create a new class extending LookupElement?
-//                                LookupElement element = LookupElementBuilder.create(value)
-                                // if this is a leaf node we are passing an empty string as the Object for the lookupElement because
-                                // we are using that object in MagicentoXmlDocumentationProvider (and we don't need it for leaf nodes), this is really ugly
-                                LookupElement element = LookupElementBuilder.create(hasChildren ? name : "" /*newTag*/, value)
-                                        .setPresentableText(name)
-                                        .setIcon(myIcon)
-                                        //.addLookupString(value.substring(1))
-                                        .setInsertHandler(INSERT_HANDLER)
-                                        ;
 
-                                LookupElement elementWithPriority = PrioritizedLookupElement.withPriority(element, -count);
+                            if(name != null && value != null)
+                            {
 
-                                //element.renderElement();
-                                //element.handleInsert();
-                                //_result.addElement(element);
-                                result.addElement(elementWithPriority);
-                                addedElementsToResult++;
-                            //}
+                                //XmlTag newTag = XmlElementFactory.getInstance(currentElement.getProject()).createTagFromText(value);
+                                // prefix doesn't contain the initial '<'
+                                //if( true || prefix == null || prefix.isEmpty() || value.startsWith(prefix, 1)){
+                                    // value = prefix == null || prefix.isEmpty() ? value : value.substring(1);
+                                    // TODO: create a new class extending LookupElement?
+
+
+                                XmlTagParentsFakeElement fake = createFakeElementForLookup(name, currentElement, isAttribute, hasChildren);
+
+    //                                LookupElement element = LookupElementBuilder.create(value)
+                                    // if this is a leaf node we are passing an empty string as the Object for the lookupElement because
+                                    // we are using that object in MagicentoXmlDocumentationProvider (and we don't need it for leaf nodes), this is really ugly
+                                    // and we need to pass the name of the current selected lookup item because it's not inserted yet, so we can't read it from the current PsiElement
+                                    LookupElement element = LookupElementBuilder.create(fake, value)
+                                            .setPresentableText(name)
+                                            .setIcon(myIcon)
+                                            //.addLookupString(value.substring(1))
+                                            .setInsertHandler(INSERT_HANDLER)
+                                            ;
+
+                                    LookupElement elementWithPriority = PrioritizedLookupElement.withPriority(element, -count);
+
+                                    //element.renderElement();
+                                    //element.handleInsert();
+                                    //_result.addElement(element);
+                                    result.addElement(elementWithPriority);
+                                    addedElementsToResult++;
+                                    //}
+                            }
 
                         }
                         // prevents extra codeCompletion from jIDEA (PHPStorm) because it's confusing and they are appearing first !
@@ -227,6 +276,46 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
 
             }
         });
+    }
+
+
+    /**
+     * this is used inside MagicentoXmlDocumentationProvider, because we don't have a real XmlElement when we are requesting
+     * documentation from a lookupitem (because the items was not inserted yet)
+     * @param name
+     * @param currentElement
+     * @param isAttribute
+     * @return
+     */
+    protected XmlTagParentsFakeElement createFakeElementForLookup(String name, PsiElement currentElement, boolean isAttribute, boolean hasChildren)
+    {
+        XmlTagParentsFakeElement fake = null;
+
+        XmlTag xmlTagParent = XmlHelper.getParentOfType(currentElement, XmlTag.class, true);
+        if(xmlTagParent != null){
+            if(XmlHelper.isXmlTagIncomplete(xmlTagParent)){
+                xmlTagParent = XmlHelper.getParentOfType(currentElement, XmlTag.class, true);
+            }
+            if(xmlTagParent != null){
+                // TODO: this is really ugly, but we need the parents hierarchy for finding the right documentation and jIDEA requires a PsiElement ! (this will be changed in the next version of jIDEA I think)
+                fake = new XmlTagParentsFakeElement();
+                fake.setParent(xmlTagParent);
+                if( isAttribute){
+                    fake.setName("");
+                    fake.setAttribute(name);
+                }
+                else {
+                    if(hasChildren){
+                        fake.setName("");
+                    }
+                    else {
+                        fake.setName(name);
+                    }
+                }
+            }
+        }
+
+        return fake;
     }
 
 

@@ -57,6 +57,8 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
                 "AddVarPhpDoc",
                 "RemoveFromCoreResource",
                 "GoToBlockFromTemplate",
+                "GotoTemplateFromBlock",
+                "GoToBlockDefinitionInLayout",
                 "AddVarThisToTemplate",
                 "CopyTemplate",
                 "GetStoreConfig",

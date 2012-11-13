@@ -7,9 +7,13 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.magicento.helpers.IdeHelper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @State(
         name = "MagicentoSettings",    // must be equal to the class name I think
@@ -32,6 +36,12 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
     public boolean useVarFolder = false;
     public boolean useIdeaFolder = true;
     public boolean showPhpWarning = true;
+
+    public boolean useVarDump = true;
+    public boolean layoutEnabled = true;
+    public String packages;
+    public String themes;
+
 
     protected String relativePathToMage = "/app/Mage.php";
     protected boolean isPathToMageValid = false;
@@ -211,6 +221,24 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
             isPathToMageValid = f.exists() && f.isFile();
         }
         return isPathToMageValid;
+    }
+
+    @NotNull public List<String> getPackages()
+    {
+        if(packages == null || packages.isEmpty()) {
+            return new ArrayList<String>();
+        }
+        String[] packagesList = packages.replace(" ", "").split(",");
+        return Arrays.asList(packagesList);
+    }
+
+    @NotNull public List<String> getThemes()
+    {
+        if(themes == null || themes.isEmpty()) {
+            return new ArrayList<String>();
+        }
+        String[] packagesList = themes.replace(" ", "").split(",");
+        return Arrays.asList(packagesList);
     }
 
 }

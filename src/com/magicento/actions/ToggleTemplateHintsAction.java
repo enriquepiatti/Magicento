@@ -17,15 +17,23 @@ public class ToggleTemplateHintsAction extends MagicentoPhpActionAbstract
         if(magicento != null)
         {
             String phpCode =
+            "$websiteIds = Mage::getModel('core/website')->getCollection()->getAllIds();"+
+            "$storeIds = Mage::getModel('core/store')->getCollection()->getAllIds();"+
             "$config = new Mage_Core_Model_Config();"+
             "$pathTemplateHints = 'dev/debug/template_hints';"+
             "$pathBlockHints = 'dev/debug/template_hints_blocks';"+
             "$current = Mage::getStoreConfig($pathTemplateHints);"+
             "$toggle = 1 - $current;"+
-            "$config->saveConfig($pathTemplateHints, $toggle, 'websites', 1);"+
-            "$config->saveConfig($pathBlockHints, $toggle, 'websites', 1);"+
             "$config->saveConfig($pathTemplateHints, $toggle, 'default', 0);"+
             "$config->saveConfig($pathBlockHints, $toggle, 'default', 0);"+
+            "foreach($websiteIds as $id){"+
+                "$config->saveConfig($pathTemplateHints, $toggle, 'websites', $id);"+
+                "$config->saveConfig($pathBlockHints, $toggle, 'websites', $id);"+
+            "}"+
+            "foreach($storeIds as $id){"+
+                "$config->saveConfig($pathTemplateHints, $toggle, 'stores', $id);"+
+                "$config->saveConfig($pathBlockHints, $toggle, 'stores', $id);"+
+            "}"+
             "echo $toggle;";
             String result = magicento.executePhpWithMagento(phpCode);
             String text = result.equals("1") ? "Enabled" : "Disabled";

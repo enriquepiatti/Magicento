@@ -1,5 +1,7 @@
 package com.magicento.extensions;
 
+import com.intellij.psi.xml.XmlAttribute;
+import com.intellij.psi.xml.XmlElementType;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
 import com.magicento.helpers.XmlHelper;
@@ -40,6 +42,8 @@ public class MagicentoXmlDocumentationProvider extends AbstractDocumentationProv
         }
 
         MagentoXmlTag matchedTag = null;
+        String attrName = null;
+
         MagentoXml magentoXml = MagentoXmlFactory.getInstance(originalElement);
         if(magentoXml == null){
             return null;
@@ -48,15 +52,29 @@ public class MagicentoXmlDocumentationProvider extends AbstractDocumentationProv
         if(element instanceof XmlTagParentsFakeElement){
             XmlTagParentsFakeElement fake = (XmlTagParentsFakeElement) element;
             matchedTag = magentoXml.getMatchedTag(fake.getFullPath());   // matchedElement?
+            attrName = fake.getAttribute();
         }
         else if(originalElement instanceof XmlTag){
             matchedTag = magentoXml.getMatchedTag(originalElement.getLastChild());
         }
         else if(originalElement instanceof XmlElement){
             matchedTag = magentoXml.getMatchedTag(originalElement);
+            if( XmlHelper.isAttribute(originalElement) ){
+                XmlAttribute attr = XmlHelper.getParentOfType(originalElement, XmlAttribute.class, false);
+                if(attr != null){
+                    attrName = XmlHelper.getAttributeName(attr);
+                }
+            }
         }
         if(matchedTag != null){
-            return matchedTag.getHelp();
+            String help = "";
+            if( attrName != null ){
+                help = matchedTag.getAttributeHelp(attrName);
+            }
+            else {
+                help = matchedTag.getHelp();
+            }
+            return help;
             // TODO: use HTML with colors according to current theme
             //TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(PropertiesHighlighter.PROPERTY_COMMENT).clone();
             //Color background = attributes.getBackgroundColor();
@@ -66,6 +84,14 @@ public class MagicentoXmlDocumentationProvider extends AbstractDocumentationProv
         return null;
     }
 
+    /**
+     * When we are requesting documentation from the lookupitem, the PsiElement for that item does'nt exist yet, because it wasn't inserted.
+     * That's why we need an extra param (object in this case) to identify the correct node
+     * @param psiManager
+     * @param object
+     * @param element
+     * @return
+     */
     @Override
     public PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object object, PsiElement element)
     {
@@ -74,34 +100,8 @@ public class MagicentoXmlDocumentationProvider extends AbstractDocumentationProv
         }
 
         // TODO do this inside MagicentoXmlCompletionContributor when the lookupItem is created?
-        if(object instanceof String){
-            String name = (String) object;
-            XmlTag xmlTagParent = PsiTreeUtil.getParentOfType(element, XmlTag.class);
-            if(xmlTagParent != null){
-                if(XmlHelper.isXmlTagIncomplete(xmlTagParent)){
-                    xmlTagParent = PsiTreeUtil.getParentOfType(xmlTagParent, XmlTag.class);
-                }
-                if(xmlTagParent != null){
-                    // TODO: this is really ugly, but we need the parents hierarchy for finding the right documentation and jIDEA requires a PsiElement ! (this will be changed in the next version of jIDEA I think)
-                    XmlTagParentsFakeElement fake = new XmlTagParentsFakeElement();
-                    fake.setParent(xmlTagParent);
-                    fake.setName(name);
-                    return fake;
-
-                    // TODO: this works too, analyze which is better
-//                    //XmlTag fake = xmlTagParent.copy();
-//                    final XmlTag fake = xmlTagParent;
-//                    final XmlTag newTag = XmlElementFactory.getInstance(xmlTagParent.getProject()).createTagFromText('<' + name + "></" + name + '>');
-//                    ApplicationManager.getApplication().runWriteAction(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            fake.addSubTag(newTag, true);
-//                        }
-//                    });
-//                    return XmlUtil.findSubTag( fake, newTag.getName());
-
-                }
-            }
+        if(object instanceof XmlTagParentsFakeElement){
+            return (XmlTagParentsFakeElement)object;
         }
 
         return null;

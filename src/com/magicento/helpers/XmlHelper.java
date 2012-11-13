@@ -1,14 +1,18 @@
 package com.magicento.helpers;
 
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiErrorElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.xml.XmlAttribute;
+import com.intellij.psi.xml.XmlElementType;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.xml.util.XmlUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.tools.ant.util.FileUtils;
+import org.intellij.plugins.xpathView.support.XPathSupport;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -18,12 +22,19 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.xml.sax.SAXException;
 
+import javax.management.remote.rmi._RMIConnection_Stub;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.*;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Helper for XML related
@@ -452,5 +463,151 @@ public class XmlHelper {
 
     }
 
+
+    /**
+     * merge xml files appending content
+     * @param files
+     * @return
+     */
+    public static String combineXmlFiles(List<File> files)
+    {
+        String mergedContent = "";
+        if(files != null && files.size() > 0)
+        {
+            String rootNodeName = getDocumentFromFile(files.get(0)).getRootElement().getName();
+            mergedContent = "<"+rootNodeName+">";
+            try {
+                for(File file : files){
+                    String content = FileUtil.loadFile(file);
+                    // bypass rootnode and all the previous things (like prologue)
+                    int start = content.indexOf("<"+rootNodeName);
+                    if(start != -1){
+                        start = content.indexOf("<", start+1);
+                        if(start != -1){
+                            int end = content.lastIndexOf("</"+rootNodeName);
+                            if(end != -1){
+                                mergedContent += content.substring(start, end);
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mergedContent += "</"+rootNodeName+">";
+        }
+        return mergedContent;
+
+    }
+
+
+    public static boolean isAttribute(PsiElement psiElement)
+    {
+        return psiElement.getNode().getElementType() == XmlElementType.XML_ATTRIBUTE ||
+               isAttributeName(psiElement) ||
+               isAttributeValue(psiElement);
+    }
+
+    public static boolean isAttributeName(PsiElement psiElement)
+    {
+        return psiElement.getNode().getElementType() == XmlElementType.XML_NAME;
+    }
+
+    public static boolean isAttributeValue(PsiElement psiElement)
+    {
+        return psiElement.getNode().getElementType() == XmlElementType.XML_ATTRIBUTE_VALUE ||
+               psiElement.getNode().getElementType() == XmlElementType.XML_ATTRIBUTE_VALUE_TOKEN;
+    }
+
+    /**
+     *
+     * @param element
+     * @param aClass
+     * @param strict if strict is true, it won't return the current element, it will search always for a parent element
+     * @param <T>
+     * @return
+     */
+    public static <T extends PsiElement> T getParentOfType(@Nullable PsiElement element, @NotNull Class<T> aClass, boolean strict)
+    {
+        return PsiTreeUtil.getParentOfType(element, aClass, strict);
+    }
+
+    public static String getAttributeName(XmlAttribute attribute)
+    {
+        if(attribute != null){
+            for(PsiElement child : attribute.getChildren()){
+                if(XmlHelper.isAttributeName(child)){
+                    return child.getText();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isAttributeValueEmpty(PsiElement psiElement)
+    {
+        String text = psiElement.getText();
+        // return text.isEmpty() || text.startsWith(IdeHelper.INTELLIJ_IDEA_RULEZZZ);
+        return getValueOnAutocomplete(psiElement).isEmpty();
+    }
+
+    public static String getValueOnAutocomplete(PsiElement psiElement)
+    {
+        String text = psiElement.getText();
+        return text.replace(IdeHelper.INTELLIJ_IDEA_RULEZZZ, "");
+    }
+
+
+    /**
+     * TODO: this method should be removed when find by xpath is ready, and currently works fine only with one attribute
+     * @return
+     */
+    @NotNull public static List<XmlTag> findTagInFile(@NotNull XmlFile xmlFile, @NotNull String nodeName, Map<String, String> attributes)
+    {
+        List<XmlTag> xmlTags = new ArrayList<XmlTag>();
+        // XmlTag rootTag = xmlFile.getRootTag();
+        // xmlFile.getDocument().getManager();
+        String xmlText = xmlFile.getText();
+
+        // final XPathSupport support = XPathSupport.getInstance();
+
+        String regex = "<"+nodeName+"[\\s>]+.*?";
+        if(attributes != null){
+            for(Map.Entry<String, String> entry : attributes.entrySet()){
+                String attrName = entry.getKey();
+                String attrValue = entry.getValue();
+                regex += attrName+"\\s*"+"=\\s*\""+attrValue+"\"\\s*";
+            }
+        }
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(xmlText);
+        List<Integer> positions = new ArrayList<Integer>();
+        while(m.find()) {
+            positions.add(m.start());
+        }
+        for(Integer position : positions){
+            PsiElement psiElement = xmlFile.findElementAt(position);
+            XmlTag xmlTag = XmlHelper.getParentOfType(psiElement, XmlTag.class, false);
+            if(xmlTag != null){
+                xmlTags.add(xmlTag);
+            }
+        }
+
+        return xmlTags;
+    }
+
+
+    public static List<XmlTag> findTagInFile(@NotNull XmlFile xmlFile, @NotNull String xpath)
+    {
+        // TODO: search an Element (jdom) with xpath and then search that Element with findTagInFile(PsiFile psiFile, Element element)
+        // or even better use the XPath plugin
+        return null;
+    }
+
+    public static List<XmlTag> findTagInFile(@NotNull XmlFile xmlFile, @NotNull Element element)
+    {
+        // TODO: compare hierarchy, nodeName, and attributes
+        return null;
+    }
 
 }

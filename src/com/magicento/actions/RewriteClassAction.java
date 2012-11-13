@@ -72,7 +72,8 @@ public class RewriteClassAction extends MagicentoActionAbstract {
                             if(correctNode != null){
                                 String firstPart = correctNode.getParentElement().getName();
                                 String secondPartClassName = className.substring(correctNode.getValue().length()+1);
-                                String secondPart = WordUtils.uncapitalize(secondPartClassName.replace("_", " ")).replace(" ", "_");
+                                String secondPart = WordUtils.uncapitalize(secondPartClassName.replace("_", " ")).replace(" ", "_");    // MagentoParser.getSecondPartUriFromClassName(className, correctNode.getValue());
+
                                 // String originalUri = firstPart+"/"+secondPart;
                                 File targetConfigXml = new File(selectedModulePath+"/etc/config.xml");
 
@@ -91,8 +92,8 @@ public class RewriteClassAction extends MagicentoActionAbstract {
                                 if(psiXmlFile != null)
                                 {
                                     String type = classType.toLowerCase()+"s";
-                                    String path = "config/global/"+type+"/"+firstPart;
-                                    XmlTag newTag = XmlHelper.createTagInFile(psiXmlFile, "rewrite", newClassName, path);
+                                    String path = "config/global/"+type+"/"+firstPart+"/rewrite";
+                                    XmlTag newTag = XmlHelper.createTagInFile(psiXmlFile, secondPart, newClassName, path);
                                     if(newTag == null){
                                         IdeHelper.showDialog(project, "Error trying to create rewrite node in "+psiXmlFile.getVirtualFile().getPath(), "Magicento Rewrite Class");
                                         return;

@@ -4,9 +4,19 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>1.0</version>
+  <version>1.0.1</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>1.0.1</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Small bugfix for NullPointerException</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
         <p>
             <span>1.0</span>
             <ul>

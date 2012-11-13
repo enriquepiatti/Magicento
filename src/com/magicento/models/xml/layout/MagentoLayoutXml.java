@@ -128,11 +128,13 @@ public class MagentoLayoutXml extends MagentoXml {
             if(configXmlFile != null && configXmlFile.exists()){
                 String xpath = "//"+area+"/layout/updates/*";
                 List<Element> updates = XmlHelper.findXpath(configXmlFile, xpath);
-                for(Element update : updates)
-                {
-                    Element fileNode = update.getChild("file");
-                    if(fileNode != null){
-                        updateFiles.add(fileNode.getValue());
+                if(updates != null){
+                    for(Element update : updates)
+                    {
+                        Element fileNode = update.getChild("file");
+                        if(fileNode != null){
+                            updateFiles.add(fileNode.getValue());
+                        }
                     }
                 }
                 updateFiles.add("local.xml");

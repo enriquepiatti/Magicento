@@ -1,10 +1,12 @@
 package com.magicento.actions;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
+import com.magicento.helpers.IdeHelper;
 
 /**
  * @author Enrique Piatti
@@ -47,12 +49,14 @@ public class FlushCacheAction extends MagicentoPhpActionAbstract
                                 "echo '1';";
                 String result = magicento.executePhpWithMagento(phpCode);
                 String text = result.equals("1") ? "Magento and Storage cache flushed" : "Error flushing the cache";
-                magicento.showMessage(text, "Flush Cache", MagicentoIcons.MAGENTO_ICON_16x16);
+                // magicento.showMessage(text, "Flush Cache", MagicentoIcons.MAGENTO_ICON_16x16);
+                IdeHelper.showNotification(text, NotificationType.INFORMATION, getProject());
 
             }
             else {
                 String text = "Magicento Settings not found";
-                magicento.showMessage(text, "Flush Cache", MagicentoIcons.MAGENTO_ICON_16x16);
+                // magicento.showMessage(text, "Flush Cache", MagicentoIcons.MAGENTO_ICON_16x16);
+                IdeHelper.showNotification(text, NotificationType.ERROR, getProject());
             }
 
         }

@@ -92,6 +92,9 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                         else if(MagentoParser.isBlockNameInTemplate(currentElement)){
                             elements = getAutocompleteForGetBlockInTemplate(currentElement, prefix);
                         }
+                        else if(isClassExtendsAutocomplete(currentElement)){
+                            elements = getAutocompleteForClassExtends(currentElement, prefix);
+                        }
 
                         if(elements != null && elements.size() > 0)
                         {
@@ -106,6 +109,26 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
     }
 
 
+
+    /**
+     * checks if autocomplete is requested after "extends"
+     * @param currentElement
+     * @return
+     */
+    protected boolean isClassExtendsAutocomplete(PsiElement currentElement)
+    {
+        PsiElement prevSibling = currentElement.getPrevSibling();
+        if(prevSibling == null){
+            prevSibling = currentElement.getParent().getPrevSibling();
+        }
+        while(prevSibling != null && prevSibling instanceof PsiWhiteSpace){
+            prevSibling = prevSibling.getPrevSibling();
+        }
+        if(prevSibling != null && prevSibling.getText().equals("extends")){
+            return true;
+        }
+        return false;
+    }
 
 
     protected boolean isGetChildInTemplate(@NotNull PsiElement currentElement)
@@ -337,78 +360,6 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
             elements.add(element);
         }
 
-//        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(currentElement.getProject());
-//        if(magicento != null)
-//        {
-//            String lastPrefix = prefix;
-//            boolean endsWithSlash = prefix.endsWith("/");
-//
-//            String[] parts = prefix.split("/");
-//            if(endsWithSlash){
-//                lastPrefix = "";
-//            }
-//            else if(parts.length > 0){
-//                lastPrefix = parts[parts.length-1];
-//            }
-//
-//            // cehck for system config values
-//            if(parts.length < 3 || (parts.length == 3 && ! endsWithSlash))
-//            {
-//                File configFile = magicento.getCachedSystemXml();
-//                String xpath = "config/sections/";
-//                if(parts.length > 1 || (parts.length == 1 && endsWithSlash)){
-//                    xpath += parts[0]+"/groups/";
-//                }
-//                if(parts.length > 2 || (parts.length == 2 && endsWithSlash)){
-//                    xpath += parts[1]+"/fields/";
-//                }
-//                xpath += "*";
-//                if( ! lastPrefix.isEmpty()){
-//                    xpath += "[starts-with(name(),'" + lastPrefix + "')]";
-//                }
-//
-//                List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
-//                if(nodes != null && nodes.size() > 0){
-//                    for(Element node : nodes)
-//                    {
-//                        String nodeName = node.getName();
-//                        String lookup = prefix.substring(0, prefix.length()-lastPrefix.length())+nodeName;
-//                        LookupElement element = LookupElementBuilder.create("", lookup)
-//                                .setPresentableText(lookup)
-//                                .setIcon(myIcon)
-//                                ;
-//                        elements.add(element);
-//                    }
-//                }
-//
-//            }
-//
-//            // get list of config values from config.xml
-//            File configFile = magicento.getCachedConfigXml();
-//            String xpath = "config/default/";
-//            int limit = endsWithSlash ? parts.length : (parts.length-1);
-//            for(int i=0; i<limit; i++){
-//                xpath += parts[i]+"/";
-//            }
-//            xpath += "*";
-//            if( ! lastPrefix.isEmpty()){
-//                xpath += "[starts-with(name(),'" + lastPrefix + "')]";
-//            }
-//            List<Element> nodes = XmlHelper.findXpath(configFile, xpath);
-//            if(nodes != null && nodes.size() > 0){
-//                for(Element node : nodes)
-//                {
-//                    String nodeName = node.getName();
-//                    String lookup = prefix.substring(0, prefix.length()-lastPrefix.length())+nodeName;
-//                    LookupElement element = LookupElementBuilder.create("", lookup)
-//                            .setPresentableText(lookup)
-//                            .setIcon(myIcon)
-//                            ;
-//                    elements.add(element);
-//                }
-//            }
-//
-//        }
         return elements;
     }
 
@@ -581,6 +532,48 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
         }
         return elements;
 
+    }
+
+    protected List<LookupElement> getAutocompleteForClassExtends(PsiElement currentElement, String prefix)
+    {
+        List<LookupElement> elements = new ArrayList<LookupElement>();
+
+        List<String> names = new ArrayList<String>();
+        if(MagentoParser.isBlock(currentElement)){
+            names.add("Mage_Core_Block_Template");
+            names.add("Mage_Adminhtml_Block_Widget_Grid_Container");
+            names.add("Mage_Adminhtml_Block_Widget_Grid");
+            names.add("Mage_Adminhtml_Block_Widget_Form_Container");
+            names.add("Mage_Adminhtml_Block_Widget_Form");
+        }
+        else if(MagentoParser.isController(currentElement)){
+            names.add("Mage_Core_Controller_Front_Action");
+            names.add("Mage_Adminhtml_Controller_Action");
+        }
+        else if(MagentoParser.isModel(currentElement)){
+            names.add("Mage_Core_Model_Abstract");
+        }
+        else if(MagentoParser.isResourceModel(currentElement)){
+            names.add("Mage_Core_Model_Resource_Db_Abstract");
+            names.add("Mage_Eav_Model_Entity_Abstract");
+        }
+        else if(MagentoParser.isCollection(currentElement)){
+            names.add("Mage_Core_Model_Resource_Db_Collection_Abstract");
+        }
+        else if(MagentoParser.isHelper(currentElement)){
+            names.add("Mage_Core_Helper_Abstract");
+        }
+
+        for(String name : names){
+            LookupElement element = LookupElementBuilder.create("magicento_extends", name)
+                    .setPresentableText(name)
+                    .setIcon(myIcon)
+                    ;
+
+            elements.add(element);
+        }
+
+        return elements;
     }
 
 }

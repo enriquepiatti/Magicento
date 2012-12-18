@@ -600,14 +600,16 @@ public class MagentoParser {
 
     public static boolean isHandleNode(PsiElement sourceElement)
     {
-        MagentoXml magentoXml = MagentoXmlFactory.getInstance(sourceElement);
-        if(magentoXml != null && magentoXml instanceof MagentoLayoutXml)
-        {
-            // MagentoLayoutXml layoutXml = (MagentoLayoutXml)magentoXml;
-            XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, false);
-            if(xmlTag != null){
-                MagentoXmlTag matchedTag = magentoXml.getMatchedTag(xmlTag.getLastChild());
-                return matchedTag != null && matchedTag instanceof HandleXmlTag;
+        if(sourceElement != null){
+            MagentoXml magentoXml = MagentoXmlFactory.getInstance(sourceElement);
+            if(magentoXml != null && magentoXml instanceof MagentoLayoutXml)
+            {
+                // MagentoLayoutXml layoutXml = (MagentoLayoutXml)magentoXml;
+                XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, false);
+                if(xmlTag != null){
+                    MagentoXmlTag matchedTag = magentoXml.getMatchedTag(xmlTag.getLastChild());
+                    return matchedTag != null && matchedTag instanceof HandleXmlTag;
+                }
             }
         }
         return false;

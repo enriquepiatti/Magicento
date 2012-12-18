@@ -70,29 +70,31 @@ public class MagentoXmlFactory {
 
     public static MagentoXml getInstance(PsiElement psiElement)
     {
-        final PsiFile file = psiElement.getContainingFile().getOriginalFile();
-        String fileName = file./*getVirtualFile().*/getName();
-        Project project = psiElement.getProject();
-        if( fileName.equals("config.xml") ){
-            return MagentoXmlFactory.getInstance(MagentoXmlType.CONFIG, project);
-        }
-        else if( fileName.equals("system.xml")){
-            return MagentoXmlFactory.getInstance(MagentoXmlType.SYSTEM, project);
-        }
-        else if( fileName.equals("adminhtml.xml")){
-            return MagentoXmlFactory.getInstance(MagentoXmlType.ADMINHTML, project);
-        }
-        else if( (fileName.endsWith(".xml") || fileName.endsWith(".phtml")) && file.getVirtualFile().getPath().contains(MagentoLayoutXml.BASE_PATH) ){
+        if(psiElement != null){
+            final PsiFile file = psiElement.getContainingFile().getOriginalFile();
+            String fileName = file./*getVirtualFile().*/getName();
+            Project project = psiElement.getProject();
+            if( fileName.equals("config.xml") ){
+                return MagentoXmlFactory.getInstance(MagentoXmlType.CONFIG, project);
+            }
+            else if( fileName.equals("system.xml")){
+                return MagentoXmlFactory.getInstance(MagentoXmlType.SYSTEM, project);
+            }
+            else if( fileName.equals("adminhtml.xml")){
+                return MagentoXmlFactory.getInstance(MagentoXmlType.ADMINHTML, project);
+            }
+            else if( (fileName.endsWith(".xml") || fileName.endsWith(".phtml")) && file.getVirtualFile().getPath().contains(MagentoLayoutXml.BASE_PATH) ){
 
-            MagicentoSettings settings = MagicentoSettings.getInstance(project);
-            if(settings != null && settings.layoutEnabled)
-            {
-                MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
-                LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
-                layoutXml.setArea(layoutFile.getArea());
-                layoutXml.setPackageName(layoutFile.getPackage());
-                layoutXml.setTheme(layoutFile.getTheme());
-                return layoutXml;
+                MagicentoSettings settings = MagicentoSettings.getInstance(project);
+                if(settings != null && settings.layoutEnabled)
+                {
+                    MagentoLayoutXml layoutXml = (MagentoLayoutXml)MagentoXmlFactory.getInstance(MagentoXmlType.LAYOUT, project);
+                    LayoutFile layoutFile = new LayoutFile(file.getVirtualFile());
+                    layoutXml.setArea(layoutFile.getArea());
+                    layoutXml.setPackageName(layoutFile.getPackage());
+                    layoutXml.setTheme(layoutFile.getTheme());
+                    return layoutXml;
+                }
             }
         }
         return null;

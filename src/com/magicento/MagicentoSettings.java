@@ -93,9 +93,15 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
         {
             String defaultPathToMagento = getDefaultPathToMagento(project);
             if( defaultPathToMagento != null){
+                // temp disable for avoid warning if path to mage is not valid
+                enabled = false;
                 setPathToMage(defaultPathToMagento + relativePathToMage);
+                if( isPathToMageValid()){
+                    enabled = true;
+                }
             }
             else {
+                // disable magicento if we cannot find the default path to Magento
                 enabled = false;
             }
         }

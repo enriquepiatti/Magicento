@@ -1,6 +1,11 @@
 package com.magicento.models.xml.config;
 
 import com.intellij.psi.xml.XmlTag;
+import com.magicento.helpers.IdeHelper;
+import com.magicento.helpers.JavaHelper;
+import com.magicento.helpers.Magento;
+import com.magicento.helpers.Magicento;
+import org.apache.commons.lang.WordUtils;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -24,8 +29,8 @@ public class GlobalEventsIdObserversIdMethodXmlTag extends MagentoConfigXmlTag {
         //XmlTag event = getNodeFromContextHierarchy("config/global/events/*");
         XmlTag event = getNodeFromContextHierarchy("config/*/events/*");
         if(event != null){
-            // TODO: convert to CamelCase before?
-            possibleValues.add(event.getName());
+            String methodName = JavaHelper.camelCase(event.getName(), "_");
+            possibleValues.add(methodName);
         }
         return super.getPossibleValues();
     }

@@ -53,6 +53,8 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
     {
         List<AnAction> actions = new ArrayList<AnAction>();
         String[] actionIds = {
+                "AddTranslation",
+                "MagicentoTranslateText",
                 "GotoMagentoClass",
                 "AddVarPhpDoc",
                 "RemoveFromCoreResource",

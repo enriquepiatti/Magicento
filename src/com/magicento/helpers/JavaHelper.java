@@ -1,5 +1,7 @@
 package com.magicento.helpers;
 
+import org.apache.commons.lang.WordUtils;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.regex.Matcher;
@@ -86,6 +88,11 @@ public class JavaHelper {
 //            return null;
 //        }
 
+    }
+
+    public static String camelCase(String original, String separator)
+    {
+        return WordUtils.uncapitalize(WordUtils.capitalize(original.replace(separator, " ")).replace(" ", ""));
     }
 
 }

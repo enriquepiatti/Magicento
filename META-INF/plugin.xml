@@ -4,9 +4,34 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>1.0.1</version>
+  <version>1.2.0</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>1.2.0</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+                        <li>Disable magicento automatically for non Magento projects</li>
+	                    <li>NullPointerExceptions</li>
+                    </ul>
+                </li>
+                <li>Added magento dictionary from https://github.com/tim-bezhashvyly/phpstorm-magento-dictionary</>
+                <li>Autocomplete observer method names in config.xml in camelCase to follow coding standard</li>
+                <li>Autocomplete for common "extends" (use Ctrl+Space after extends keyword)</li>
+                <li>New actions for translating text.
+                    <ul>
+                        <li>Select any html text or any string in php and use Alt+M > Translate Text for wrapping that text with $this->__() *
+	                        <br>(Tip: use Ctrl+W for selecting the text to translate quickly)
+	                        <br>* You could do the same using the native Surround With Live Templates functionality (check http://blogs.jetbrains.com/idea/tag/surround-with/)
+	                    </li>
+	                    <li>
+    	                    Use Alt+M > Add Translation when the cursor is over $this->__('[HERE]') to define a new translation (it will be appended to the selected csv file, or create a new csv if not exist).
+	                    </li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
         <p>
             <span>1.0.1</span>
             <ul>
@@ -123,6 +148,7 @@
 
 
   <depends>com.intellij.modules.lang</depends>
+  <!--<depends>com.jetbrains.php</depends>-->
 
   <application-components>
     <!-- Add your application components here -->
@@ -180,6 +206,10 @@
               text="Go to template from Block" description="Go to templates using this Block"/>
       <action id="GoToBlockDefinitionInLayout" class="com.magicento.actions.GoToBlockDefinitionInLayoutAction"
               text="Goto block definition in layout" description="go to block tag definition in layout xml"/>
+      <action id="MagicentoTranslateText" class="com.magicento.actions.TranslateTextAction" text="Translate Text"
+              description="wrap selected text with $this->__()"/>
+      <action id="AddTranslation" class="com.magicento.actions.AddTranslationAction" text="Add Translation"
+              description="add translation for this text to the selected csv file"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">
@@ -187,7 +217,7 @@
     <!--<applicationConfigurable instance="com.magicento.ui.forms.MagicentoSettingsForm"></applicationConfigurable>-->
     <projectConfigurable instance="com.magicento.ui.forms.MagicentoSettingsForm"></projectConfigurable>
     <completion.contributor language="XML" implementationClass="com.magicento.extensions.MagicentoXmlCompletionContributor"/>
-    <completion.contributor language="PHP" implementationClass="com.magicento.extensions.MagicentoPhpCompletionContributor"/>
+    <completion.contributor language="PHP" implementationClass="com.magicento.extensions.MagicentoPhpCompletionContributor" />
     <projectService serviceImplementation="com.magicento.MagicentoSettings"/>
     <weigher key="completion" implementationClass="com.magicento.extensions.MagicentoPhpWeigher" id="magicentoPhpWeigher" />
     <!--<gotoSymbolContributor implementation="" id="magicentoFactoryGotoSymbolContributor" />-->
@@ -195,6 +225,10 @@
     <gotoDeclarationHandler implementation="com.magicento.extensions.MagicentoGotoDeclarationHandler" />
 
     <fileTemplateGroup implementation="com.magicento.extensions.MagicentoTemplateFactory"/>
+
+    <spellchecker.bundledDictionaryProvider implementation="com.magicento.extensions.MagicentoDictionaryProvider"/>
+
+    <!--<psi.referenceContributor implementation="com.magicento.extensions.MagicentoReferenceContributor" />-->
 
   </extensions>
 </idea-plugin>

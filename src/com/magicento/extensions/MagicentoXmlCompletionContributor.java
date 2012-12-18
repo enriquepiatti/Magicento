@@ -305,12 +305,13 @@ public class MagicentoXmlCompletionContributor extends CompletionContributor {
                     fake.setAttribute(name);
                 }
                 else {
-                    if(hasChildren){
-                        fake.setName("");
-                    }
-                    else {
-                        fake.setName(name);
-                    }
+                    fake.setName(name);
+//                    if(hasChildren){
+//                        fake.setName("");
+//                    }
+//                    else {
+//                        fake.setName(name);
+//                    }
                 }
             }
         }

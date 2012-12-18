@@ -1,6 +1,8 @@
 package com.magicento.actions;
 
 import com.intellij.ide.IdeView;
+import com.intellij.lang.html.HTMLLanguage;
+import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -393,6 +395,32 @@ public abstract class MagicentoActionAbstract extends AnAction implements IMagic
             }
         });
     }
+
+    protected boolean isPhp()
+    {
+        // return getPsiElementAtCursor().getLanguage() instanceof com.jetbrains.php.lang.PhpLanguage;
+        return getPsiElementAtCursor().getLanguage().getID().equals("PHP");
+    }
+
+    protected boolean isXml()
+    {
+        // return getPsiElementAtCursor().getLanguage() instanceof XMLLanguage;
+        return getPsiElementAtCursor().getLanguage().getID().equals("XML");
+    }
+
+    protected boolean isHtml()
+    {
+        // InjectedLanguageUtil, InjectedLanguageManager
+        // return getPsiElementAtCursor().getLanguage() instanceof HTMLLanguage;
+        String languageId = getPsiElementAtCursor().getLanguage().getID();
+        return languageId.equals("HTML") || languageId.equals("XHTML") || (languageId.equals("XML") && isPhtml());
+    }
+
+    protected boolean isPhtml()
+    {
+        return getVirtualFile().getExtension().equals("phtml");
+    }
+
 
 
 }

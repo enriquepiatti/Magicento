@@ -405,6 +405,10 @@ public class XmlHelper {
         return null;
     }
 
+    public static XmlTag createTagInFile(final XmlFile xmlFile, String tagName, String tagValue, String path)
+    {
+        return createTagInFile(xmlFile, tagName, tagValue, path, null);
+    }
 
     /**
      *
@@ -414,7 +418,7 @@ public class XmlHelper {
      * @param path  hierarchy path, this will be the parent of the new tag, ex: root/node1/node2
      * @return
      */
-    public static XmlTag createTagInFile(final XmlFile xmlFile, String tagName, String tagValue, String path)
+    public static XmlTag createTagInFile(final XmlFile xmlFile, String tagName, String tagValue, String path, Map<String, String> attributes)
     {
         XmlTag root = xmlFile.getRootTag();
 
@@ -437,6 +441,13 @@ public class XmlHelper {
                 curPath += "/"+curTagName;
             }
             final XmlTag newTag = lastExistentParent.createChildTag(tagName, "", tagValue, false);
+
+            if(attributes != null){
+                for(Map.Entry<String, String> entry : attributes.entrySet()){
+                    newTag.setAttribute(entry.getKey(), entry.getValue());
+                }
+            }
+
             final XmlTag parent = lastExistentParent;
             Runnable runnable = new Runnable() {
                 @Override

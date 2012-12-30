@@ -66,6 +66,7 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
                 "GetStoreConfig",
                 "CompareWithOriginal",
                 "RewriteClass",
+                "RewriteController",
                 "EvaluateInMagento",
                 "GotoClassesOfFactory",
                 "CreateModule",

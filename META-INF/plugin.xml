@@ -4,9 +4,33 @@
   <description>Plugin for magento development</description>
   <idea-version since-build="111.296"/>
 
-  <version>1.2.0</version>
+  <version>1.3.0</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>1.3.0</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+	                    <li>NullPointerExceptions</li>
+                    </ul>
+                </li>
+                <li>Enhancend goto (Ctrl+B, Middle click, Ctrl+Click) for Layout XML
+                    <ul>
+                        <li>Now it works with "alias" inside templates which are assigned directly from the Block class (like $this->getChildHtml('topLinks') inside header.phtml)</li>
+                        <li>Goto handle definition from &gt;update handle="[HERE]"&lt;</li>
+                    </ul>
+                </li>
+                <li>Enhanced Rewrite Class action
+                    <ul>
+                        <li>Added support for Rewriting controllers (Alt+M &gt; Rewrite Controller when editing some controller, put the cursor inside the class).</li>
+                        <li>Suggested class name now includes the original module name too to follow convention and avoid collitions</li>
+                        <li>Rewrite works for default classes from magento even when they are not declared in config.xml</li>
+                    </ul>
+                </li>
+                <li>Autocompletion for xml files inside app/etc/modules/*.xml</li>
+            </ul>
+        </p>
         <p>
             <span>1.2.0</span>
             <ul>
@@ -16,17 +40,17 @@
 	                    <li>NullPointerExceptions</li>
                     </ul>
                 </li>
-                <li>Added magento dictionary from https://github.com/tim-bezhashvyly/phpstorm-magento-dictionary</>
+                <li>Added magento dictionary from https://github.com/tim-bezhashvyly/phpstorm-magento-dictionary</li>
                 <li>Autocomplete observer method names in config.xml in camelCase to follow coding standard</li>
                 <li>Autocomplete for common "extends" (use Ctrl+Space after extends keyword)</li>
                 <li>New actions for translating text.
                     <ul>
-                        <li>Select any html text or any string in php and use Alt+M > Translate Text for wrapping that text with $this->__() *
+                        <li>Select any html text or any string in php and use Alt+M &gt; Translate Text for wrapping that text with $this->__() *
 	                        <br>(Tip: use Ctrl+W for selecting the text to translate quickly)
 	                        <br>* You could do the same using the native Surround With Live Templates functionality (check http://blogs.jetbrains.com/idea/tag/surround-with/)
 	                    </li>
 	                    <li>
-    	                    Use Alt+M > Add Translation when the cursor is over $this->__('[HERE]') to define a new translation (it will be appended to the selected csv file, or create a new csv if not exist).
+    	                    Use Alt+M &gt; Add Translation when the cursor is over $this->__('[HERE]') to define a new translation (it will be appended to the selected csv file, or create a new csv if not exist).
 	                    </li>
                     </ul>
                 </li>
@@ -65,7 +89,7 @@
                         <li>Goto xml block definition in layout Action (use Alt+M when editing any Block class to go to the block node definition in layout xml)</li>
                         <li>Goto xml layout definitions for block names inside templates (use Ctrl+B or middle click over any name in getChild, getChildHtml, getBlock, getBlockHtml([HERE]) call)</li>
                         <li>Autocomplete for getChild, getChildHtml, getBlock and getBlockHtml on templates (use Ctrl+Space)</li>
-                        <li>Config options for enabling/disabling layout features and choosing packages and themes (File > Settings > Magicento)</li>
+                        <li>Config options for enabling/disabling layout features and choosing packages and themes (File &gt; Settings &gt; Magicento)</li>
                     </ul>
                 </li>
             </ul>
@@ -210,6 +234,7 @@
               description="wrap selected text with $this->__()"/>
       <action id="AddTranslation" class="com.magicento.actions.AddTranslationAction" text="Add Translation"
               description="add translation for this text to the selected csv file"/>
+      <action id="RewriteController" class="com.magicento.actions.RewriteControllerAction" text="Rewrite Controller"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

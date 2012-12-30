@@ -423,7 +423,7 @@ public class MagentoParser {
                 }
             }
 
-            String filePath = child.getContainingFile().getVirtualFile().getPath().replace("\\", "/");
+            String filePath = child.getContainingFile().getOriginalFile().getVirtualFile().getPath().replace("\\", "/");
             if(filePath.contains("/controllers/")){
                 return MagentoClassInfo.ClassType.CONTROLLER;
             }
@@ -486,7 +486,7 @@ public class MagentoParser {
     public static String getNamespaceModuleFromClassName(String className)
     {
         String classNameParts[] = className.split("_");
-        if(classNameParts.length > 3) {
+        if(classNameParts.length > 2) {
             return classNameParts[0]+"_"+classNameParts[1];
         }
         return null;
@@ -614,4 +614,23 @@ public class MagentoParser {
         }
         return false;
     }
+
+    public static boolean isUpdateHandleInLayoutXml(PsiElement psiElement)
+    {
+        if(psiElement != null)
+        {
+            String filePath = psiElement.getContainingFile().getOriginalFile().getVirtualFile().getPath();
+            if(filePath.contains(MagentoLayoutXml.BASE_PATH) && filePath.endsWith(".xml")){
+                if(XmlHelper.isAttributeValue(psiElement))
+                {
+                    XmlAttribute attribute = XmlHelper.getParentOfType(psiElement, XmlAttribute.class, true);
+                    String attrName = XmlHelper.getAttributeName(attribute);
+                    return (attrName != null && attrName.equals("handle"));
+                }
+            }
+        }
+        return false;
+
+    }
+
 }

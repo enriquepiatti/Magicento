@@ -5,5 +5,5 @@ package com.magicento.models.xml;
  */
 public enum MagentoXmlType
 {
-    CONFIG, SYSTEM, ADMINHTML, LAYOUT, WIDGET;
+    CONFIG, SYSTEM, ADMINHTML, LAYOUT, WIDGET, MODULES;
 }

@@ -25,11 +25,11 @@ import java.util.List;
 public class ChooseModuleDialog extends DialogWrapper
 {
 
-    private final String LOCAL = "local";
-    private final String COMMUNITY = "community";
+    protected final String LOCAL = "local";
+    protected final String COMMUNITY = "community";
 
-    private JComboBox codePool;
-    private JComboBox modules;
+    protected JComboBox codePool;
+    protected JComboBox modules;
     protected Project project;
 
     protected Map<String, String> communityModules;
@@ -154,6 +154,11 @@ public class ChooseModuleDialog extends DialogWrapper
 
     public String getSelectedPool() {
         return selectedPool;
+    }
+
+    public String getSelectedModule()
+    {
+        return (String)modules.getSelectedItem();
     }
 
 }

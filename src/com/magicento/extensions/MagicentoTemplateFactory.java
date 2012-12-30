@@ -26,7 +26,8 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
         ConfigXml("magicento_config.xml"),
         Helper("magicento_helper.php"),
         Installer("magicento_installer.php"),
-        PhpClass("magicento_class.php");
+        PhpClass("magicento_class.php"),
+        Controller("magicento_controller.php");
 
         String file;
         Template(String file) {
@@ -43,7 +44,7 @@ public class MagicentoTemplateFactory implements FileTemplateGroupDescriptorFact
         String title = "Magicento";
         final FileTemplateGroupDescriptor group = new FileTemplateGroupDescriptor(title, MagicentoIcons.MAGENTO_ICON_16x16);
         group.addTemplate(new FileTemplateDescriptor(Template.PhpClass.getFile(), MagicentoIcons.MAGENTO_ICON_16x16));
-
+        group.addTemplate(new FileTemplateDescriptor(Template.Controller.getFile(), MagicentoIcons.MAGENTO_ICON_16x16));
         return group;
     }
 

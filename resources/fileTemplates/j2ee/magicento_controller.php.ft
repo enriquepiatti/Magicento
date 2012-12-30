@@ -1,0 +1,11 @@
+<?php
+#parse("PHP File Header")
+#if(${REQUIRE} != "")
+
+require_once '${REQUIRE}';
+
+#end
+
+class ${CLASSNAME} #if(${EXTENDS} != "")extends ${EXTENDS}#end {
+
+}

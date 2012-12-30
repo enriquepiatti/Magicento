@@ -33,6 +33,14 @@ public class RewriteClassAction extends MagicentoActionAbstract {
     public void executeAction()
     {
         final Project project = getProject();
+
+        PsiElement psiElement = getPsiElementAtCursor();
+        String className = PsiPhpHelper.getClassName(psiElement);
+        if(className.endsWith("_Abstract")){
+            IdeHelper.showDialog(project, "Cannot rewrite Abstract Classes", "Magicento Rewrite Class");
+            return;
+        }
+
         ChooseModuleDialog dialog = new ChooseModuleDialog(project);
         dialog.show();
         if( dialog.isOK())
@@ -42,14 +50,14 @@ public class RewriteClassAction extends MagicentoActionAbstract {
             if(selectedModulePath != null)
             {
                 VirtualFile currentFile = getVirtualFile();
-                PsiElement psiElement = getPsiElementAtCursor();
-                String className = PsiPhpHelper.getClassName(psiElement);
                 String classNameParts[] = className.split("_");
                 if(classNameParts.length > 3)
                 {
-                    String originalModuleName = classNameParts[0]+"_"+classNameParts[1];
+                    String originalNamespace = classNameParts[0];
+                    String originalModuleName = classNameParts[1];
+                    String originalFullModuleName = originalNamespace+"_"+originalModuleName;
                     String classType = classNameParts[2];
-                    String originalClassPrefix = originalModuleName+"_"+classType;
+                    String originalClassPrefix = originalFullModuleName+"_"+classType;
                     String originalFilePath = currentFile.getPath().replace("\\", "/");
                     String regex = "^(.+?/"+classNameParts[0]+"/"+classNameParts[1]+"/).+";
                     String originalModulePath = JavaHelper.extractFirstCaptureRegex(regex,originalFilePath);
@@ -57,11 +65,18 @@ public class RewriteClassAction extends MagicentoActionAbstract {
                     File originalConfigXml = new File(originalXmlPath);
                     if(originalConfigXml.exists())
                     {
+
+                        String firstPart = null;
+                        String secondPartClassName = null;
+                        String secondPart = null;
+                        String groupType = null;
+
+                        // search inside config.xml for the class prefix (so we can detect if this is a resource model)
+                        // and also we need to know the group name on the xml to add the <rewrite> node there
                         String xpath = "//class[contains(.,'"+originalClassPrefix+"')]";
                         List<Element> originalClassNodes = XmlHelper.findXpath(originalConfigXml, xpath);
-                        // TODO: search for default helper nodes too (not declared inside config.xml) @see MagicentoProjectComponent::defaultGroupsFromMagento
-                        // TODO: add check for abstract classes (abstract classes cannot be rewritted)
-                        if(originalClassNodes != null && originalClassNodes.size() > 0){
+                        if(originalClassNodes != null && originalClassNodes.size() > 0)
+                        {
                             Element correctNode = null;
                             for(Element originalClassNode : originalClassNodes){
                                 String classPrefix = originalClassNode.getValue();
@@ -69,60 +84,70 @@ public class RewriteClassAction extends MagicentoActionAbstract {
                                     correctNode = originalClassNode;
                                 }
                             }
+
                             if(correctNode != null){
-                                String firstPart = correctNode.getParentElement().getName();
-                                String secondPartClassName = className.substring(correctNode.getValue().length()+1);
-                                String secondPart = WordUtils.uncapitalize(secondPartClassName.replace("_", " ")).replace(" ", "_");    // MagentoParser.getSecondPartUriFromClassName(className, correctNode.getValue());
-
-                                // String originalUri = firstPart+"/"+secondPart;
-                                File targetConfigXml = new File(selectedModulePath+"/etc/config.xml");
-
-                                String targetModuleName = MagentoParser.getModuleNameFromModulePath(selectedModulePath);
-                                String suggestedClassName = targetModuleName+"_"+correctNode.getValue().substring(originalModuleName.length()+1)+"_"+secondPartClassName;
-                                final String newClassName = Messages.showInputDialog(project, "New class name", "Write the name of the new class", Messages.getQuestionIcon(), suggestedClassName, null);
-                                if(newClassName == null || newClassName.isEmpty() || ! newClassName.startsWith(targetModuleName+"_"+classType)){
-                                    IdeHelper.showDialog(project, "Wrong class name", "Magicento Rewrite Class");
-                                    return;
-                                }
-
-
-                                VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(targetConfigXml);
-                                final XmlFile psiXmlFile = (XmlFile)PsiManager.getInstance(project).findFile(vFile);
-
-                                if(psiXmlFile != null)
-                                {
-                                    String type = classType.toLowerCase()+"s";
-                                    String path = "config/global/"+type+"/"+firstPart+"/rewrite";
-                                    XmlTag newTag = XmlHelper.createTagInFile(psiXmlFile, secondPart, newClassName, path);
-                                    if(newTag == null){
-                                        IdeHelper.showDialog(project, "Error trying to create rewrite node in "+psiXmlFile.getVirtualFile().getPath(), "Magicento Rewrite Class");
-                                        return;
-                                    }
-
-                                    String relativePath = newClassName.substring(targetModuleName.length(),newClassName.lastIndexOf("_")).replace("_", "/");
-                                    String directoryPath = selectedModulePath + relativePath;
-                                    PsiFile newClassFile = createClass(directoryPath, newClassName, className);
-
-                                    openFile(newClassFile);
-
-                                }
-
-
+                                firstPart = correctNode.getParentElement().getName();
+                                secondPartClassName = className.substring(correctNode.getValue().length()+1);
+                                secondPart = WordUtils.uncapitalize(secondPartClassName.replace("_", " ")).replace(" ", "_");    // MagentoParser.getSecondPartUriFromClassName(className, correctNode.getValue());
+                                groupType = correctNode.getValue().substring(originalFullModuleName.length() + 1);
                             }
                             else {
                                 IdeHelper.showDialog(project, "Couldn't find class node", "Magicento Rewrite Class");
+                                return;
                             }
+
+                        }
+                        // try the default nodes from Magento (not declared explicitely on the config.xml)
+                        else if(originalNamespace.equals("Mage")){
+                            firstPart = originalModuleName.toLowerCase();
+                            secondPartClassName = className.substring(originalClassPrefix.length()+1);
+                            secondPart = WordUtils.uncapitalize(secondPartClassName.replace("_", " ")).replace(" ", "_");
+                            groupType = classType;
                         }
                         else {
                             IdeHelper.showDialog(project, "Couldn't find class node containing "+ originalClassPrefix + " value", "Magicento Rewrite Class");
+                            return;
                         }
+
+
+                        // String originalUri = firstPart+"/"+secondPart;
+                        File targetConfigXml = new File(selectedModulePath+"/etc/config.xml");
+
+                        String targetModuleName = MagentoParser.getModuleNameFromModulePath(selectedModulePath);
+                        String suggestedClassName = targetModuleName+"_"+groupType+"_"+originalModuleName+"_"+secondPartClassName;
+                        final String newClassName = Messages.showInputDialog(project, "New class name", "Write the name of the new class", Messages.getQuestionIcon(), suggestedClassName, null);
+                        if(newClassName == null || newClassName.isEmpty() || ! newClassName.startsWith(targetModuleName+"_"+classType)){
+                            IdeHelper.showDialog(project, "Wrong class name", "Magicento Rewrite Class");
+                            return;
+                        }
+
+
+                        VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(targetConfigXml);
+                        final XmlFile psiXmlFile = (XmlFile)PsiManager.getInstance(project).findFile(vFile);
+
+                        if(psiXmlFile != null)
+                        {
+                            String type = classType.toLowerCase()+"s";
+                            String path = "config/global/"+type+"/"+firstPart+"/rewrite";
+                            XmlTag newTag = XmlHelper.createTagInFile(psiXmlFile, secondPart, newClassName, path);
+                            if(newTag == null){
+                                IdeHelper.showDialog(project, "Error trying to create rewrite node in "+psiXmlFile.getVirtualFile().getPath(), "Magicento Rewrite Class");
+                                return;
+                            }
+
+                            String relativePath = newClassName.substring(targetModuleName.length(),newClassName.lastIndexOf("_")).replace("_", "/");
+                            String directoryPath = selectedModulePath + relativePath;
+                            PsiFile newClassFile = createClass(directoryPath, newClassName, className);
+
+                            openFile(newClassFile);
+
+                        }
+
 
                     }
                     else {
                         IdeHelper.showDialog(project, "Couldn't find: "+originalXmlPath, "Magicento Rewrite Class");
                     }
-
-                    // TODO add support for default magento helpers (not declared explicitely in config.xml)
 
                 }
 

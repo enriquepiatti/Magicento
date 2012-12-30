@@ -2,12 +2,15 @@ package com.magicento.helpers;
 
 import com.magicento.MagicentoSettings;
 import com.intellij.openapi.project.Project;
+import com.magicento.models.MagentoClassInfo;
 import org.apache.commons.lang.WordUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 
 import java.io.File;
 import java.util.*;
+
+import static com.magicento.models.MagentoClassInfo.UriType.HELPER;
 
 /**
  * This class has code and functions translated from Magento to Java
@@ -388,5 +391,37 @@ public class Magento {
 
         return null;
     }
+
+
+    /**
+     * Magento doesn't have all his classes defined inside the config.xml, and it uses the default with Mage_ for those who are not in the xml
+     * $className = 'mage_'.$group.'_'.$groupType;
+     * @param group first part of uri for the factory
+     * @return
+     */
+    public static String getDefaultClassPrefixForUri(String group, MagentoClassInfo.UriType uriType)
+    {
+        String groupType = null;
+        switch(uriType){
+            case HELPER:
+                groupType = "helper";
+                break;
+            case BLOCK:
+                groupType = "block";
+                break;
+            case MODEL:
+                groupType = "model";
+                break;
+//            case RESOURCEMODEL:
+//                break;
+        }
+        if(groupType != null){
+            return uc_words("mage_"+group+"_"+groupType);
+        }
+        return null;
+    }
+
+
+
 
 }

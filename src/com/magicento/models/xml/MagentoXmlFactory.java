@@ -6,6 +6,7 @@ import com.magicento.MagicentoSettings;
 import com.magicento.models.layout.LayoutFile;
 import com.magicento.models.xml.config.MagentoConfigXml;
 import com.magicento.models.xml.config.adminhtml.MagentoAdminhtmlXml;
+import com.magicento.models.xml.config.modules.MagentoModulesXml;
 import com.magicento.models.xml.config.system.MagentoSystemXml;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -63,6 +64,9 @@ public class MagentoXmlFactory {
                 case LAYOUT:
                     projectInstances.put(type, new MagentoLayoutXml(project));
                     break;
+                case MODULES:
+                    projectInstances.put(type, new MagentoModulesXml(project));
+                    break;
             }
         }
         return projectInstances.get(type);
@@ -72,10 +76,15 @@ public class MagentoXmlFactory {
     {
         if(psiElement != null){
             final PsiFile file = psiElement.getContainingFile().getOriginalFile();
+            String filePath = file.getVirtualFile().getPath().replace("\\", "/");
             String fileName = file./*getVirtualFile().*/getName();
             Project project = psiElement.getProject();
-            if( fileName.equals("config.xml") ){
+            if( fileName.equals("config.xml")){
                 return MagentoXmlFactory.getInstance(MagentoXmlType.CONFIG, project);
+            }
+            else if(filePath.contains("/app/etc/modules/")){
+                return MagentoXmlFactory.getInstance(MagentoXmlType.MODULES, project);
+                // MagentoModulesXml
             }
             else if( fileName.equals("system.xml")){
                 return MagentoXmlFactory.getInstance(MagentoXmlType.SYSTEM, project);
@@ -83,7 +92,7 @@ public class MagentoXmlFactory {
             else if( fileName.equals("adminhtml.xml")){
                 return MagentoXmlFactory.getInstance(MagentoXmlType.ADMINHTML, project);
             }
-            else if( (fileName.endsWith(".xml") || fileName.endsWith(".phtml")) && file.getVirtualFile().getPath().contains(MagentoLayoutXml.BASE_PATH) ){
+            else if( (fileName.endsWith(".xml") || fileName.endsWith(".phtml")) && filePath.contains(MagentoLayoutXml.BASE_PATH) ){
 
                 MagicentoSettings settings = MagicentoSettings.getInstance(project);
                 if(settings != null && settings.layoutEnabled)

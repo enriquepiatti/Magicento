@@ -1,6 +1,7 @@
 package com.magicento.extensions;
 
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.magicento.MagicentoProjectComponent;
@@ -204,6 +205,7 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
                 String area = template.getArea();
                 if(area != null && ! area.isEmpty())
                 {
+                    // search blocks for current template
                     List<Element> blocks = template.getBlockElements(sourceElement.getProject());
                     if(blocks != null)
                     {
@@ -216,36 +218,45 @@ public class MagicentoGotoDeclarationHandler implements GotoDeclarationHandler
                             }
                         }
                     }
+
                 }
 
-                if(currentTemplateBlockNames.size() > 0)
+                MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
+                if(xml != null && xml instanceof MagentoLayoutXml)
                 {
-                    MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
-                    if(xml != null && xml instanceof MagentoLayoutXml)
-                    {
-                        MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
-                        // search by alias and also by name, then filter using the currentTemplateBlockNames
-                        List<XmlTag> blocks = layoutXml.findNodesInOriginalXmlByBlockAlias(blockName, nodeNames);
-                        blocks.addAll(layoutXml.findNodesInOriginalXmlByBlockName(blockName, nodeNames));
-                        for(XmlTag block : blocks){
-                            String parentBlockName = block.getParentTag().getAttributeValue("name");
-                            if(parentBlockName != null && currentTemplateBlockNames.contains(parentBlockName)){
-                                psiElements.add(block);
-                            }
+                    MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
+                    // search by alias and also by name, then filter using the currentTemplateBlockNames
+                    List<XmlTag> blocks = layoutXml.findNodesInOriginalXmlByBlockAlias(blockName, nodeNames);
+                    blocks.addAll(layoutXml.findNodesInOriginalXmlByBlockName(blockName, nodeNames));
+                    for(XmlTag block : blocks){
+                        String parentBlockName = block.getParentTag().getAttributeValue("name");
+                        // add elements if we have parent blocks corresponding to the current template, or if we don't have any parent block for the current template
+                        // whis will happen when the template is assigned directly inside the Block class, not inside the layout.xml
+                        if(parentBlockName != null && (currentTemplateBlockNames.size() == 0 || currentTemplateBlockNames.contains(parentBlockName))){
+                            psiElements.add(block);
                         }
                     }
                 }
             }
         }
-        else if(settings.layoutEnabled && MagentoParser.isHandleNode(sourceElement))
+        else if(settings.layoutEnabled && (MagentoParser.isHandleNode(sourceElement) || MagentoParser.isUpdateHandleInLayoutXml(sourceElement)))
         {
-            XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, false);
-            String handleName = xmlTag.getName();
-            MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
-            if(xml != null && xml instanceof MagentoLayoutXml)
-            {
-                MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
-                psiElements.addAll( layoutXml.findNodesInOriginalXmlByNodeName(handleName));
+            String handleName = null;
+            if(MagentoParser.isHandleNode(sourceElement)){
+                XmlTag xmlTag = XmlHelper.getParentOfType(sourceElement, XmlTag.class, false);
+                handleName = xmlTag.getName();
+            }
+            else {
+                XmlAttribute attribute = XmlHelper.getParentOfType(sourceElement, XmlAttribute.class, true);
+                handleName = attribute.getValue();
+            }
+            if(handleName != null){
+                MagentoXml xml = MagentoXmlFactory.getInstance(sourceElement);
+                if(xml != null && xml instanceof MagentoLayoutXml)
+                {
+                    MagentoLayoutXml layoutXml = (MagentoLayoutXml)xml;
+                    psiElements.addAll( layoutXml.findNodesInOriginalXmlByNodeName(handleName));
+                }
             }
         }
 

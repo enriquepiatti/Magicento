@@ -496,6 +496,58 @@ public class PsiPhpHelper {
         return null;
     }
 
+
+    public static String getParentClassName(PsiElement child)
+    {
+        return getExtendsClassName(child);
+    }
+
+    public static String getExtendsClassName(PsiElement child)
+    {
+        PsiElement psiClass = getClassElement(child);
+        if(psiClass != null){
+            PsiElement[] children = psiClass.getChildren();
+            for(PsiElement psiClassChild : children){
+                if( isElementType(psiClassChild, EXTENDS_LIST))
+                {
+                    PsiElement[] extendsElements = psiClassChild.getChildren();
+                    for(PsiElement extendsElement : extendsElements){
+                        if(isElementType(extendsElement, CLASS_REFERENCE))
+                        {
+                            return extendsElement.getText();
+
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public static PsiElement getparentClassElement(PsiElement child)
+    {
+        return getExtendsClassElement(child);
+    }
+
+    /**
+     * returns the first class element (is possible to have more than one psiClass for the same class name but this only returns the first)
+     * @param child
+     * @return
+     */
+    public static PsiElement getExtendsClassElement(PsiElement child)
+    {
+        String extendsClassName = getExtendsClassName(child);
+        if(extendsClassName != null){
+            List<PsiElement> classes = getPsiElementsFromClassName(extendsClassName, child.getProject());
+            for(PsiElement parentClass : classes){
+                return parentClass;
+            }
+        }
+        return null;
+    }
+
     public static PsiElement getClassElement(PsiElement child)
     {
         return PsiPhpHelper.findFirstParentOfType(child, PsiPhpHelper.CLASS, PsiPhpHelper.CLASS);

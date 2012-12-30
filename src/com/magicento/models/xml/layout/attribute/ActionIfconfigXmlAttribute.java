@@ -16,7 +16,8 @@ import java.util.Map;
 /**
  * @author Enrique Piatti
  */
-public class ActionIfconfigXmlAttribute extends MagentoLayoutXmlAttribute {
+public class ActionIfconfigXmlAttribute extends MagentoLayoutXmlAttribute
+{
 
     public ActionIfconfigXmlAttribute()
     {

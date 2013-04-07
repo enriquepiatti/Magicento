@@ -42,6 +42,10 @@ public class PsiPhpHelper {
     public static final String DOUBLE_QUOTED_STRING = "double quoted string";
     public static final String EXTENDS_LIST = "Extends list";
     public static final String CLASS_REFERENCE = "Class reference";
+    public static final String ARRAY_CREATION_EXPRESSION = "Array creation expression";
+    public static final String HASH_ARRAY_ELEMENT = "Hash array element";
+    public static final String ARRAY_KEY = "Array key";
+    public static final String ARRAY_VALUE = "Array value";
 
 
 
@@ -278,11 +282,27 @@ public class PsiPhpHelper {
 
 
     public static PsiElement findFirstChildOfType(PsiElement psiElement, String type){
+        return findFirstChildOfType(psiElement, type, false);
+    }
+
+    public static PsiElement findFirstChildOfType(PsiElement psiElement, String type, boolean recursirve)
+    {
         PsiElement[] children = psiElement.getChildren();
         if(children.length > 0){
+            // check full top level first
             for(PsiElement child : children){
                 if(isElementType(child, new String[]{type})){
                     return child;
+                }
+            }
+
+            if(recursirve){
+                PsiElement found = null;
+                for(PsiElement child : children){
+                    found = findFirstChildOfType(child, type, recursirve);
+                    if(found != null){
+                        return found;
+                    }
                 }
             }
         }

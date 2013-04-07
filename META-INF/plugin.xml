@@ -2,11 +2,28 @@
   <name>Magicento</name>
   <vendor email="contacto@enriquepiatti.com" url="http://www.magicento.com">Enrique Piatti</vendor>
   <description>Plugin for magento development</description>
-  <idea-version since-build="111.296"/>
+  <idea-version since-build="117.105"/>
 
-  <version>1.3.0</version>
+  <depends>com.intellij.modules.lang</depends>
+  <!--<depends>com.jetbrains.php</depends>-->
+
+
+  <version>1.4.0</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>1.4.0</span>
+            <ul>
+                <li>
+                    New action "Create PHPSTORM_META namespace":<br/>
+	                use Alt+M when editing any file to select this action and create a new file in the project rot called "magicento.phpstorm.meta.php", this file will contain information used by PHPStorm (+v6.x) to recognize the factory class type automatically
+                </li>
+                <li>
+                    New action "Add Factory to PHPSTORM_META Namespace":<br/>
+	                use Alt+M when the cursor is over some factory string, ie: Mage::getModel('[HERE]'), to update the PHPSTORM_META file with the correct class for that factory.
+                </li>
+            </ul>
+        </p>
         <p>
             <span>1.3.0</span>
             <ul>
@@ -171,9 +188,6 @@
   </change-notes>
 
 
-  <depends>com.intellij.modules.lang</depends>
-  <!--<depends>com.jetbrains.php</depends>-->
-
   <application-components>
     <!-- Add your application components here -->
   </application-components>
@@ -235,6 +249,13 @@
       <action id="AddTranslation" class="com.magicento.actions.AddTranslationAction" text="Add Translation"
               description="add translation for this text to the selected csv file"/>
       <action id="RewriteController" class="com.magicento.actions.RewriteControllerAction" text="Rewrite Controller"/>
+      <action id="CreatePhpStormMetaNamespace" class="com.magicento.actions.CreatePhpStormMetaNamespaceAction"
+              text="Create PHPSTORM_META namespace"
+              description="creates a php file in project root used by PHPStorm (+6.x) for resolving factories automatically"/>
+      <action id="AddFactoryToPhpStormMetaNamespace"
+              class="com.magicento.actions.AddFactoryToPhpStormMetaNamespaceAction"
+              text="Add Factory to PHPSTORM_META Namespace"
+              description="Search the corresponding class for the current factory and adds it to PHPSTORM_META Namespace"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

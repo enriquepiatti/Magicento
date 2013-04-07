@@ -4,6 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.magicento.file.MagicentoFileListener;
 import com.magicento.helpers.*;
 import com.magicento.models.MagentoClassInfo;
+import com.magicento.models.PhpStormMetaNamespace;
 import com.magicento.models.xml.MagentoXml;
 import com.magicento.models.xml.MagentoXmlFactory;
 import com.magicento.models.xml.MagentoXmlType;
@@ -702,5 +703,27 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
         }
         return false;
     }
+
+
+    public MagicentoSettings getMagicentoSettings()
+    {
+        return MagicentoSettings.getInstance(_project);
+    }
+
+    public void savePhpStormMetaFile(String content)
+    {
+        PhpStormMetaNamespace.getInstance(_project).savePhpStormMetaFile(content);
+    }
+
+    public String getPhpStormMetaFilePath()
+    {
+        return PhpStormMetaNamespace.getInstance(_project).getPhpStormMetaFilePath();
+    }
+
+    public File getPhpStormMetaFile()
+    {
+        return PhpStormMetaNamespace.getInstance(_project).getPhpStormMetaFile();
+    }
+
 
 }

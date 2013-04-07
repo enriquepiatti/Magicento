@@ -6,13 +6,16 @@ import com.magicento.MagicentoProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.magicento.MagicentoSettings;
+import com.magicento.models.MagentoClassInfo;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -127,7 +130,6 @@ public class Magicento {
         return new String[]{};
     }
 
-
     /**
      * get factory uri given the class name
      * @param className
@@ -136,35 +138,137 @@ public class Magicento {
     public static String getUriFromClassName(@NotNull Project project, @NotNull String className)
     {
         // check for rewrites first
+//        MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
+//        File configXml = magicento.getCachedConfigXml();
+//        if(false && configXml != null && configXml.exists())
+//        {
+//            String xpath = "//rewrite/*[text()='"+className+"']";
+//            List<Element> rewrites = XmlHelper.findXpath(configXml, xpath);
+//            if(rewrites != null && rewrites.size() > 0){
+//                // ideally we will have only one rewrite
+//                Element rewrite = rewrites.get(0);
+//                String secondPart = rewrite.getName();
+//                String firstPart = rewrite.getParentElement().getParentElement().getName();
+//                return firstPart+"/"+secondPart;
+//            }
+//
+//            String classPrefix = MagentoParser.getClassPrefix(className);
+//            xpath = "//global/*[name()='models' or name()='blocks' or name()='helpers']/*[class[text()='"+classPrefix+"']]";
+//            List<Element> factories = cachedFactories != null ? cachedFactories : XmlHelper.findXpath(configXml, xpath);
+//            if(factories != null && factories.size() > 0){
+//                // ideally we will have only one factory for the class prefix
+//                Element factory = factories.get(0);
+//                String firstPart = factory.getName();
+//                String secondPart = MagentoParser.getSecondPartUriFromClassName(className);
+//                return firstPart+"/"+secondPart;
+//            }
+//
+//        }
+//
+//        return null;
+
+        List<String> classNames = new ArrayList<String>();
+        classNames.add(className);
+        Map<MagentoClassInfo.UriType, Map<String, String>> mappingByType = getUriFromClassNames(project, classNames);
+        for(Map.Entry<MagentoClassInfo.UriType, Map<String, String>> entry : mappingByType.entrySet())
+        {
+            for(Map.Entry<String, String> mapping : entry.getValue().entrySet())
+            {
+                return mapping.getValue();
+            }
+        }
+        return null;
+
+    }
+
+
+    public static Map<MagentoClassInfo.UriType, Map<String, String>> getUriFromClassNames(@NotNull Project project, @NotNull List<String> classNames)
+    {
+
+        Map<MagentoClassInfo.UriType, Map<String, String>> mappingByType = new HashMap<MagentoClassInfo.UriType, Map<String, String>>();
+        for (MagentoClassInfo.UriType uriType : MagentoClassInfo.UriType.values()) {
+            mappingByType.put(uriType, new HashMap<String, String>());
+        }
+
         MagicentoProjectComponent magicento = MagicentoProjectComponent.getInstance(project);
         File configXml = magicento.getCachedConfigXml();
         if(configXml != null && configXml.exists())
         {
-            String xpath = "//rewrite/*[text()='"+className+"']";
+            // cache rewrites and factories for better performance
+            String xpath = "//rewrite/*";
             List<Element> rewrites = XmlHelper.findXpath(configXml, xpath);
-            if(rewrites != null && rewrites.size() > 0){
-                // ideally we will have only one rewrite
-                Element rewrite = rewrites.get(0);
-                String secondPart = rewrite.getName();
-                String firstPart = rewrite.getParentElement().getParentElement().getName();
-                return firstPart+"/"+secondPart;
-            }
-
-            String classPrefix = MagentoParser.getClassPrefix(className);
-            xpath = "//global/*[name()='models' or name()='blocks' or name()='helpers']/*[class[text()='"+classPrefix+"']]";
+            xpath = "//global/*[name()='models' or name()='blocks' or name()='helpers']/*";
             List<Element> factories = XmlHelper.findXpath(configXml, xpath);
-            if(factories != null && factories.size() > 0){
-                // ideally we will have only one factory for the class prefix
-                Element factory = factories.get(0);
-                String firstPart = factory.getName();
-                String secondPart = MagentoParser.getSecondPartUriFromClassName(className);
-                return firstPart+"/"+secondPart;
+
+            for(String className: classNames)
+            {
+                MagentoClassInfo.ClassType classType = MagentoParser.getClassTypeFromClassName(className);
+                MagentoClassInfo.UriType classUriType = MagentoClassInfo.getUriTypeFromClassType(classType);
+                if(classUriType == MagentoClassInfo.UriType.HELPER
+                        || classUriType == MagentoClassInfo.UriType.RESOURCEMODEL
+                        || classUriType == MagentoClassInfo.UriType.MODEL
+                        || classUriType == MagentoClassInfo.UriType.BLOCK)
+                {
+                    String uri = null;
+
+                    // check rewrites first
+                    if(rewrites != null && rewrites.size() > 0){
+                        for(Element rewrite : rewrites){
+                            if(rewrite.getValue().equals(className)){
+                                String secondPart = rewrite.getName();
+                                String firstPart = rewrite.getParentElement().getParentElement().getName();
+                                uri = firstPart+"/"+secondPart;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(uri == null){
+                        boolean isResource = classUriType == MagentoClassInfo.UriType.RESOURCEMODEL;
+                        String classPrefix = MagentoParser.getClassPrefix(className, isResource);
+                        if(factories != null && factories.size() > 0){
+                            for(Element factory : factories)
+                            {
+                                Element classElement = factory.getChild("class");
+                                if(classElement != null && classElement.getValue().equals(classPrefix))
+                                {
+                                    if(isResource){
+                                        String resourceModelNode = factory.getName();
+                                        for(Element parentModelNode : factories){
+                                            Element resourceModelElement = parentModelNode.getChild("resourceModel");
+                                            if(resourceModelElement != null && resourceModelElement.getValue().equals(resourceModelNode)){
+                                                String firstPart = parentModelNode.getName();
+                                                String secondPart = MagentoParser.getSecondPartUriFromClassName(className, classPrefix);
+                                                uri = firstPart+"/"+secondPart;
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        String firstPart = factory.getName();
+                                        String secondPart = MagentoParser.getSecondPartUriFromClassName(className, classPrefix);
+                                        uri = firstPart+"/"+secondPart;
+                                    }
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+
+                    if(uri != null){
+                        if(classType != null){
+                            mappingByType.get(classUriType).put(uri, className);
+                        }
+                        else {
+                            IdeHelper.logWarning("Magicento: Cannot deduce class type for "+ className);
+                        }
+                    }
+                }
             }
-
         }
-
-        return null;
+        return mappingByType;
     }
+
 
 
     @NotNull public static List<String> getStoreConfigPaths(Project project, String prefix)

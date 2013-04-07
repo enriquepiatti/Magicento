@@ -3,6 +3,14 @@ package com.magicento.extensions;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.patterns.PsiElementPattern;
@@ -18,10 +26,9 @@ import com.intellij.util.containers.ArrayListSet;
 import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.MagicentoSettings;
-import com.magicento.helpers.MagentoParser;
-import com.magicento.helpers.Magicento;
-import com.magicento.helpers.PsiPhpHelper;
-import com.magicento.helpers.XmlHelper;
+import com.magicento.actions.CreatePhpStormMetaNamespaceAction;
+import com.magicento.actions.IMagicentoAction;
+import com.magicento.helpers.*;
 import com.magicento.models.MagentoClassInfo;
 import com.magicento.models.layout.Template;
 import com.magicento.models.xml.MagentoXml;
@@ -95,6 +102,19 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                         else if(isClassExtendsAutocomplete(currentElement)){
                             elements = getAutocompleteForClassExtends(currentElement, prefix);
                         }
+                        else if(isMageFactoryChainedMethod(currentElement)){
+                            // check if PHPStorm Meta File Exists
+//                            File metaFile = getMagicentoComponent().getPhpStormMetaFile();
+//                            if( ! metaFile.exists()){
+//                                  ActionManager actionManager = ActionManagerImpl.getInstance();
+//                                  String actionId = "CreatePhpStormMetaNamespace";
+//                                  CreatePhpStormMetaNamespaceAction action = (CreatePhpStormMetaNamespaceAction) actionManager.getAction(actionId);
+////                                EditorEx editor = (EditorEx)parameters.getLookup().getEditor();
+////                                AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), actionId, new Presentation(), actionManager, 0);
+////                                action.actionPerformed(event);
+//                                IdeHelper.showNotification("If you are using PHPStorm v6+ use Alt+M > Create PHPSTORM_META namespace for helping the IDE with the autocomplete on factories", NotificationType.INFORMATION, currentElement.getProject());
+//                            }
+                        }
 
                         if(elements != null && elements.size() > 0)
                         {
@@ -108,6 +128,15 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
             });
     }
 
+
+    /**
+     * @todo: implement, detect if cursor is in something like Mage::getModel('uri')->[HERE]
+     * @return
+     */
+    protected boolean isMageFactoryChainedMethod(PsiElement currentElemen)
+    {
+        return true;
+    }
 
 
     /**

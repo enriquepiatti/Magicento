@@ -1,20 +1,23 @@
 package com.magicento.helpers;
 
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.newvfs.RefreshQueue;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.indexing.IOUtils;
-import com.magicento.MagicentoSettings;
-import org.apache.tools.ant.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,5 +154,15 @@ public class FileHelper
         return null;
     }
 
+
+    public static void refreshVirtualFile(VirtualFile virtualFile)
+    {
+        if(virtualFile != null){
+            FileDocumentManager.getInstance().saveAllDocuments();
+            // SaveAndSyncHandlerImpl.refreshOpenFiles();
+            RefreshQueue.getInstance().refresh(false, false, null, virtualFile);
+            VirtualFileManager.getInstance().refreshWithoutFileWatcher(true);
+        }
+    }
 
 }

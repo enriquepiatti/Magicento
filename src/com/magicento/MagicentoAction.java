@@ -56,6 +56,7 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
                 "AddTranslation",
                 "MagicentoTranslateText",
                 "GotoMagentoClass",
+                "AddFactoryToPhpStormMetaNamespace",
                 "AddVarPhpDoc",
                 "RemoveFromCoreResource",
                 "GoToBlockFromTemplate",
@@ -72,6 +73,7 @@ public class MagicentoAction extends MagicentoActionAbstract implements IMagicen
                 "CreateModule",
                 "SetMagePath",
                 "SetStore",
+                "CreatePhpStormMetaNamespace",
                 "FlushCache",
                 "ToggleTemplateHints"
         };

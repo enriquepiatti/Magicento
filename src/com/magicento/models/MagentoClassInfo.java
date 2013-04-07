@@ -21,6 +21,29 @@ public class MagentoClassInfo {
         MODEL, RESOURCEMODEL, COLLECTION, HELPER, BLOCK, CONTROLLER, INSTALLER;
     }
 
+    public static UriType getUriTypeFromClassType(ClassType classType)
+    {
+        UriType uriType = null;
+        if(classType != null){
+            switch (classType){
+                case BLOCK:
+                    uriType = UriType.BLOCK;
+                    break;
+                case HELPER:
+                    uriType = UriType.HELPER;
+                    break;
+                case MODEL:
+                    uriType = UriType.MODEL;
+                    break;
+                case RESOURCEMODEL:
+                case COLLECTION:
+                    uriType = UriType.RESOURCEMODEL;
+                    break;
+            }
+        }
+        return uriType;
+    }
+
     protected String module;
     public String name;
     public String uriFirstPart;

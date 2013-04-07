@@ -1,23 +1,13 @@
 package com.magicento.actions;
 
-import com.intellij.codeInsight.CodeInsightBundle;
-import com.intellij.codeInsight.template.zencoding.filters.ZenCodingFilter;
-import com.intellij.codeInsight.template.zencoding.generators.ZenCodingGenerator;
-import com.intellij.codeInsight.template.zencoding.nodes.ZenCodingNode;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.EditorModificationUtil;
 import com.intellij.openapi.editor.SelectionModel;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
 import com.magicento.helpers.PsiPhpHelper;
-
-import java.util.List;
 
 /**
  * @author Enrique Piatti

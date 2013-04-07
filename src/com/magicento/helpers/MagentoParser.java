@@ -403,23 +403,9 @@ public class MagentoParser {
             String className = PsiPhpHelper.getClassName(child);
             if(className != null)
             {
-                if(className.contains("_Model_"))
-                {
-                    if(className.endsWith("Collection")){
-                        return MagentoClassInfo.ClassType.COLLECTION;
-                    }
-                    if(className.contains("_Resource_") || className.contains("_Mysql4_")){
-                        return MagentoClassInfo.ClassType.RESOURCEMODEL;
-                    }
-                    return MagentoClassInfo.ClassType.MODEL;
-                }
-
-                if(className.contains("_Block_")){
-                    return MagentoClassInfo.ClassType.BLOCK;
-                }
-
-                if(className.contains("_Helper_")){
-                    return MagentoClassInfo.ClassType.HELPER;
+                MagentoClassInfo.ClassType classType = getClassTypeFromClassName(className);
+                if(classType != null){
+                    return classType;
                 }
             }
 
@@ -432,6 +418,32 @@ public class MagentoParser {
             }
         }
 
+        return null;
+    }
+
+    public static MagentoClassInfo.ClassType getClassTypeFromClassName(String className)
+    {
+        if(className != null)
+        {
+            if(className.contains("_Model_"))
+            {
+                if(className.endsWith("_Collection")){
+                    return MagentoClassInfo.ClassType.COLLECTION;
+                }
+                if(className.contains("_Resource_") || className.contains("_Mysql4_")){
+                    return MagentoClassInfo.ClassType.RESOURCEMODEL;
+                }
+                return MagentoClassInfo.ClassType.MODEL;
+            }
+
+            if(className.contains("_Block_")){
+                return MagentoClassInfo.ClassType.BLOCK;
+            }
+
+            if(className.contains("_Helper_")){
+                return MagentoClassInfo.ClassType.HELPER;
+            }
+        }
         return null;
     }
 
@@ -495,12 +507,24 @@ public class MagentoParser {
 
     public static String getClassPrefix(String className)
     {
-        String classNameParts[] = className.split("_");
-        if(classNameParts.length > 3) {
-            return classNameParts[0]+"_"+classNameParts[1]+"_"+classNameParts[2];
-        }
-        return null;
+        return getClassPrefix(className, false);
     }
+
+
+    public static String getClassPrefix(String className, boolean isResource)
+    {
+        String classNameParts[] = className.split("_");
+        String prefix = null;
+        if(classNameParts.length > 3) {
+            prefix = classNameParts[0]+"_"+classNameParts[1]+"_"+classNameParts[2];
+            // for cimplicity, we are assuming resources have a separated folder (and just one), this is the convention anyway, is hard to find a case when this is not the case
+            if(isResource && classNameParts.length > 4){
+                prefix += "_"+classNameParts[3];
+            }
+        }
+        return prefix;
+    }
+
 
     /**
      *

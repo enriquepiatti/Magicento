@@ -1,16 +1,23 @@
 package com.magicento.models;
 
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.psi.*;
+import com.intellij.util.FileContentUtil;
 import com.magicento.MagicentoProjectComponent;
 import com.magicento.helpers.FileHelper;
+import com.magicento.helpers.IdeHelper;
 import com.magicento.helpers.MagentoParser;
 import com.magicento.helpers.PsiPhpHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,9 +53,11 @@ public class PhpStormMetaNamespace
         return instances.get(project);
     }
 
-    public void savePhpStormMetaFile(String content)
+    public void savePhpStormMetaFile(final String content)
     {
-        _magicentoProject.saveCacheFile(getPhpStormMetaFile(), content);
+        String filename = getPhpStormMetaFile().getName();
+        String directoryPath = getPhpStormMetaFile().getParent();
+        FileHelper.createPsiFile(filename, directoryPath, content, FileHelper.getPhpFileType(_project), _project);
     }
 
     public String getPhpStormMetaFilePath()
@@ -119,7 +128,9 @@ public class PhpStormMetaNamespace
         VirtualFile virtualFile = FileHelper.getVirtualFileFromFile(_metaFile);
         if(virtualFile != null){
             FileHelper.refreshVirtualFile(virtualFile);
+            // FileHelper.refreshVirtualFile(virtualFile, _project);
         }
+
     }
 
 
@@ -146,7 +157,7 @@ public class PhpStormMetaNamespace
             mappingByType.put(uriType, new HashMap<String, String>());
         }
 
-        PsiFile psiFile = FileHelper.getPsiFileFromFile(_metaFile, _project);
+        PsiFile psiFile = getPsiMetaFile();
         PsiElement firstArrayExpression = PsiPhpHelper.findFirstChildOfType(psiFile.getFirstChild(), PsiPhpHelper.ARRAY_CREATION_EXPRESSION, true);
         if(firstArrayExpression != null){
             PsiElement hashElement = PsiPhpHelper.findFirstChildOfType(firstArrayExpression, PsiPhpHelper.HASH_ARRAY_ELEMENT, true);
@@ -186,5 +197,11 @@ public class PhpStormMetaNamespace
             uriType = MagentoClassInfo.UriType.RESOURCEMODEL;
         }
         return uriType;
+    }
+
+
+    public PsiFile getPsiMetaFile()
+    {
+        return FileHelper.getPsiFileFromFile(_metaFile, _project);
     }
 }

@@ -1,14 +1,14 @@
 package com.magicento.helpers;
 
 import com.intellij.ide.util.gotoByName.GotoClassModel2;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiErrorElement;
-import com.intellij.psi.PsiNamedElement;
-import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.*;
+import com.magicento.MagicentoSettings;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +46,6 @@ public class PsiPhpHelper {
     public static final String HASH_ARRAY_ELEMENT = "Hash array element";
     public static final String ARRAY_KEY = "Array key";
     public static final String ARRAY_VALUE = "Array value";
-
 
 
     @NotNull private static String getElementType(PsiElement psiElement){
@@ -672,5 +671,4 @@ public class PsiPhpHelper {
         }
         return null;
     }
-
 }

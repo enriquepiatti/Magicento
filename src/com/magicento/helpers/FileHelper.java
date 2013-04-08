@@ -1,6 +1,8 @@
 package com.magicento.helpers;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -8,10 +10,11 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.RefreshQueue;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
+import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
+import com.intellij.util.FileContentUtil;
+import com.magicento.MagicentoSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -19,6 +22,7 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -165,4 +169,72 @@ public class FileHelper
         }
     }
 
+    public static void refreshVirtualFile(VirtualFile virtualFile, Project project)
+    {
+        if(project != null && virtualFile != null){
+            Collection<VirtualFile> virtualFiles = new ArrayList<VirtualFile>();
+            virtualFiles.add(virtualFile);
+            FileContentUtil.reparseFiles(project, virtualFiles, false);
+        }
+    }
+
+
+    /**
+     * fake method for returning PHP FileType because the PHP is not open
+     * @return
+     */
+    public static FileType getPhpFileType(Project project)
+    {
+        MagicentoSettings settings = MagicentoSettings.getInstance(project);
+        PsiFile psiFile = FileHelper.getPsiFileFromFile(new File(settings.getPathToMage()), project);
+        if(psiFile != null){
+            return psiFile.getFileType();
+        }
+        return null;
+    }
+
+
+    public static PsiFile createPsiFile(final String filename, final String directoryPath, final String content, final FileType filetype, final Project project)
+    {
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            @Override
+            public void run()
+            {
+                // remove first if exists we are creating it again
+                VirtualFile virtualFile = FileHelper.getVirtualFileFromFile(new File(directoryPath+"/"+filename));
+                if(virtualFile != null){
+                    try {
+                        virtualFile.delete(null);
+                    } catch (IOException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                }
+                // create folder if not exists
+                VirtualFile directory = LocalFileSystem.getInstance().findFileByIoFile(new File(directoryPath));
+                if(directory == null){
+                    try {
+                        directory = VfsUtil.createDirectories(directoryPath);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(directory != null)
+                {
+                    final PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(directory);
+                    if(psiDirectory != null)
+                    {
+                        PsiFile psiFile = PsiFileFactory.getInstance(project).createFileFromText(filename, filetype, content);
+//                        if(psiDirectory.findFile(filename) == null){
+                            psiDirectory.add(psiFile);
+//                        }
+//                        else {
+//                            // PsiDocumentManager.getInstance(project).commitAllDocuments();
+//                            PsiDocumentManager.getInstance(project).commitDocument(PsiDocumentManager.getInstance(project).getDocument(psiFile));
+//                        }
+                    }
+                }
+            }
+        });
+        return FileHelper.getPsiFileFromFile(new File(directoryPath+"/"+filename), project);
+    }
 }

@@ -5,7 +5,7 @@
   <idea-version since-build="117.105"/>
 
   <depends>com.intellij.modules.lang</depends>
-  <!--<depends>com.jetbrains.php</depends>-->
+  <depends>com.jetbrains.php</depends>
 
 
   <version>1.4.0</version>

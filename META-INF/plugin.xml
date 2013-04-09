@@ -8,9 +8,20 @@
   <depends>com.jetbrains.php</depends>
 
 
-  <version>1.4.0</version>
+  <version>1.4.1</version>
   <change-notes>
       <![CDATA[
+        <p>
+            <span>1.4.1</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+	                    <li>Compiled with JDK6 for better compatibility</li>
+	                    <li>Suggestions from Magicento when using code completion for "extends" have higher priority on the list now (they should appear first always)</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
         <p>
             <span>1.4.0</span>
             <ul>

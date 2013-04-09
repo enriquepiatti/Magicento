@@ -118,10 +118,12 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
 
                         if(elements != null && elements.size() > 0)
                         {
-                            _result.addAllElements(elements);
-//                            for(LookupElement element : elements){
-//                                _result.addElement(element);
-//                            }
+                            //_result.addAllElements(elements);
+                            int count = 1000;
+                            for(LookupElement element : elements){
+                                count++;
+                                _result.addElement(PrioritizedLookupElement.withPriority(element, count));
+                            }
                         }
                     }
                 }

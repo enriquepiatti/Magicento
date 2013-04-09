@@ -80,6 +80,11 @@ public class PhpStormMetaNamespace
         savePhpStormMetaFile(fileContent);
     }
 
+    /**
+     * @todo make this run faster
+     * @param mappingByType
+     * @return
+     */
     protected String createMetaContent(Map<MagentoClassInfo.UriType, Map<String, String>> mappingByType)
     {
         String content = "<?php\n" +

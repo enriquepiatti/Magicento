@@ -1,6 +1,7 @@
 package com.magicento.models;
 
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
@@ -55,6 +56,10 @@ public class PhpStormMetaNamespace
 
     public void savePhpStormMetaFile(final String content)
     {
+        if(content == null || content.isEmpty()){
+            IdeHelper.showNotification("Magicento: PHPSTORM_META content is empty", NotificationType.ERROR, _project);
+            return;
+        }
         String filename = getPhpStormMetaFile().getName();
         String directoryPath = getPhpStormMetaFile().getParent();
         FileHelper.createPsiFile(filename, directoryPath, content, FileHelper.getPhpFileType(_project), _project);

@@ -255,6 +255,21 @@ public class Magicento {
                         }
                     }
 
+                    // some factories are not defined in config.xml and assumed in Mage_
+                    if(uri == null && classUriType == MagentoClassInfo.UriType.HELPER){
+                        if(className.startsWith("Mage_")){
+                            String[] parts = className.split("_");
+                            String firstPart = parts[1].toLowerCase();
+                            String secondPart = MagentoParser.getSecondPartUriFromClassName(className);
+                            if(secondPart.equals("data")){
+                                uri = firstPart;
+                            }
+                            else {
+                                uri = firstPart+"/"+secondPart;
+                            }
+                        }
+                    }
+
                     if(uri != null){
                         if(classType != null){
                             mappingByType.get(classUriType).put(uri, className);

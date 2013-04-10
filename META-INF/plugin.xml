@@ -5,12 +5,23 @@
   <idea-version since-build="117.105"/>
 
   <depends>com.intellij.modules.lang</depends>
-  <depends>com.jetbrains.php</depends>
+  <!--<depends>com.jetbrains.php</depends>-->
 
+  <version>1.4.2</version>
 
-  <version>1.4.1</version>
   <change-notes>
       <![CDATA[
+        p>
+            <span>1.4.2</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+	                    <li>Autocomplete for class names</li>
+	                    <li>Generate mapping for Helper classes not defined in config.xml</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
         <p>
             <span>1.4.1</span>
             <ul>

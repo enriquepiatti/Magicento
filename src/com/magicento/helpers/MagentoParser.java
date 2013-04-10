@@ -527,13 +527,12 @@ public class MagentoParser {
 
 
     /**
-     *
+     * Warning: this doesn't take into account resource models, use getSecondPartUriFromClassName(String className, String prefix) for that
      * @param className
      * @return
      */
     public static String getSecondPartUriFromClassName(String className)
     {
-        // TODO: this doesn't take into account resource models
         String prefix = getClassPrefix(className);
         return getSecondPartUriFromClassName(className, prefix);
     }

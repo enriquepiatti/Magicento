@@ -58,7 +58,7 @@ public class BlockTypeProvider implements PhpTypeProvider {
         final VirtualFile file = e.getContainingFile().getOriginalFile().getVirtualFile();
         Template template = new Template(file);
         List<String> blocks = template.getBlocksClasses(e.getProject());
-        if(blocks != null)
+        if(blocks != null && blocks.size() > 0)
         {
             return new PhpType().add(blocks.get(0));
         }

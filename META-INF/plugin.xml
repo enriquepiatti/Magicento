@@ -15,6 +15,16 @@
   <change-notes>
       <![CDATA[
         <p>
+            <span>1.6.1</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+	                    <li>BlockTypeProvider bugfix</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
+        <p>
             <span>1.6.0</span>
             <ul>
                 <li>Bugfixes:

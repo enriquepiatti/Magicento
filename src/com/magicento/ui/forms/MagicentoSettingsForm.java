@@ -55,6 +55,7 @@ public class MagicentoSettingsForm implements Configurable {
     private JTextField packagesTextField;
     private JTextField themesTextField;
     private JTextField storeTextField;
+    private JCheckBox automaticThisInTemplateCheckBox;
     // private TextFieldWithBrowseButton myProcessorPathField;
     private Project project;
 
@@ -206,6 +207,7 @@ public class MagicentoSettingsForm implements Configurable {
             if(magicentoSettings.store != null){
                 storeTextField.setText(magicentoSettings.store);
             }
+            automaticThisInTemplateCheckBox.setSelected(magicentoSettings.automaticThisInTemplate);
 
         }
         else {
@@ -273,7 +275,8 @@ public class MagicentoSettingsForm implements Configurable {
                 magicentoSettings.layoutEnabled == layoutEnabledCheckBox.isSelected() &&
                 magicentoSettings.themes != null && magicentoSettings.themes.equals(themesTextField.getText()) &&
                 magicentoSettings.packages != null && magicentoSettings.packages.equals(packagesTextField.getText()) &&
-                magicentoSettings.store != null && magicentoSettings.store.equals(storeTextField.getText())
+                magicentoSettings.store != null && magicentoSettings.store.equals(storeTextField.getText()) &&
+                magicentoSettings.automaticThisInTemplate == automaticThisInTemplateCheckBox.isSelected()
               ) {
                 return false;
             }
@@ -337,6 +340,7 @@ public class MagicentoSettingsForm implements Configurable {
                         settings.themes = themesTextField.getText().trim();
                         settings.packages = packagesTextField.getText().trim();
                         settings.store = storeTextField.getText().trim();
+                        settings.automaticThisInTemplate = automaticThisInTemplateCheckBox.isSelected();
                     }
                     else {
                         IdeHelper.logError("MagicentoSettings is null");

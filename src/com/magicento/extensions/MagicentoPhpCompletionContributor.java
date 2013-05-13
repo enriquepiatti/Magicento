@@ -3,38 +3,19 @@ package com.magicento.extensions;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.notification.NotificationType;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.Presentation;
-import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
-import com.intellij.psi.XmlElementFactory;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.xml.XmlAttribute;
-import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
-import com.intellij.util.containers.ArrayListSet;
 import com.magicento.MagicentoIcons;
 import com.magicento.MagicentoProjectComponent;
-import com.magicento.MagicentoSettings;
-import com.magicento.actions.CreatePhpStormMetaNamespaceAction;
-import com.magicento.actions.IMagicentoAction;
-import com.magicento.helpers.*;
+import com.magicento.helpers.MagentoParser;
+import com.magicento.helpers.Magicento;
+import com.magicento.helpers.PsiPhpHelper;
+import com.magicento.helpers.XmlHelper;
 import com.magicento.models.MagentoClassInfo;
 import com.magicento.models.layout.Template;
-import com.magicento.models.xml.MagentoXml;
-import com.magicento.models.xml.MagentoXmlFactory;
-import com.magicento.models.xml.MagentoXmlTag;
-import com.magicento.models.xml.MagentoXmlType;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -118,12 +99,14 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
 
                         if(elements != null && elements.size() > 0)
                         {
-                            //_result.addAllElements(elements);
-                            int count = 1000;
-                            for(LookupElement element : elements){
-                                count++;
-                                _result.addElement(PrioritizedLookupElement.withPriority(element, count));
-                            }
+                            _result.addAllElements(elements);
+                            // we are using the prioritized lookup inside every get* method because this general solutions is failing for example for getAutocompleteForFactory, I don't know why
+//                            int count = 10000;
+//                            for(LookupElement element : elements){
+//                                count++;
+//                                _result.addElement(PrioritizedLookupElement.withPriority(element, count));
+//                                //_result.addElement(element);
+//                            }
                         }
                     }
                 }
@@ -234,7 +217,7 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                         .setIcon(myIcon)
                         ;
 
-                elements.add(element);
+                elements.add(PrioritizedLookupElement.withPriority(element, 1000));
             }
         }
         return elements;
@@ -348,15 +331,14 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
 
                 if(classes != null && classes.size() > 0)
                 {
-                    int count = 0;
+                    int count = classes.size();
                     for(MagentoClassInfo classInfo : classes)
                     {
                         String valueToInsert = classInfo.getUri();
-                        if(isHelper && valueToInsert.endsWith("/data")){
+                        if(isHelper && valueToInsert != null && valueToInsert.endsWith("/data")){
                             valueToInsert = valueToInsert.substring(0, valueToInsert.length()-5);
                         }
                         String presentableText = valueToInsert;
-                        count++;
                         LookupElement element = LookupElementBuilder.create("", valueToInsert)
                                 .setPresentableText(presentableText)
                                 .setIcon(myIcon)
@@ -365,9 +347,10 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                                 .setTailText("  "+classInfo.name, true)
                                 ;
 
-                        LookupElement elementWithPriority = PrioritizedLookupElement.withPriority(element, -count);
-
-                        elements.add(elementWithPriority);
+                        //LookupElement elementWithPriority = PrioritizedLookupElement.withPriority(element, count);
+                        // elements.add(elementWithPriority);
+                        elements.add(element);
+                        count--;
                     }
                 }
             }
@@ -595,13 +578,16 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
             names.add("Mage_Core_Helper_Abstract");
         }
 
+        int count = 1000;
         for(String name : names){
             LookupElement element = LookupElementBuilder.create("magicento_extends", name)
                     .setPresentableText(name)
                     .setIcon(myIcon)
                     ;
 
-            elements.add(element);
+            //elements.add(element);
+            elements.add(PrioritizedLookupElement.withPriority(element, count));
+            count++;
         }
 
         return elements;

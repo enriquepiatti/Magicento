@@ -4,12 +4,18 @@ import com.intellij.ide.util.gotoByName.GotoClassModel2;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.jetbrains.php.PhpIndex;
+import com.jetbrains.php.lang.psi.elements.Method;
+import com.jetbrains.php.lang.psi.elements.MethodReference;
+import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.magicento.MagicentoSettings;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -671,4 +677,125 @@ public class PsiPhpHelper {
         }
         return null;
     }
+
+
+    /**
+     * returns PHP Method (this is using the Psi from PHP)
+     * @param project
+     * @param classFQN
+     * @param methodName
+     * @return
+     */
+    public static Method getClassMethod(Project project, String classFQN, String methodName)
+    {
+        PhpIndex phpIndex = PhpIndex.getInstance(project);
+        Object[] classes = phpIndex.getClassesByFQN(classFQN).toArray();
+
+        if (classes.length < 1) {
+            return null;
+        }
+
+        return findClassMethodByName((PhpClass)classes[0], methodName);
+    }
+
+
+    public static Method findClassMethodByName(PhpClass phpClass, String methodName)
+    {
+        for (Method method : phpClass.getMethods()) {
+            if (method.getName().equals(methodName)) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
+
+    public static boolean isCallTo(PsiElement e, @NotNull Method[] expectedMethods)
+    {
+        if (!(e instanceof MethodReference)) {
+            return false;
+        }
+
+        MethodReference methodRef = (MethodReference) e;
+        if (null == e.getReference()) {
+            return false;
+        }
+
+
+        // resolve is also called on invalid php code like "use <xxx>"
+        // so double check the method name before resolve the method
+        if(!isMatchingMethodName(methodRef, expectedMethods)) {
+            return false;
+        }
+
+        PsiElement resolvedReference = methodRef.getReference().resolve();
+        if (!(resolvedReference instanceof Method)) {
+            return false;
+        }
+
+        Method method = (Method) resolvedReference;
+        PhpClass methodClass = method.getContainingClass();
+
+        for (Method expectedMethod : Arrays.asList(expectedMethods)) {
+            if (null != expectedMethod
+                    && expectedMethod.getName().equals(method.getName())
+                    && isInstanceOf(methodClass, expectedMethod.getContainingClass())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    public static boolean isMatchingMethodName(MethodReference methodRef, Method[] expectedMethods)
+    {
+        for (Method expectedMethod : Arrays.asList(expectedMethods)) {
+            if(expectedMethod != null && expectedMethod.getName().equals(methodRef.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    public static boolean isInstanceOf(PhpClass subjectClass, PhpClass expectedClass)
+    {
+        if (subjectClass == expectedClass) {
+            return true;
+        }
+
+        if (expectedClass.isInterface()) {
+            return isImplementationOfInterface(subjectClass, expectedClass);
+        }
+
+        if (null == subjectClass.getSuperClass()) {
+            return false;
+        }
+
+        return isInstanceOf(subjectClass.getSuperClass(), expectedClass);
+    }
+
+
+    public static boolean isImplementationOfInterface(PhpClass phpClass, PhpClass phpInterface)
+    {
+        if (phpClass == phpInterface) {
+            return true;
+        }
+
+        for (PhpClass implementedInterface : phpClass.getImplementedInterfaces()) {
+            if (isImplementationOfInterface(implementedInterface, phpInterface)) {
+                return true;
+            }
+        }
+
+        if (null == phpClass.getSuperClass()) {
+            return false;
+        }
+
+        return isImplementationOfInterface(phpClass.getSuperClass(), phpInterface);
+    }
+
 }

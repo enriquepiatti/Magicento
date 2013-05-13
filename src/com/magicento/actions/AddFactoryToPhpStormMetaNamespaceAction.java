@@ -2,12 +2,9 @@ package com.magicento.actions;
 
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.PsiElement;
-import com.magicento.helpers.FileHelper;
 import com.magicento.helpers.IdeHelper;
 import com.magicento.helpers.MagentoParser;
 import com.magicento.helpers.PsiPhpHelper;
@@ -15,7 +12,6 @@ import com.magicento.models.MagentoClassInfo;
 import com.magicento.models.PhpStormMetaNamespace;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public class AddFactoryToPhpStormMetaNamespaceAction extends MagicentoActionAbstract {
@@ -48,9 +44,13 @@ public class AddFactoryToPhpStormMetaNamespaceAction extends MagicentoActionAbst
 
     @Override
     public Boolean isApplicable(AnActionEvent e) {
-        setEvent(e);
-        PsiElement psiElement = getPsiElementAtCursor();
-        return MagentoParser.isUri(psiElement) && MagentoParser.isFactory(PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.METHOD_REFERENCE));
+        return false;
+//        if( ! IdeHelper.isPhpWithAutocompleteFeature()){
+//            return false;
+//        }
+//        setEvent(e);
+//        PsiElement psiElement = getPsiElementAtCursor();
+//        return MagentoParser.isUri(psiElement) && MagentoParser.isFactory(PsiPhpHelper.findFirstParentOfType(psiElement, PsiPhpHelper.METHOD_REFERENCE));
     }
 
     protected String getFactoryMethod()

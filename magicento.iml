@@ -9,6 +9,24 @@
     </content>
     <orderEntry type="jdk" jdkName="IDEA PS-129.196" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library>
+        <CLASSES>
+          <root url="jar://C:/Program Files (x86)/JetBrains/PhpStorm 129.196/plugins/php/lib/php-openapi.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library>
+        <CLASSES>
+          <root url="jar://C:/Program Files (x86)/JetBrains/PhpStorm 129.196/plugins/php/lib/php.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 

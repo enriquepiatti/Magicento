@@ -37,6 +37,12 @@ public class AddTranslationAction extends MagicentoActionAbstract {
         {
             // remove quotes
             originalText = originalText.replaceAll("(^['\"])|(['\"]$)","");
+            if(PsiPhpHelper.isElementType(currentElement, PsiPhpHelper.SINGLE_QUOTED_STRING)){
+                originalText = originalText.replaceAll("\\\\'","'");
+            }
+            else {
+                originalText = originalText.replaceAll("\\\\\"","\"");
+            }
             AddTranslationDialog dialog = new AddTranslationDialog(project, originalText, getPsiElementAtCursor());
             dialog.show();
             if( dialog.isOK())

@@ -3,15 +3,13 @@ package com.magicento.actions;
 import com.intellij.ide.util.gotoByName.GotoClassModel2;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.magicento.MagicentoProjectComponent;
-import com.magicento.helpers.*;
+import com.magicento.helpers.IdeHelper;
+import com.magicento.helpers.Magicento;
 import com.magicento.models.MagentoClassInfo;
 import com.magicento.models.PhpStormMetaNamespace;
-import org.jdom.Element;
 
-import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
 
 
 public class CreatePhpStormMetaNamespaceAction extends MagicentoActionAbstract
@@ -40,7 +38,11 @@ public class CreatePhpStormMetaNamespaceAction extends MagicentoActionAbstract
 
     @Override
     public Boolean isApplicable(AnActionEvent e) {
-        return true;
+        return false;
+//        if( ! IdeHelper.isPhpWithAutocompleteFeature()){
+//            return false;
+//        }
+//        return true;
     }
 
 

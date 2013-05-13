@@ -2,11 +2,13 @@ package com.magicento.helpers;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.psi.PsiElement;
 import com.magicento.MagicentoProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.magicento.MagicentoSettings;
 import com.magicento.models.MagentoClassInfo;
+import com.magicento.models.layout.Template;
 import org.apache.commons.lang.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -355,5 +357,17 @@ public class Magicento {
         }
         return paths;
     }
+
+
+    public static boolean isInsideTemplateFile(PsiElement e)
+    {
+        VirtualFile vf = e.getContainingFile().getOriginalFile().getVirtualFile();
+        if(vf != null){
+            Template template = new Template(vf);
+            return template.isTemplate();
+        }
+        return false;
+    }
+
 
 }

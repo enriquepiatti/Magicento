@@ -4,20 +4,18 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
+import com.jetbrains.php.lang.psi.elements.Method;
 import com.magicento.models.MagentoClassInfo;
-import com.magicento.models.layout.LayoutFile;
 import com.magicento.models.xml.MagentoXml;
 import com.magicento.models.xml.MagentoXmlFactory;
 import com.magicento.models.xml.MagentoXmlTag;
-import com.magicento.models.xml.layout.BlockXmlTag;
 import com.magicento.models.xml.layout.HandleXmlTag;
 import com.magicento.models.xml.layout.MagentoLayoutXml;
-import com.magicento.models.xml.layout.attribute.BlockNameXmlAttribute;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
-import org.omg.CosNaming._BindingIteratorImplBase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -277,10 +275,21 @@ public class MagentoParser {
 
     public static boolean isFactory(PsiElement psiElement)
     {
-        if(psiElement != null){
-            return isFactory(psiElement.getText());
+        boolean isFactory = false;
+        if(psiElement != null)
+        {
+            List<Method> methods = new ArrayList<Method>();
+            for(String factory : FACTORIES){
+                methods.add(PsiPhpHelper.getClassMethod(psiElement.getProject(), "Mage", factory));
+            }
+            isFactory = PsiPhpHelper.isCallTo(psiElement, methods.toArray(new Method[methods.size()]));
+
+            // fallback just in case:
+            if( ! isFactory ){
+                isFactory = isFactory(psiElement.getText());
+            }
         }
-        return false;
+        return isFactory;
     }
 
     public static boolean isFactory(String phpCode)

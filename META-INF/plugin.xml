@@ -1,17 +1,36 @@
-<idea-plugin version="2">
+<idea-plugin version="2" url="https://github.com/enriquepiatti/Magicento">
   <name>Magicento</name>
   <vendor email="contacto@enriquepiatti.com" url="http://www.magicento.com">Enrique Piatti</vendor>
   <description>Plugin for magento development</description>
   <idea-version since-build="117.105"/>
+  <!--<idea-version since-build="129.196"/>-->
 
   <depends>com.intellij.modules.lang</depends>
-  <!--<depends>com.jetbrains.php</depends>-->
 
-  <version>1.4.2</version>
+  <depends>com.jetbrains.php</depends>
+  <depends>com.intellij.modules.platform</depends>
+
+  <version>1.6.0</version>
 
   <change-notes>
       <![CDATA[
-        p>
+        <p>
+            <span>1.6.0</span>
+            <ul>
+                <li>Bugfixes:
+                    <ul>
+	                    <li>Better autocomplete for resource models uri (factory string). Mage::getResourceModel('[CTRL+SPACE HERE]') and $this->_init('[CTRL+SPACE HERE]') inside Models</li>
+	                    <li>Quotes in Add Translation action are not escaped now when they are added to the .csv file</li>
+	                    <li>Rewrite Class Action bugfix</li>
+                    </ul>
+                </li>
+                <li>Factories are recognized automatically, PHPSTORM META file is not needed anymore (requires PHPStorm 6+)</li>
+                <li>Block type is infered automatically inside template (.phtml) files for $this var (this feature can be enabled/disabled from Magicento Settings)</li>
+                <li>Code completion works automatically for $this->helper('...')->[CTRL+SPACE HERE] inside .phtml files</li>
+                <li>Autocomplete for observer class name in config.xml is offering the factory version of the class name too</li>
+            </ul>
+        </p>
+        <p>
             <span>1.4.2</span>
             <ul>
                 <li>Bugfixes:
@@ -285,9 +304,9 @@
     <!--<applicationConfigurable instance="com.magicento.ui.forms.MagicentoSettingsForm"></applicationConfigurable>-->
     <projectConfigurable instance="com.magicento.ui.forms.MagicentoSettingsForm"></projectConfigurable>
     <completion.contributor language="XML" implementationClass="com.magicento.extensions.MagicentoXmlCompletionContributor"/>
-    <completion.contributor language="PHP" implementationClass="com.magicento.extensions.MagicentoPhpCompletionContributor" />
+    <completion.contributor language="PHP" implementationClass="com.magicento.extensions.MagicentoPhpCompletionContributor" order="first" />
     <projectService serviceImplementation="com.magicento.MagicentoSettings"/>
-    <weigher key="completion" implementationClass="com.magicento.extensions.MagicentoPhpWeigher" id="magicentoPhpWeigher" />
+    <!--<weigher key="completion" implementationClass="com.magicento.extensions.MagicentoPhpWeigher" id="magicentoPhpWeigher" />-->
     <!--<gotoSymbolContributor implementation="" id="magicentoFactoryGotoSymbolContributor" />-->
     <documentationProvider implementation="com.magicento.extensions.MagicentoXmlDocumentationProvider" id="magicentoConfigXmlDocumentation" />
     <gotoDeclarationHandler implementation="com.magicento.extensions.MagicentoGotoDeclarationHandler" />
@@ -296,7 +315,11 @@
 
     <spellchecker.bundledDictionaryProvider implementation="com.magicento.extensions.MagicentoDictionaryProvider"/>
 
-    <!--<psi.referenceContributor implementation="com.magicento.extensions.MagicentoReferenceContributor" />-->
+    <php.typeProvider implementation="com.magicento.extensions.FactoryTypeProvider"/>
+    <php.typeProvider implementation="com.magicento.extensions.BlockTypeProvider"/>
+
+    <!--We are doing this inside completion.contributor but maybe is beeter to do it with this refenrece contributor (it will add automatic support for the gotoDeclaration too  -->
+    <!--<psi.referenceContributor implementation="com.magicento.extensions.FactoryReferenceContributor"/>-->
 
   </extensions>
 </idea-plugin>

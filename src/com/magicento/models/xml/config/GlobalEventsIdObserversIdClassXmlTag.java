@@ -1,6 +1,10 @@
 package com.magicento.models.xml.config;
 
+import com.magicento.helpers.Magicento;
+import org.jdom.Element;
+
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +25,17 @@ public class GlobalEventsIdObserversIdClassXmlTag extends MagentoConfigXmlTag {
         possibleValues = new ArrayList<String>();
         String moduleName = getModuleName();
         if(moduleName != null){
-            possibleValues.add(moduleName+"_Model_Observer");
+            String fullClassName = moduleName+"_Model_Observer";
+            possibleValues.add(fullClassName);
+            List<Element> modelNodes = getAllNodesFromCurrentXml("/config/global/models/*[class='"+moduleName+"_Model']");
+            if(modelNodes != null){
+                Element modelNode = modelNodes.get(0);
+                String firstPart = modelNode.getName();
+                String secondPart = "observer";
+                String uri = firstPart+"/"+secondPart;
+                possibleValues.add(uri);
+            }
+
         }
         return super.getPossibleValues();
     }

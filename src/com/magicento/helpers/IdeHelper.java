@@ -1,17 +1,17 @@
 package com.magicento.helpers;
 
 import com.intellij.codeInsight.TargetElementUtilBase;
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
@@ -22,10 +22,10 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.UIUtil;
 import com.magicento.MagicentoIcons;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
 
 /**
  * Helper for working easily with the IDE
@@ -138,6 +138,48 @@ public class IdeHelper {
                 messageBus.syncPublisher(Notifications.TOPIC).notify(notification);
             }
         });
+    }
+
+
+    public static String getIdeVersion()
+    {
+//        ApplicationInfo.getInstance().getVersionName();		// JetBrains PhpStorm
+//        ApplicationInfo.getInstance().getFullVersion();      // 6.0.1
+        return ApplicationInfo.getInstance().getBuild().asString();		// PS-129.196
+    }
+
+
+    public static IdeaPluginDescriptor getPluginDescriptorByPluginName(@NotNull String pluginName)
+    {
+        for(IdeaPluginDescriptor pluginDescriptor : PluginManager.getPlugins()){
+            if(pluginDescriptor.getName().equals(pluginName)){
+                return pluginDescriptor;
+            }
+        }
+        return null;
+    }
+
+    public static String getPhpPluginVersion()
+    {
+        IdeaPluginDescriptor phpPlugin = getPluginDescriptorByPluginName("PHP");
+        return phpPlugin != null ? phpPlugin.getVersion() : ""; // 129.196
+    }
+
+
+    public static boolean isPhpWithAutocompleteFeature()
+    {
+        String currentVersion = getPhpPluginVersion();
+        if( currentVersion != null && ! currentVersion.isEmpty()){
+            String[] currentVersionParts = currentVersion.split("\\.");
+            int currentMajor = Integer.parseInt(currentVersionParts[0]);
+            int currentMinor = Integer.parseInt(currentVersionParts[1]);
+            // BuildNumber minVersion = new BuildNumber(null, 129, 196);
+            String[] requiredVersion = "129.196".split("\\.");
+            int requiredMajor = Integer.parseInt(requiredVersion[0]);
+            int requiredMinor = Integer.parseInt(requiredVersion[1]);
+            return currentMajor >= requiredMajor && currentMinor >= requiredMinor;
+        }
+        return false;
     }
 
 

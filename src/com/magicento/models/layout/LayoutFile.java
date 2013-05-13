@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.magicento.MagicentoSettings;
 import com.magicento.helpers.JavaHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.LinkedHashSet;
@@ -24,7 +25,7 @@ public class LayoutFile
     protected String theme;
 
 
-    public LayoutFile(VirtualFile file)
+    public LayoutFile(@NotNull VirtualFile file)
     {
         virtualFile = file;
         //file = new File(file.getPath());

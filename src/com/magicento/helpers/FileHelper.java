@@ -194,7 +194,7 @@ public class FileHelper
     }
 
 
-    public static PsiFile createPsiFile(final String filename, final String directoryPath, @NotNull final String content, final FileType filetype, final Project project)
+    public static PsiFile createPsiFile(@NotNull final String filename, @NotNull final String directoryPath, @NotNull final String content, @NotNull final FileType filetype, @NotNull final Project project)
     {
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             @Override

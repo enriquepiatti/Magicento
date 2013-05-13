@@ -73,7 +73,7 @@ public class RewriteClassAction extends MagicentoActionAbstract {
 
                         // search inside config.xml for the class prefix (so we can detect if this is a resource model)
                         // and also we need to know the group name on the xml to add the <rewrite> node there
-                        String xpath = "//class[contains(.,'"+originalClassPrefix+"')]";
+                        String xpath = "/config/global/models/*/class[contains(.,'"+originalClassPrefix+"')]";
                         List<Element> originalClassNodes = XmlHelper.findXpath(originalConfigXml, xpath);
                         if(originalClassNodes != null && originalClassNodes.size() > 0)
                         {

@@ -1,7 +1,7 @@
 package com.magicento.models;
 
 import com.intellij.openapi.util.text.StringUtil;
-import org.apache.commons.lang.WordUtils;
+import com.magicento.helpers.MagentoParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,21 +91,10 @@ public class MagentoClassInfo {
     {
         if(uriFirstPart != null)
         {
-            // if it's a rewrite we can't make this assumption
+            // if it's a rewrite we can't assume the second part uri is the same as the new rewritten class name
             if((uriSecondPart == null || uriSecondPart.isEmpty()) && ! isRewrite)
             {
-                if(name == null){
-                    return null;
-                }
-                List<String> nameParts = StringUtil.split(name, "_");
-                if(nameParts.size()>3)
-                {
-                    uriSecondPart = "";
-                    for(int i=3; i<nameParts.size(); i++){
-                        uriSecondPart += "_"+WordUtils.uncapitalize(nameParts.get(i));
-                    }
-                    uriSecondPart = uriSecondPart.substring(1);
-                }
+                uriSecondPart = MagentoParser.getSecondPartUriFromClassName(name, MagentoParser.getClassPrefix(name, getType()==UriType.RESOURCEMODEL));
             }
             if(uriSecondPart != null && ! uriSecondPart.isEmpty()){
                 return uriFirstPart+"/"+uriSecondPart;

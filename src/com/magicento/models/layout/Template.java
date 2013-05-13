@@ -8,6 +8,7 @@ import com.magicento.helpers.JavaHelper;
 import com.magicento.helpers.MagentoParser;
 import com.magicento.helpers.XmlHelper;
 import com.magicento.models.MagentoClassInfo;
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,58 +61,57 @@ public class Template extends LayoutFile {
             File layoutFile = magicento.getCachedLayoutXml(this.getArea(), this.getPackage(), this.getTheme());
             if(layoutFile != null && layoutFile.exists())
             {
-                //Set<String> blocks = new LinkedHashSet<String>();
-                //Set<String> factoriesAdded = new HashSet<String>();
-                String templatePath = this.getRelativePath();
-
-                String xpath = "//block[@template='"+templatePath+"']";
-                List<Element> blocksElements = XmlHelper.findXpath(layoutFile, xpath);
-
-                if(blocksElements == null){
-                    blocksElements = new ArrayList<Element>();
-                }
-
-                //regex = "//action/*[.='"+templatePath+"']";
-                xpath = "//action[*[.='"+templatePath+"']]";
-                //regex = "//*[action/*[.='"+templatePath+"']]";
-                List<Element> blocksElementsFromActions = new ArrayList<Element>(); // XmlHelper.findXpath(layoutFile, regex);
-                List<Element> actionsWithTemplate = XmlHelper.findXpath(layoutFile, xpath);
-                if(actionsWithTemplate != null)
+                Document layoutXmlDocument = XmlHelper.getDocumentFromFile(layoutFile);
+                if(layoutXmlDocument != null)
                 {
-                    int n = actionsWithTemplate.size();
-                    for(int i=n-1; i>=0; i--)
+                    String templatePath = this.getRelativePath();
+
+                    String xpath = "//block[@template='"+templatePath+"']";
+                    List<Element> blocksElements = XmlHelper.findXpath(layoutXmlDocument, xpath);
+
+                    if(blocksElements == null){
+                        blocksElements = new ArrayList<Element>();
+                    }
+
+                    xpath = "//action[*[.='"+templatePath+"']]";
+                    List<Element> blocksElementsFromActions = new ArrayList<Element>(); // XmlHelper.findXpath(layoutFile, regex);
+                    List<Element> actionsWithTemplate = XmlHelper.findXpath(layoutXmlDocument, xpath);
+                    if(actionsWithTemplate != null)
                     {
-                        Element actionElement = actionsWithTemplate.get(i);
-                        String actionMethod = actionElement.getAttributeValue("method");
-                        if(actionMethod != null && actionMethod.equals("addItemRender")){
-                            for(Object actionParam : actionElement.getChildren()){
-                                String paramValue = ((Element)actionParam).getValue();
-                                if(MagentoParser.isUri(paramValue)){
-                                    blocksElementsFromActions.add((Element)actionParam);
+                        int n = actionsWithTemplate.size();
+                        for(int i=n-1; i>=0; i--)
+                        {
+                            Element actionElement = actionsWithTemplate.get(i);
+                            String actionMethod = actionElement.getAttributeValue("method");
+                            if(actionMethod != null && actionMethod.equals("addItemRender")){
+                                for(Object actionParam : actionElement.getChildren()){
+                                    String paramValue = ((Element)actionParam).getValue();
+                                    if(MagentoParser.isUri(paramValue)){
+                                        blocksElementsFromActions.add((Element)actionParam);
+                                    }
                                 }
                             }
-                        }
-                        else {
-                            Element blockElement = actionElement.getParentElement();
-                            if(blockElement.getName().equals("reference"))
-                            {
-                                String blockName = blockElement.getAttributeValue("name");
-                                if(blockName != null){
-                                    xpath = "//block[@name='"+blockName+"']";
-                                    List<Element> referencedBlocks = XmlHelper.findXpath(layoutFile, xpath);
-                                    // blocksElementsFromActions.remove(i);
-                                    if(referencedBlocks != null){
-                                        blocksElementsFromActions.addAll(referencedBlocks);
+                            else {
+                                Element blockElement = actionElement.getParentElement();
+                                if(blockElement.getName().equals("reference"))
+                                {
+                                    String blockName = blockElement.getAttributeValue("name");
+                                    if(blockName != null){
+                                        xpath = "//block[@name='"+blockName+"']";
+                                        List<Element> referencedBlocks = XmlHelper.findXpath(layoutXmlDocument, xpath);
+                                        // blocksElementsFromActions.remove(i);
+                                        if(referencedBlocks != null){
+                                            blocksElementsFromActions.addAll(referencedBlocks);
+                                        }
                                     }
                                 }
                             }
                         }
-
                     }
-                }
 
-                blocksElements.addAll(blocksElementsFromActions);
-                return blocksElements;
+                    blocksElements.addAll(blocksElementsFromActions);
+                    return blocksElements;
+                }
             }
         }
         return null;

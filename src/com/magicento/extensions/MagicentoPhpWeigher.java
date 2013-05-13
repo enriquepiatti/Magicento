@@ -25,7 +25,7 @@ public class MagicentoPhpWeigher extends CompletionWeigher {
         if(object instanceof String){
             String reference = (String) object;
             if(reference.startsWith("magicento")){
-                return -100;
+                return -10000;
             }
         }
         return null;

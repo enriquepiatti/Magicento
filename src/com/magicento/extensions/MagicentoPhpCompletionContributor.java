@@ -83,19 +83,6 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
                         else if(isClassExtendsAutocomplete(currentElement)){
                             elements = getAutocompleteForClassExtends(currentElement, prefix);
                         }
-                        else if(isMageFactoryChainedMethod(currentElement)){
-                            // check if PHPStorm Meta File Exists
-//                            File metaFile = getMagicentoComponent().getPhpStormMetaFile();
-//                            if( ! metaFile.exists()){
-//                                  ActionManager actionManager = ActionManagerImpl.getInstance();
-//                                  String actionId = "CreatePhpStormMetaNamespace";
-//                                  CreatePhpStormMetaNamespaceAction action = (CreatePhpStormMetaNamespaceAction) actionManager.getAction(actionId);
-////                                EditorEx editor = (EditorEx)parameters.getLookup().getEditor();
-////                                AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), actionId, new Presentation(), actionManager, 0);
-////                                action.actionPerformed(event);
-//                                IdeHelper.showNotification("If you are using PHPStorm v6+ use Alt+M > Create PHPSTORM_META namespace for helping the IDE with the autocomplete on factories", NotificationType.INFORMATION, currentElement.getProject());
-//                            }
-                        }
 
                         if(elements != null && elements.size() > 0)
                         {
@@ -113,15 +100,6 @@ public class MagicentoPhpCompletionContributor extends CompletionContributor {
             });
     }
 
-
-    /**
-     * @todo: implement, detect if cursor is in something like Mage::getModel('uri')->[HERE]
-     * @return
-     */
-    protected boolean isMageFactoryChainedMethod(PsiElement currentElemen)
-    {
-        return true;
-    }
 
 
     /**

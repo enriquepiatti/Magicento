@@ -17,6 +17,7 @@ import com.magicento.models.layout.LayoutFile;
 import com.magicento.models.xml.MagentoXml;
 import com.magicento.models.xml.MagentoXmlTag;
 import com.magicento.models.xml.MagentoXmlType;
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +36,8 @@ public class MagentoLayoutXml extends MagentoXml {
     protected String area = "frontend";
     protected String packageName = "base";
     protected String theme = "default";
+
+    Map<String, Document> cachedXmlDocuments;
 
 
     // protected PsiElement currentContext;
@@ -55,6 +58,7 @@ public class MagentoLayoutXml extends MagentoXml {
         classNamePrefix = fallbackClassNamePrefix+"layout.";
         fallbackClassName = "MagentoLayoutXmlTag";
         mergedXmlFilename = "layout.xml";
+        cachedXmlDocuments = new HashMap<String, Document>();
 
         // super._init();   // don't create skeleton
         xml = _createRootTag();
@@ -81,7 +85,7 @@ public class MagentoLayoutXml extends MagentoXml {
     protected String getMergedXml()
     {
         MagicentoSettings settings = MagicentoSettings.getInstance(project);
-        if(settings != null)
+        if(settings != null && area != null)
         {
             // don't use PHP anymore for getting the layout
 //            if(settings.phpEnabled)
@@ -419,6 +423,16 @@ public class MagentoLayoutXml extends MagentoXml {
     @NotNull public List<XmlTag> findNodesInOriginalXmlByNodeName(@NotNull String nodeName)
     {
         return findNodesInOriginalXml(new String[]{nodeName}, null);
+    }
+
+
+    public Document getMergedXmlDocument()
+    {
+        if( ! isCacheInvalidated() && cachedXmlDocuments.get(area) != null){
+            return cachedXmlDocuments.get(area);
+        }
+        cachedXmlDocuments.put(area, XmlHelper.getDocumentFromFile(getMergedXmlFile()));
+        return cachedXmlDocuments.get(area);
     }
 
 

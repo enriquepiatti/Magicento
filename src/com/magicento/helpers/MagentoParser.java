@@ -30,6 +30,8 @@ public class MagentoParser {
 
 
     protected static final String[] FACTORIES = {"helper", "getModel","getResourceModel", "getSingleton", "getResourceSingleton", "getSingletonBlock", "getResourceHelper"};
+    protected static final String[] FACTORY_WRAPPERS = {"getHelper", "getModel","getResourceModel", "getSingleton"};
+
 
     /**
      * returns the factory string, something like "Mage::getModel('catalog/product')" or null if the position is not over (or beginning of) the factory
@@ -218,6 +220,22 @@ public class MagentoParser {
                             }
                         }
                     }
+                    if(isFactoryWrapper(methodCall))
+                    {
+                        Map<MagentoClassInfo.UriType, String[]> uriTypes = new HashMap<MagentoClassInfo.UriType, String[]>();
+                        uriTypes.put(MagentoClassInfo.UriType.MODEL, new String[]{"getModel", "getSingleton" });
+                        uriTypes.put(MagentoClassInfo.UriType.RESOURCEMODEL, new String[]{"getResourceModel" });
+                        uriTypes.put(MagentoClassInfo.UriType.HELPER, new String[]{"getHelper" });
+
+                        for(Map.Entry<MagentoClassInfo.UriType, String[]> entry : uriTypes.entrySet()){
+                            String[] factories = entry.getValue();
+                            for(String factory : factories){
+                                if(methodCall.contains(factory)){
+                                    return entry.getKey();
+                                }
+                            }
+                        }
+                    }
                     if(isCreateBlock(methodCall)){
                         return MagentoClassInfo.UriType.BLOCK;
                     }
@@ -278,11 +296,12 @@ public class MagentoParser {
         boolean isFactory = false;
         if(psiElement != null)
         {
-            List<Method> methods = new ArrayList<Method>();
-            for(String factory : FACTORIES){
-                methods.add(PsiPhpHelper.getClassMethod(psiElement.getProject(), "Mage", factory));
-            }
-            isFactory = PsiPhpHelper.isCallTo(psiElement, methods.toArray(new Method[methods.size()]));
+            // I think this is freezing the IDE sometimes
+//            List<Method> methods = new ArrayList<Method>();
+//            for(String factory : FACTORIES){
+//                methods.add(PsiPhpHelper.getClassMethod(psiElement.getProject(), "Mage", factory));
+//            }
+//            isFactory = PsiPhpHelper.isCallTo(psiElement, methods.toArray(new Method[methods.size()]));
 
             // fallback just in case:
             if( ! isFactory ){
@@ -298,6 +317,18 @@ public class MagentoParser {
         {
             String options = "(" + StringUtils.join(FACTORIES, "|") + ")";
             String regex = "^Mage::\\s*"+options+"\\s*\\(";
+            //return phpCode.matches(regex);   // for using this we need regex+".*"
+            return JavaHelper.testRegex(regex, phpCode) || isFactoryWrapper(phpCode);
+        }
+        return false;
+    }
+
+    public static boolean isFactoryWrapper(String phpCode)
+    {
+        if(phpCode != null)
+        {
+            String options = "(" + StringUtils.join(FACTORY_WRAPPERS, "|") + ")";
+            String regex = "^\\$this\\s*->\\s*_factory\\s*->\\s*"+options+"\\s*\\(";
             //return phpCode.matches(regex);   // for using this we need regex+".*"
             return JavaHelper.testRegex(regex, phpCode);
         }

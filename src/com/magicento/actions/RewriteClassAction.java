@@ -1,7 +1,6 @@
 package com.magicento.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -13,15 +12,18 @@ import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.magicento.extensions.MagicentoTemplateFactory;
 import com.magicento.helpers.*;
+import com.magicento.models.xml.MagentoXml;
+import com.magicento.models.xml.MagentoXmlFactory;
+import com.magicento.models.xml.MagentoXmlType;
+import com.magicento.models.xml.config.MagentoConfigXml;
 import com.magicento.ui.dialog.ChooseModuleDialog;
 import org.apache.commons.lang.WordUtils;
-import org.jdom.Document;
 import org.jdom.Element;
-
 
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 /**
  * @author Enrique Piatti
@@ -111,7 +113,7 @@ public class RewriteClassAction extends MagicentoActionAbstract {
 
 
                         // String originalUri = firstPart+"/"+secondPart;
-                        File targetConfigXml = new File(selectedModulePath+"/etc/config.xml");
+                        final File targetConfigXml = new File(selectedModulePath+"/etc/config.xml");
 
                         String targetModuleName = MagentoParser.getModuleNameFromModulePath(selectedModulePath);
                         String suggestedClassName = targetModuleName+"_"+groupType+"_"+originalModuleName+"_"+secondPartClassName;
@@ -129,6 +131,7 @@ public class RewriteClassAction extends MagicentoActionAbstract {
                         {
                             String type = classType.toLowerCase()+"s";
                             String path = "config/global/"+type+"/"+firstPart+"/rewrite";
+
                             XmlTag newTag = XmlHelper.createTagInFile(psiXmlFile, secondPart, newClassName, path);
                             if(newTag == null){
                                 IdeHelper.showDialog(project, "Error trying to create rewrite node in "+psiXmlFile.getVirtualFile().getPath(), "Magicento Rewrite Class");
@@ -140,6 +143,20 @@ public class RewriteClassAction extends MagicentoActionAbstract {
                             PsiFile newClassFile = createClass(directoryPath, newClassName, className);
 
                             openFile(newClassFile);
+
+                            FileHelper.refreshVirtualFile(psiXmlFile.getOriginalFile().getVirtualFile(), getProject());
+
+                            final MagentoXml magentoXml = MagentoXmlFactory.getInstance(MagentoXmlType.CONFIG, getProject());
+                            if(magentoXml != null && magentoXml instanceof MagentoConfigXml){
+                                JavaHelper.delay(1000, new Callable() {
+                                    @Override
+                                    public Object call() throws Exception {
+                                        magentoXml.invalidateCache();
+                                        ((MagentoConfigXml) magentoXml).checkConfigXml(magentoXml.getMergedXmlDocument(), getProject());
+                                        return null;
+                                    }
+                                });
+                            }
 
                         }
 

@@ -20,6 +20,7 @@ import com.magicento.models.xml.MagentoXmlType;
 import com.magicento.models.xml.config.MagentoConfigXml;
 import com.magicento.models.xml.config.system.MagentoSystemXml;
 import com.magicento.models.xml.layout.MagentoLayoutXml;
+import org.jdom.Document;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -131,6 +132,19 @@ public class MagicentoProjectComponent implements ProjectComponent/*, Persistent
             layout.setPackageName(packageName);
             layout.setTheme(theme);
             return layout.getMergedXmlFile();
+        }
+        return null;
+    }
+
+    public Document getCachedLayoutXmlDocument(String area, String packageName, String theme)
+    {
+        MagentoXml magentoXml = MagentoXmlFactory.getInstance(MagentoLayoutXml.TYPE, _project);
+        if(magentoXml != null && magentoXml instanceof MagentoLayoutXml){
+            MagentoLayoutXml layout = (MagentoLayoutXml)magentoXml;
+            layout.setArea(area);
+            layout.setPackageName(packageName);
+            layout.setTheme(theme);
+            return layout.getMergedXmlDocument();
         }
         return null;
     }

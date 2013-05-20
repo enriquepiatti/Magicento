@@ -47,7 +47,7 @@ public class MagicentoSettings implements PersistentStateComponent<MagicentoSett
     protected boolean isPathToMageValid = false;
 
     protected Project project;
-    public boolean automaticThisInTemplate = true;
+    public boolean automaticThisInTemplate = false;
 
     public static MagicentoSettings getInstance(Project project)
     {

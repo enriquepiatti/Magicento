@@ -49,7 +49,6 @@ public class MagentoConfigXml extends MagentoXml {
     @Override
     protected String getMergedXml()
     {
-        // TODO: execute PHP only if user has enabled this feature
         // MagicentoProjectComponent magicentoProject = MagicentoProjectComponent.getInstance(project);
         // return magicentoProject.executePhpWithMagento("echo Mage::app()->getConfig()->getNode()->asXML();");
 
@@ -66,7 +65,7 @@ public class MagentoConfigXml extends MagentoXml {
 
     }
 
-    private void checkConfigXml(Document configXml, Project project)
+    public void checkConfigXml(Document configXml, Project project)
     {
         String error = checkRewriteConflicts(configXml);
         if(error != null){
@@ -103,15 +102,19 @@ public class MagentoConfigXml extends MagentoXml {
                     fullPathElements.put(fullPath, rewrite);
                 }
                 else {
+                    String class1 = fullPathElements.get(fullPath).getValue();
+                    String class2 = rewrite.getValue();
                     String factory = group+"/"+name;
+                    String classInfo = " ("+class1+" | "+class2+")";
+                    String rewriteDetails = factory + classInfo;
                     if(type.equals("models")){
-                        duplicatedModels.add(factory);
+                        duplicatedModels.add(rewriteDetails);
                     }
                     else if(type.equals("blocks")){
-                        duplicatedBlocks.add(factory);
+                        duplicatedBlocks.add(rewriteDetails);
                     }
                     else if(type.equals("helpers")){
-                        duplicatedHelpers.add(factory);
+                        duplicatedHelpers.add(rewriteDetails);
                     }
                 }
             }

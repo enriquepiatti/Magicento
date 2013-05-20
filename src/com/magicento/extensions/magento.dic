@@ -1,6 +1,7 @@
 addto
 addtocart
 adminhtml
+async
 authorizenet
 attributeset
 attributesets
@@ -41,8 +42,11 @@ nofeed
 noform
 noscript
 notifystock
+nullable
 onepage
+opcheckout
 mecl
+mmdb
 multishipping
 opensource
 pagecache
@@ -52,6 +56,7 @@ payflowlink
 paypal
 paypaluk
 pbridge
+phpunit
 phtml
 placeform
 productalert
@@ -71,6 +76,7 @@ sitemap
 solr
 stockqty
 storecredit
+taxvat
 tierprices
 tocart
 topmenu

@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import org.apache.commons.lang.StringUtils;
+import org.jdom.Document;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,7 @@ abstract public class MagentoXml {
     protected MagentoXmlTag xml;
 
     protected boolean isCacheInvalid = true;
+    protected Document cachedXmlDocument;
 
     public String getMergedXmlFilename()
     {
@@ -290,12 +292,28 @@ abstract public class MagentoXml {
     }
 
 
+    public Document getMergedXmlDocument()
+    {
+        if( ! isCacheInvalidated() && cachedXmlDocument != null){
+            return cachedXmlDocument;
+        }
+        cachedXmlDocument = XmlHelper.getDocumentFromFile(getMergedXmlFile());
+        return cachedXmlDocument;
+    }
+
+
     abstract protected String getMergedXml();
 
 
     public void invalidateCache()
     {
         isCacheInvalid = true;
+        cachedXmlDocument = null;
+    }
+
+    public boolean isCacheInvalidated()
+    {
+        return isCacheInvalid;
     }
 
 }

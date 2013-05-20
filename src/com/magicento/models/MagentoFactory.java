@@ -6,6 +6,7 @@ import com.intellij.util.StringLenComparator;
 import com.magicento.helpers.Magicento;
 import com.magicento.helpers.XmlHelper;
 import org.apache.commons.lang.StringUtils;
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,7 +64,7 @@ public class MagentoFactory
         boolean exactMatch = isExactMatch(factoryToSearch);
         String[] uriParts = prepareUriParts(factoryToSearch);
         String firstPart = uriParts[0];
-        String secondPart = uriParts[1];
+        // String secondPart = uriParts[1];
         String firstCondition = factoryToSearch.contains("/") || exactMatch ? ("name()='"+firstPart+"'") : ("starts-with(name(),'" + firstPart + "')");
 
         List<String> typeConditions = new ArrayList<String>();
@@ -80,7 +81,7 @@ public class MagentoFactory
 
         String typeExp = StringUtils.join(typeConditions, " or ");
         //String xpath = "//config/global/*[name()='models' or name()='helpers' or name()='blocks']/*["+firstCondition+"]";
-        String xpath = "//config/global/*["+typeExp+"]/*["+firstCondition+"]";
+        String xpath = "/config/global/*["+typeExp+"]/*["+firstCondition+"]";
 
         return xpath;
     }
@@ -213,6 +214,24 @@ public class MagentoFactory
         if(factory == null || factory.isEmpty() || xmlFile == null || ! xmlFile.exists()){
             return null;
         }
+        Document xmlDocuemnt = XmlHelper.getDocumentFromFile(xmlFile);
+        return findClassesForFactory(factory, xmlDocuemnt, types);
+    }
+
+
+
+    /**
+     *
+     * @param factory uri of the class
+     * @param xmlDocument config.xml (merged)
+     * @param types (blocks|models|helpers)
+     * @return
+     */
+    public List<MagentoClassInfo> findClassesForFactory(String factory, Document xmlDocument, MagentoClassInfo.UriType[] types)
+    {
+        if(factory == null || factory.isEmpty() || xmlDocument == null){
+            return null;
+        }
 
         if(types == null){
             types = new MagentoClassInfo.UriType[]{};
@@ -259,7 +278,7 @@ public class MagentoFactory
 
         String xpath = createXpath(factory, searchModels, searchBlocks, searchHelpers, searchResourceModels);
 
-        List<Element> nodes = XmlHelper.findXpath(xmlFile, xpath);
+        List<Element> nodes = XmlHelper.findXpath(xmlDocument, xpath);
         if(nodes != null)
         {
             for (int i = 0; i < nodes.size(); ++i)
@@ -282,7 +301,7 @@ public class MagentoFactory
                             if( ! exactMatch){
                                 newFactory += "*";
                             }
-                            List<MagentoClassInfo> resources = findClassesForFactory(newFactory, xmlFile, new MagentoClassInfo.UriType[]{MagentoClassInfo.UriType.MODEL});
+                            List<MagentoClassInfo> resources = findClassesForFactory(newFactory, xmlDocument, new MagentoClassInfo.UriType[]{MagentoClassInfo.UriType.MODEL});
 
                             if(resources != null && resources.size() > 0){
                                 for(MagentoClassInfo resourceInfo : resources){

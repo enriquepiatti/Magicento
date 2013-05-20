@@ -24,6 +24,8 @@ public class SectionsIdGroupsIdFieldsIdFrontend_typeXmlTag extends MagentoConfig
         possibleValues.add("allowspecific");
         possibleValues.add("import");
         possibleValues.add("export");
+        possibleValues.add("label");
+        possibleValues.add("obscure");
     }
 
 }

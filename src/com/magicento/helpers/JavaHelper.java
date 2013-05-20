@@ -1,9 +1,11 @@
 package com.magicento.helpers;
 
+import com.magicento.models.xml.config.MagentoConfigXml;
 import org.apache.commons.lang.WordUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,6 +95,22 @@ public class JavaHelper {
     public static String camelCase(String original, String separator)
     {
         return WordUtils.uncapitalize(WordUtils.capitalize(original.replace(separator, " ")).replace(" ", ""));
+    }
+
+    public static void delay(int msec, final Callable func){
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            func.call();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                msec
+        );
     }
 
 }

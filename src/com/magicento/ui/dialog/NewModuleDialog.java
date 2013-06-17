@@ -125,10 +125,10 @@ public class NewModuleDialog extends DialogWrapper
         panel.add(version, c);
 
         c.gridx = 0; c.gridy = 5;
-        panel.add(new Label("PHPStorm Folder"), c);
+        panel.add(new Label("PhpStorm Folder"), c);
         c.gridx = 1; c.gridy = 5;
         panel.add(projectDir,c);
-        group.setToolTipText("Tick to create files under PHPStorm's project folder / unticked means files are created inside the linked Magento installation.");
+        group.setToolTipText("Tick to create files under PhpStorm's project folder / unticked means files are created inside the linked Magento installation.");
 
         c.gridx = 0; c.gridy = 6;
         panel.add(new Label("Depends"), c);

@@ -26,6 +26,7 @@ public class NewModuleDialog extends DialogWrapper
     private JCheckBox model;
     private JCheckBox block;
     private JCheckBox installer;
+    private JCheckBox projectDir;
     private JTextField group;
     private JPanel panel;
 
@@ -45,6 +46,7 @@ public class NewModuleDialog extends DialogWrapper
         model = new JCheckBox("model");
         block = new JCheckBox("block");
         installer = new JCheckBox("installer");
+        projectDir = new JCheckBox("");
         group = new JTextField(10);
         init();
         setTitle("New Module");
@@ -64,6 +66,7 @@ public class NewModuleDialog extends DialogWrapper
         helper.setSelected(true);
         block.setSelected(true);
         installer.setSelected(true);
+        projectDir.setSelected(false);
 
         super.init();
     }
@@ -122,15 +125,21 @@ public class NewModuleDialog extends DialogWrapper
         panel.add(version, c);
 
         c.gridx = 0; c.gridy = 5;
-        panel.add(new Label("Depends"), c);
+        panel.add(new Label("PHPStorm Folder"), c);
         c.gridx = 1; c.gridy = 5;
+        panel.add(projectDir,c);
+        group.setToolTipText("Tick to create files under PHPStorm's project folder / unticked means files are created inside the linked Magento installation.");
+
+        c.gridx = 0; c.gridy = 6;
+        panel.add(new Label("Depends"), c);
+        c.gridx = 1; c.gridy = 6;
         //panel.add(depends, c);
         depends.setVisibleRowCount(6);
         JScrollPane listScroller = new JScrollPane(depends);
         //listScroller.setPreferredSize(new Dimension(250, 80));
         panel.add(listScroller, c);
 
-        c.gridx = 0; c.gridy = 6;
+        c.gridx = 0; c.gridy = 7;
         panel.add(new Label("Include"), c);
         JPanel includePanel = new JPanel();
         includePanel.setLayout(new BoxLayout(includePanel, BoxLayout.Y_AXIS));
@@ -138,7 +147,7 @@ public class NewModuleDialog extends DialogWrapper
         includePanel.add(helper);
         includePanel.add(block);
         includePanel.add(installer);
-        c.gridx = 1; c.gridy = 6;
+        c.gridx = 1; c.gridy = 7;
         panel.add(includePanel, c);
 
         return panel;
@@ -194,6 +203,11 @@ public class NewModuleDialog extends DialogWrapper
     public boolean includeInstaller()
     {
         return installer.isSelected();
+    }
+
+    public boolean createInProjectDir()
+    {
+        return projectDir.isSelected();
     }
 
     @Override

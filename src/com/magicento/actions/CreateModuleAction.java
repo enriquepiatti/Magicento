@@ -66,7 +66,11 @@ public class CreateModuleAction extends MagicentoActionAbstract {
             boolean includeBlock = dialog.includeBlock();
             boolean includeModel = dialog.includeModel();
             boolean includeInstaller = dialog.includeInstaller();
+            boolean createInProjectDir = dialog.createInProjectDir();
 
+            if(createInProjectDir){
+                pathToMagento = project.getBaseDir().getPath();
+            }
             PsiFile moduleXml = createModuleXmlFile(moduleName, codePool, depends);
             if(moduleXml != null){
 

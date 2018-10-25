@@ -48,10 +48,10 @@ public class RemoveFromCoreResourceAction extends MagicentoPhpActionAbstract {
 
                 String result = magicento.executePhpWithMagento(phpCode);
                 if(result != null && ! result.isEmpty()){
-                    String message = "Installer for "+resourceName+" was reseted to "+ result +" version";
+                    String message = "Installer for "+resourceName+" was reset to "+ result +" version";
                     if( ! isUpgrade){
                         boolean modified = result.equals("1");
-                        message = modified ? "Installer for "+resourceName+" was removed from core_resource" : "Error: Installer was not reseted to previous version";
+                        message = modified ? "Installer for "+resourceName+" was removed from core_resource" : "Error: Installer was not reset to previous version";
                     }
                     magicento.showMessage(message,"Magicento - Reset Installer", MagicentoIcons.MAGENTO_ICON_16x16);
                 }
